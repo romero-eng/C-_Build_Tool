@@ -1,6 +1,9 @@
 # Ignore C/C++ interaction with Visual Studio Code 
 /.vscode
 
+# Ignore Object files
+*.o
+
 # Ignore any compiled executables
 *.exe
 
