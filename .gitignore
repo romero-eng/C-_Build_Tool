@@ -1,6 +1,8 @@
 # Ignore C/C++ interaction with Visual Studio Code 
 /.vscode
 
+# Ignore any compiled executables
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
