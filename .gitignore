@@ -2,6 +2,7 @@
 /.vscode
 
 # Ignore any compiled executables
+*.exe
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
