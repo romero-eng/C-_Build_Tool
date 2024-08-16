@@ -67,28 +67,43 @@ def get_compiler_warning_flags(turn_on_warnings: str | list[str] = []) -> str:
     return ' '.join([f'-W{flag:s}' for warning, flag in WARNING_DECISIONS.items() if warning in turn_on_warnings])
 
 
+def run_command(command: str,
+                command_description: str,
+                successful_return_code: int = 0):
+
+    results: subprocess.CompletedProcess = \
+        subprocess.run(command,
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE)
+
+    formatted_results: list[str] = [f'\tCommand: {command:s}']
+    formatted_results.append(f'\tCommand Results: {'Succesful' if results.returncode == successful_return_code else 'Failure':s}')
+
+    if results.stdout:
+        formatted_results.append(f'\tOutput:\n\n{results.stdout.decode('utf-8'):s}')
+
+    if results.stderr:
+        formatted_results.append(f'\t Error:\n\n{results.stderr.decode('utf-8'):s}')
+
+    print(f'\n{command_description:s}:\n{'':{'-':s}>{len(command_description) + 1:d}s}\n{'\n\n'.join(formatted_results):s}\n')
+
+
 if (__name__=='__main__'):
 
-    cpp_files = ['HelloWorld']
+    cpp_files = ['HelloWorld', 'Add']
     executable_name = 'HelloWorld'
 
     c_plus_plus_compile_command: str = 'g++ {source_files} -o {executable}.exe {build_configuration:s} {language_standard:s} {warnings:s} {miscellaneous:s}'
 
-    results: subprocess.CompletedProcess = \
-        subprocess.run(c_plus_plus_compile_command.format(source_files=' '.join([f'{cpp_file:s}.cpp' for cpp_file in cpp_files]),
+    run_command(c_plus_plus_compile_command.format(source_files=' '.join([f'{cpp_file:s}.cpp' for cpp_file in cpp_files]),
                                                           executable=executable_name,
                                                           build_configuration=get_build_configuration_flags('Debug'),
                                                                language_standard=get_language_standard_flag('C++ 2020'),
                                                                        warnings=get_compiler_warning_flags(['Treat warnings as errors',
-                                                                                                            'Avoid a lot of questionable coding practices',
-                                                                                                            'Avoid even more questionable coding practices',
-                                                                                                            'Follow Effective C++ Style Guidelines',
-                                                                                                            'Avoid potentially value-changing implicit conversions',
-                                                                                                            'Avoid potentially sign-changing implicit conversions for integers']),
+                                                                                                             'Avoid a lot of questionable coding practices',
+                                                                                                             'Avoid even more questionable coding practices',
+                                                                                                             'Follow Effective C++ Style Guidelines',
+                                                                                                             'Avoid potentially value-changing implicit conversions',
+                                                                                                             'Avoid potentially sign-changing implicit conversions for integers']),
                                                                       miscellaneous=get_miscellaneous_flags('Disable Compiler Extensions')),
-                       stdout=subprocess.PIPE,
-                       stderr=subprocess.PIPE)
-
-    print('\n\n'.join([f'Compilation Results: {'Succesful' if results.returncode == 0 else 'Failure':s}',
-                       f'\tOutput:\n\n{results.stdout.decode('utf-8'):s}',
-                       f'\t Error:\n\n{results.stderr.decode('utf-8'):s}']))
+                'Compilation Results')
