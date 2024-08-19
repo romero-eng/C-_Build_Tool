@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-build-configurations/
@@ -46,7 +47,7 @@ def get_build_configuration_flags(user_chosen_build_configuration: str) -> str:
 
     _print_chosen_flag('Build', user_chosen_build_configuration)
 
-    return ' '.join([f'-{flag:s}' for flag in FLAGS_PER_BUILD_CONFIGURATION[user_chosen_build_configuration]])
+    return ' '.join([''] + [f'-{flag:s}' for flag in FLAGS_PER_BUILD_CONFIGURATION[user_chosen_build_configuration]])
 
 
 def get_language_standard_flag(user_specified_language_standard: str) -> str:
@@ -66,7 +67,7 @@ def get_language_standard_flag(user_specified_language_standard: str) -> str:
 
     _print_chosen_flag('Language Standard', user_specified_language_standard)
 
-    return f'-std=c++{language_standard_flag:s}'
+    return f' -std=c++{language_standard_flag:s}'
 
 
 def get_miscellaneous_flags(user_chosen_misc_decisions: str | list[str]) -> str:
@@ -88,7 +89,7 @@ def get_miscellaneous_flags(user_chosen_misc_decisions: str | list[str]) -> str:
                          list(FLAG_PER_MISCELLANEOUS_DECISION.keys()),
                          user_chosen_misc_decisions)
 
-    return ' '.join([f'-{flag:s}' for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in user_chosen_misc_decisions])
+    return ' '.join([''] + [f'-{flag:s}' for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in user_chosen_misc_decisions])
 
 
 def get_compiler_warning_flags(user_chosen_warnings: str | list[str] = []) -> str:
@@ -104,4 +105,4 @@ def get_compiler_warning_flags(user_chosen_warnings: str | list[str] = []) -> st
                          list(FLAG_PER_WARNING.keys()),
                          user_chosen_warnings)
 
-    return ' '.join([f'-W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in user_chosen_warnings])
+    return ' '.join([''] + [f'-W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in user_chosen_warnings])

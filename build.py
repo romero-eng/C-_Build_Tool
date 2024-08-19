@@ -36,7 +36,7 @@ def generate_object_files(source_file_paths: list[str],
                           miscellaneous: str,
                           warnings: list[str]) -> bool:
 
-    compile_command: str = 'g++ -c {{source_file_path:s}} -o {{object_file_path:s}} {build_configuration:s} {language_standard:s} {warnings:s} {miscellaneous:s}'
+    compile_command: str = 'g++ -c {{source_file_path:s}} -o {{object_file_path:s}}{build_configuration:s}{language_standard:s}{warnings:s}{miscellaneous:s}'
 
     compile_command_with_flags: str = \
         compile_command.format(build_configuration=flags.get_build_configuration_flags(build_configuration),
