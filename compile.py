@@ -63,7 +63,7 @@ def generate_object_files(source_file_paths: list[str],
 def link_object_files_into_executable(executable_path: str,
                                       object_file_paths: list[str]) -> None:
 
-    link_command: str = 'g++ -o {executable}.exe {object_files:s}'
+    link_command: str = 'g++ -o {executable} {object_files:s}'
 
     run_command('Linking Results',
                 link_command.format(executable=executable_path,

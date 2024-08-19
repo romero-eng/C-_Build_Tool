@@ -15,7 +15,7 @@ if (__name__=='__main__'):
 
     compile.build_executable_from_source([os.path.join(source_directory, f'{file:s}.cpp') for file in cpp_files],
                                          [os.path.join(build_directory, f'{file:s}.o') for file in cpp_files],
-                                         os.path.join(build_directory, executable_name),
+                                         os.path.join(build_directory, f'{executable_name:s}.exe'),
                                          'Debug',
                                          'C++ 2020',
                                          'Disable Compiler Extensions',
