@@ -30,12 +30,12 @@ def _print_flag_statuses(title: str,
                          known_flag_descriptions: list[str],
                          chosen_descriptions: list[str]) -> None:
 
-    max_description_length: str = max([len(description) for description in known_flag_descriptions])
-    print(f'\n{title:s}\n{'':{'-':s}>{len(title) + 1:d}s}\n{'\n'.join([f'{description:>{max_description_length:d}s}: {'ON' if description in chosen_descriptions else 'OFF':s}' for description in known_flag_descriptions]):s}\n')
+    max_description_length: int = max([len(description) for description in known_flag_descriptions])
+    print(f'\n{title:s}\n{'':{'-':s}>{len(title) + 1:d}s}\n{'\n'.join([f'{description:>{max_description_length:d}s}: {'ON' if description in chosen_descriptions else 'OFF':s}' for description in known_flag_descriptions]):s}\n')  # noqa: E231, E501
 
 
 def _print_chosen_flag(flag_choice: str,
-                      chosen_flag_description: str) -> None:
+                       chosen_flag_description: str) -> None:
 
     print(f'\n{flag_choice:s}: {chosen_flag_description:s}')
 
@@ -47,11 +47,11 @@ def get_build_configuration_flags(user_chosen_build_configuration: Optional[str]
     if user_chosen_build_configuration:
 
         if user_chosen_build_configuration not in FLAGS_PER_BUILD_CONFIGURATION:
-            raise ValueError(f"The following build configuration is not recognized: {user_chosen_build_configuration:s}")
+            raise ValueError(f"The following build configuration is not recognized: {user_chosen_build_configuration:s}")   # noqa: E501
 
         _print_chosen_flag('Build', user_chosen_build_configuration)
 
-        flags = ' '.join([''] + [f'-{flag:s}' for flag in FLAGS_PER_BUILD_CONFIGURATION[user_chosen_build_configuration]])
+        flags = ' '.join([''] + [f'-{flag:s}' for flag in FLAGS_PER_BUILD_CONFIGURATION[user_chosen_build_configuration]])  # noqa: E501
 
     return flags
 
@@ -62,8 +62,8 @@ def get_language_standard_flag(user_specified_language_standard: Optional[str] =
 
     if user_specified_language_standard:
 
-        matched_standard: re.Match = re.fullmatch(r'C\++ 20(\d\d)', user_specified_language_standard)
-    
+        matched_standard: re.Match[str] | None = re.fullmatch(r'C\++ 20(\d\d)', user_specified_language_standard)
+
         standard_recognized: bool = False
         if matched_standard:
             two_digit_year: int = int(matched_standard.groups()[0])
@@ -91,7 +91,7 @@ def get_miscellaneous_flags(user_chosen_misc_decisions: Optional[str | list[str]
         if isinstance(user_chosen_misc_decisions, str):
 
             if user_chosen_misc_decisions not in FLAG_PER_MISCELLANEOUS_DECISION:
-                raise ValueError(f'The following miscellanous decision is not recognized: {user_chosen_misc_decisions:s}')
+                raise ValueError(f'The following miscellanous decision is not recognized: {user_chosen_misc_decisions:s}')  # noqa: E501
 
             user_chosen_misc_decisions = [user_chosen_misc_decisions]
 
@@ -99,13 +99,13 @@ def get_miscellaneous_flags(user_chosen_misc_decisions: Optional[str | list[str]
 
             for decision in user_chosen_misc_decisions:
                 if decision not in FLAG_PER_MISCELLANEOUS_DECISION:
-                    raise ValueError(f'The following miscellanous decision is not recognized: {decision:s}')
+                    raise ValueError(f'The following miscellanous decision is not recognized: {decision:s}')  # noqa: E501
 
         _print_flag_statuses('Miscellaneous',
                              list(FLAG_PER_MISCELLANEOUS_DECISION.keys()),
                              user_chosen_misc_decisions)
 
-        flags = ' '.join([''] + [f'-{flag:s}' for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in user_chosen_misc_decisions])
+        flags = ' '.join([''] + [f'-{flag:s}' for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in user_chosen_misc_decisions])  # noqa: E501
 
     return flags
 
@@ -126,7 +126,7 @@ def get_compiler_warning_flags(user_chosen_warnings: Optional[str | list[str]] =
         _print_flag_statuses('Warnings',
                              list(FLAG_PER_WARNING.keys()),
                              user_chosen_warnings)
-        
-        flags = ' '.join([''] + [f'-W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in user_chosen_warnings])
+
+        flags = ' '.join([''] + [f'-W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in user_chosen_warnings])  # noqa: E501
 
     return flags
