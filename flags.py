@@ -6,12 +6,7 @@ BUILD_CONFIGURATIONS: dict[str, list[str]] = \
      'Release': ['O2', 'DNDEBUG']}
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-choosing-a-language-standard/
-C_PLUS_PLUS_LANGUAGE_STANDARDS: dict[str, str] = \
-    {'C++ 2011': '0x',
-     'C++ 2014': '1y',
-     'C++ 2017': '1z',
-     'C++ 2020': '2a',
-     'C++ 2023': '2b'}
+LANGUAGE_STANDARDS: list[str] = ['0x', '1y', '1z',  '2a', '2b']
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-compiler-extensions/
 MISCELLANEOUS: dict[str, str] = \
@@ -56,7 +51,7 @@ def get_language_standard_flag(language_standard: str = 'C++ 2017') -> str:
     _print_chosen_flag('Language Standard',
                        language_standard)
 
-    return f'-std=c++{C_PLUS_PLUS_LANGUAGE_STANDARDS[language_standard]:s}'
+    return f'-std=c++{LANGUAGE_STANDARDS[int((int(language_standard.split('C++ ')[1]) - 2011)/3)]:s}'
 
 
 def get_miscellaneous_flags(make_decisions: str | list[str]) -> str:
