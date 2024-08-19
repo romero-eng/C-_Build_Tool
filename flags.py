@@ -29,16 +29,32 @@ WARNING_DECISIONS: dict[str, str] = \
      'Avoid potentially sign-changing implicit conversions for integers': 'sign-conversion'}
 
 
+def _print_flag_statuses(title: str,
+                         known_flag_descriptions: list[str],
+                         chosen_descriptions: list[str]) -> None:
+
+    max_description_length: str = max([len(description) for description in known_flag_descriptions])
+    print(f'\n{title:s}\n{'':{'-':s}>{len(title) + 1:d}s}\n{'\n'.join([f'{description:>{max_description_length:d}s}: {'ON' if description in chosen_descriptions else 'OFF':s}' for description in known_flag_descriptions]):s}\n')
+
+
+def _print_chosen_flag(flag_choice: str,
+                      chosen_flag_description: str) -> None:
+
+    print(f'\n{flag_choice:s}: {chosen_flag_description:s}')
+
+
 def get_build_configuration_flags(build: str) -> str:
 
-    print(f'Build: {build:s}')
+    _print_chosen_flag('Build',
+                       build)
 
     return ''.join([f'-{flag:s}' for flag in BUILD_CONFIGURATIONS[build]])
 
 
 def get_language_standard_flag(language_standard: str = 'C++ 2017') -> str:
 
-    print(f'\nLanguage Standard: {language_standard:s}\n')
+    _print_chosen_flag('Language Standard',
+                       language_standard)
 
     return f'-std=c++{C_PLUS_PLUS_LANGUAGE_STANDARDS[language_standard]:s}'
 
@@ -48,9 +64,9 @@ def get_miscellaneous_flags(make_decisions: str | list[str]) -> str:
     if isinstance(make_decisions, str):
         make_decisions = [make_decisions]
 
-    title: str = 'Miscellaneous'
-    max_decision_length = max([len(decision) for decision in list(MISCELLANEOUS.keys())])
-    print(f'\n{title:s}:\n{'':{'-':s}>{len(title) + 1:d}s}\n{'\n'.join([f'{decision:>{max_decision_length:d}s}: {'ON' if decision in make_decisions else 'OFF':s}' for decision in MISCELLANEOUS.keys()]):s}\n')
+    _print_flag_statuses('Miscellaneous',
+                         list(MISCELLANEOUS.keys()),
+                         make_decisions)
 
     return ' '.join([f'-{flag:s}' for decision, flag in MISCELLANEOUS.items() if decision in make_decisions])
 
@@ -60,8 +76,8 @@ def get_compiler_warning_flags(turn_on_warnings: str | list[str] = []) -> str:
     if isinstance(turn_on_warnings, str):
         turn_on_warnings = [turn_on_warnings]
 
-    title: str = 'Warnings'
-    max_warning_length = max([len(warning) for warning in list(WARNING_DECISIONS.keys())])
-    print(f'\n{title:s}:\n{'':{'-':s}>{len(title) + 1:d}s}\n{'\n'.join([f'{warning:>{max_warning_length:d}s}: {'ON' if warning in turn_on_warnings else 'OFF':s}' for warning in WARNING_DECISIONS.keys()]):s}\n')
+    _print_flag_statuses('Warnings',
+                         list(WARNING_DECISIONS.keys()),
+                         turn_on_warnings)
 
     return ' '.join([f'-W{flag:s}' for warning, flag in WARNING_DECISIONS.items() if warning in turn_on_warnings])
