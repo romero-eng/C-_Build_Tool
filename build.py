@@ -6,9 +6,9 @@ import compile
 if (__name__=='__main__'):
 
     executable_name: str = 'present_addition'
-    cpp_file_names: list[str] = ['main', 'Add']
     source_directory: str = os.path.join('sample_C++_code', 'src')
     build_directory: str = os.path.join('sample_C++_code', 'build')
+    cpp_file_names: list[str] = ['main', 'Add']
 
     if not os.path.exists(build_directory):
         os.mkdir(build_directory)
