@@ -1,7 +1,7 @@
 
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-build-configurations/
-BUILD_CONFIGURATIONS: dict[str, list[str]] = \
+FLAGS_PER_BUILD_CONFIGURATION: dict[str, list[str]] = \
     {'Debug': ['ggdb'],
      'Release': ['O2', 'DNDEBUG']}
 
@@ -9,13 +9,13 @@ BUILD_CONFIGURATIONS: dict[str, list[str]] = \
 LANGUAGE_STANDARDS: list[str] = ['0x', '1y', '1z',  '2a', '2b']
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-compiler-extensions/
-MISCELLANEOUS: dict[str, str] = \
+FLAG_PER_MISCELLANEOUS_DECISION: dict[str, str] = \
     {'Disable Compiler Extensions': 'pedantic-errors'}
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-warning-and-error-levels/
 # https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#Warning-Options
 # https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html
-WARNING_DECISIONS: dict[str, str] = \
+FLAG_PER_WARNING: dict[str, str] = \
     {'Treat warnings as errors': 'error',
      'Avoid a lot of questionable coding practices': 'all',
      'Avoid even more questionable coding practices': 'extra',
@@ -38,11 +38,11 @@ def _print_chosen_flag(flag_choice: str,
     print(f'\n{flag_choice:s}: {chosen_flag_description:s}')
 
 
-def get_build_configuration_flags(build: str) -> str:
+def get_build_configuration_flags(user_chosen_build_configuration: str) -> str:
 
-    _print_chosen_flag('Build', build)
+    _print_chosen_flag('Build', user_chosen_build_configuration)
 
-    return ' '.join([f'-{flag:s}' for flag in BUILD_CONFIGURATIONS[build]])
+    return ' '.join([f'-{flag:s}' for flag in FLAGS_PER_BUILD_CONFIGURATION[user_chosen_build_configuration]])
 
 
 def get_language_standard_flag(language_standard: str = 'C++ 2017') -> str:
@@ -52,25 +52,25 @@ def get_language_standard_flag(language_standard: str = 'C++ 2017') -> str:
     return f'-std=c++{LANGUAGE_STANDARDS[int((int(language_standard.split('C++ ')[1]) - 2011)/3)]:s}'
 
 
-def get_miscellaneous_flags(make_decisions: str | list[str]) -> str:
+def get_miscellaneous_flags(user_chosen_misc_decisions: str | list[str]) -> str:
 
-    if isinstance(make_decisions, str):
-        make_decisions = [make_decisions]
+    if isinstance(user_chosen_misc_decisions, str):
+        user_chosen_misc_decisions = [user_chosen_misc_decisions]
 
     _print_flag_statuses('Miscellaneous',
-                         list(MISCELLANEOUS.keys()),
-                         make_decisions)
+                         list(FLAG_PER_MISCELLANEOUS_DECISION.keys()),
+                         user_chosen_misc_decisions)
 
-    return ' '.join([f'-{flag:s}' for decision, flag in MISCELLANEOUS.items() if decision in make_decisions])
+    return ' '.join([f'-{flag:s}' for misc_decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if misc_decision in user_chosen_misc_decisions])
 
 
-def get_compiler_warning_flags(turn_on_warnings: str | list[str] = []) -> str:
+def get_compiler_warning_flags(user_chosen_warnings: str | list[str] = []) -> str:
 
-    if isinstance(turn_on_warnings, str):
-        turn_on_warnings = [turn_on_warnings]
+    if isinstance(user_chosen_warnings, str):
+        user_chosen_warnings = [user_chosen_warnings]
 
     _print_flag_statuses('Warnings',
-                         list(WARNING_DECISIONS.keys()),
-                         turn_on_warnings)
+                         list(FLAG_PER_WARNING.keys()),
+                         user_chosen_warnings)
 
-    return ' '.join([f'-W{flag:s}' for warning, flag in WARNING_DECISIONS.items() if warning in turn_on_warnings])
+    return ' '.join([f'-W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in user_chosen_warnings])
