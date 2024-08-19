@@ -65,10 +65,30 @@ def link_object_files_into_executable(executable_path: str,
 
     link_command: str = 'g++ -o {executable}.exe {object_files:s}'
 
+    run_command('Linking Results',
+                link_command.format(executable=executable_path,
+                                    object_files=' '.join(object_file_paths)))
+
+
+def build_executable_from_source(source_file_paths: list[str],
+                                 object_file_paths: list[str],
+                                 executable_path: str,
+                                 build_configuration: Optional[str] = None,
+                                 language_standard: Optional[str] = None,
+                                 miscellaneous: Optional[str] = None,
+                                 warnings: Optional[list[str]] = None) -> None:
+
+    success: bool = \
+        generate_object_files(source_file_paths,
+                              object_file_paths,
+                              build_configuration,
+                              language_standard,
+                              miscellaneous,
+                              warnings)
+
     if success:
-        run_command('Linking Results',
-                    link_command.format(executable=executable_path,
-                                        object_files=' '.join(object_file_paths)))
+        link_object_files_into_executable(executable_path,
+                                          object_file_paths)
 
 
 if (__name__=='__main__'):
@@ -90,14 +110,10 @@ if (__name__=='__main__'):
     if not os.path.exists('build'):
         os.mkdir('build')
 
-    success = \
-        generate_object_files([os.path.join('src', f'{file:s}.cpp') for file in cpp_files],
-                              [os.path.join('build', f'{file:s}.o') for file in cpp_files],
-                              build_configuration,
-                              language_standard,
-                              miscellaneous,
-                              warnings)
-
-    if success:
-        link_object_files_into_executable(os.path.join('build', executable_name),
-                                          [os.path.join('build', f'{file:s}.o') for file in cpp_files])
+    build_executable_from_source([os.path.join('src', f'{file:s}.cpp') for file in cpp_files],
+                                 [os.path.join('build', f'{file:s}.o') for file in cpp_files],
+                                 os.path.join('build', executable_name),
+                                 build_configuration,
+                                 language_standard,
+                                 miscellaneous,
+                                 warnings)
