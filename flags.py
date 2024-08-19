@@ -1,3 +1,4 @@
+import re
 
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-build-configurations/
@@ -40,31 +41,61 @@ def _print_chosen_flag(flag_choice: str,
 
 def get_build_configuration_flags(user_chosen_build_configuration: str) -> str:
 
+    if user_chosen_build_configuration not in FLAGS_PER_BUILD_CONFIGURATION:
+        raise ValueError(f"The following build configuration is not recognized: {user_chosen_build_configuration:s}")
+
     _print_chosen_flag('Build', user_chosen_build_configuration)
 
     return ' '.join([f'-{flag:s}' for flag in FLAGS_PER_BUILD_CONFIGURATION[user_chosen_build_configuration]])
 
 
-def get_language_standard_flag(language_standard: str = 'C++ 2017') -> str:
+def get_language_standard_flag(user_specified_language_standard: str) -> str:
 
-    _print_chosen_flag('Language Standard', language_standard)
+    matched_standard: re.Match = re.fullmatch(r'C\++ 20(\d\d)', user_specified_language_standard)
+    
+    standard_recognized: bool = False
+    if matched_standard:
+        two_digit_year: int = int(matched_standard.groups()[0])
+        if two_digit_year - 11 >= 0:
+            if (two_digit_year - 11) % 3 == 0:
+                language_standard_flag: str = LANGUAGE_STANDARDS[int((two_digit_year - 11)/3)]
+                standard_recognized = True
 
-    return f'-std=c++{LANGUAGE_STANDARDS[int((int(language_standard.split('C++ ')[1]) - 2011)/3)]:s}'
+    if not standard_recognized:
+        raise ValueError(f'The following Language Standard is not recognized: {user_specified_language_standard:s}')
+
+    _print_chosen_flag('Language Standard', user_specified_language_standard)
+
+    return f'-std=c++{language_standard_flag:s}'
 
 
 def get_miscellaneous_flags(user_chosen_misc_decisions: str | list[str]) -> str:
 
     if isinstance(user_chosen_misc_decisions, str):
+
+        if user_chosen_misc_decisions not in FLAG_PER_MISCELLANEOUS_DECISION:
+            raise ValueError(f'The following miscellanous decision is not recognized: {user_chosen_misc_decisions:s}')
+
         user_chosen_misc_decisions = [user_chosen_misc_decisions]
+
+    else:
+
+        for decision in user_chosen_misc_decisions:
+            if decision not in FLAG_PER_MISCELLANEOUS_DECISION:
+                raise ValueError(f'The following miscellanous decision is not recognized: {decision:s}')
 
     _print_flag_statuses('Miscellaneous',
                          list(FLAG_PER_MISCELLANEOUS_DECISION.keys()),
                          user_chosen_misc_decisions)
 
-    return ' '.join([f'-{flag:s}' for misc_decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if misc_decision in user_chosen_misc_decisions])
+    return ' '.join([f'-{flag:s}' for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in user_chosen_misc_decisions])
 
 
 def get_compiler_warning_flags(user_chosen_warnings: str | list[str] = []) -> str:
+
+    for warning in user_chosen_warnings:
+        if warning not in FLAG_PER_WARNING:
+            raise ValueError(f'The following warning is not recognized: {warning:s}')
 
     if isinstance(user_chosen_warnings, str):
         user_chosen_warnings = [user_chosen_warnings]
