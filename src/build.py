@@ -3,11 +3,11 @@ import os
 import compile
 
 
-if (__name__=='__main__'):
+if (__name__ == '__main__'):
 
     executable_name: str = 'present_addition'
-    source_directory: str = os.path.join('sample_C++_code', 'src')
-    build_directory: str = os.path.join('sample_C++_code', 'build')
+    source_directory: str = os.path.join(os.getcwd(), 'sample_C++_code', 'src')
+    build_directory: str = os.path.join(os.getcwd(), 'sample_C++_code', 'build')
     cpp_file_names: list[str] = ['main', 'Add']
 
     if not os.path.exists(build_directory):
