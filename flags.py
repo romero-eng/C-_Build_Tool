@@ -40,16 +40,14 @@ def _print_chosen_flag(flag_choice: str,
 
 def get_build_configuration_flags(build: str) -> str:
 
-    _print_chosen_flag('Build',
-                       build)
+    _print_chosen_flag('Build', build)
 
     return ' '.join([f'-{flag:s}' for flag in BUILD_CONFIGURATIONS[build]])
 
 
 def get_language_standard_flag(language_standard: str = 'C++ 2017') -> str:
 
-    _print_chosen_flag('Language Standard',
-                       language_standard)
+    _print_chosen_flag('Language Standard', language_standard)
 
     return f'-std=c++{LANGUAGE_STANDARDS[int((int(language_standard.split('C++ ')[1]) - 2011)/3)]:s}'
 
