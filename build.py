@@ -30,29 +30,29 @@ def run_command(command_description: str,
     return success
 
 
-def generate_object_files(build_configuration: str,
+def generate_object_files(source_file_paths: list[str],
+                          object_file_paths: list[str],
+                          build_configuration: str,
                           language_standard: str,
                           miscellaneous: str,
-                          warnings: list[str],
-                          source_dir: Optional[str] = None,
-                          build_dir: Optional[str] = None) -> bool:
+                          warnings: list[str]) -> bool:
 
-    compile_command: str = 'g++ -c {{source_file_path:s}}.cpp -o {{object_file_path:s}}.o {build_configuration:s} {language_standard:s} {warnings:s} {miscellaneous:s}'
+    compile_command: str = 'g++ -c {{source_file_path:s}} -o {{object_file_path:s}} {build_configuration:s} {language_standard:s} {warnings:s} {miscellaneous:s}'
 
     compile_command_with_flags: str = \
         compile_command.format(build_configuration=flags.get_build_configuration_flags(build_configuration),
-                               language_standard=flags.get_language_standard_flag(language_standard),
-                               warnings=flags.get_compiler_warning_flags(warnings),
-                               miscellaneous=flags.get_miscellaneous_flags(miscellaneous))
+                                 language_standard=flags.get_language_standard_flag(language_standard),
+                                          warnings=flags.get_compiler_warning_flags(warnings),
+                                     miscellaneous=flags.get_miscellaneous_flags(miscellaneous))
 
     success: bool = True
 
-    for file in cpp_files:
+    for source_file_path, object_file_path in zip(source_file_paths, object_file_paths):
 
         success = \
-            run_command(f'{file:s}.cpp Compilation Results',
-                        compile_command_with_flags.format(source_file_path=os.path.join(source_dir, file) if source_dir else file,
-                                                          object_file_path=os.path.join( build_dir, file) if  build_dir else file))
+            run_command(f'"{os.path.splitext(os.path.basename(source_file_path))[0]:s}" Compilation Results',
+                        compile_command_with_flags.format(source_file_path=source_file_path,
+                                                          object_file_path=object_file_path))
 
         if not success:
             break
@@ -60,16 +60,15 @@ def generate_object_files(build_configuration: str,
     return success
 
 
-def link_object_files_into_executable(executable_name: str,
-                                      object_file_names: list[str],
-                                      build_dir: Optional[str] = None):
+def link_object_files_into_executable(executable_path: str,
+                                      object_file_paths: list[str]):
 
     link_command: str = 'g++ -o {executable}.exe {object_files:s}'
 
     if success:
         run_command('Linking Results',
-                    link_command.format(executable=os.path.join(build_dir, f'{executable_name:s}.o') if build_dir else executable_name,
-                                        object_files=' '.join([os.path.join(build_dir, f'{file_name:s}.o') if build_dir else f'{file_name:s}.o' for file_name in object_file_names])))
+                    link_command.format(executable=executable_path,
+                                        object_files=' '.join(object_file_paths)))
 
 
 if (__name__=='__main__'):
@@ -92,14 +91,13 @@ if (__name__=='__main__'):
         os.mkdir('build')
 
     success = \
-        generate_object_files(build_configuration,
+        generate_object_files([os.path.join('src', f'{file:s}.cpp') for file in cpp_files],
+                              [os.path.join('build', f'{file:s}.o') for file in cpp_files],
+                              build_configuration,
                               language_standard,
                               miscellaneous,
-                              warnings,
-                              'src',
-                              'build')
+                              warnings)
 
     if success:
-        link_object_files_into_executable(executable_name,
-                                          cpp_files,
-                                          'build')
+        link_object_files_into_executable(os.path.join('build', executable_name),
+                                          [os.path.join('build', f'{file:s}.o') for file in cpp_files])
