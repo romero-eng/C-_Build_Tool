@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-from flags import Flags
+import flags
 
 
 def run_command(command_description: str,
@@ -39,10 +39,10 @@ def generate_object_files(source_file_paths: list[str],
     compile_command: str = 'g++ -c {{source_file_path:s}} -o {{object_file_path:s}} {build_configuration:s} {language_standard:s} {warnings:s} {miscellaneous:s}'
 
     compile_command_with_flags: str = \
-        compile_command.format(build_configuration=Flags.get_build_configuration_flags(build_configuration),
-                                 language_standard=Flags.get_language_standard_flag(language_standard),
-                                          warnings=Flags.get_compiler_warning_flags(warnings),
-                                     miscellaneous=Flags.get_miscellaneous_flags(miscellaneous))
+        compile_command.format(build_configuration=flags.get_build_configuration_flags(build_configuration),
+                                 language_standard=flags.get_language_standard_flag(language_standard),
+                                          warnings=flags.get_compiler_warning_flags(warnings),
+                                     miscellaneous=flags.get_miscellaneous_flags(miscellaneous))
 
     success: bool = True
 
