@@ -1,5 +1,6 @@
 import os
 import subprocess
+from typing import Optional
 
 import flags
 
@@ -31,10 +32,10 @@ def run_command(command_description: str,
 
 def generate_object_files(source_file_paths: list[str],
                           object_file_paths: list[str],
-                          build_configuration: str,
-                          language_standard: str,
-                          miscellaneous: str,
-                          warnings: list[str]) -> bool:
+                          build_configuration: Optional[str] = None,
+                          language_standard: Optional[str] = None,
+                          miscellaneous: Optional[str] = None,
+                          warnings: Optional[list[str]] = None) -> bool:
 
     compile_command: str = 'g++ -c {{source_file_path:s}} -o {{object_file_path:s}}{build_configuration:s}{language_standard:s}{warnings:s}{miscellaneous:s}'
 
