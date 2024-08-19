@@ -8,12 +8,12 @@ if (__name__=='__main__'):
     executable_name = 'present_addition'
     cpp_files = ['main', 'Add']
 
-    if not os.path.exists('build'):
-        os.mkdir('build')
+    if not os.path.exists(os.path.join('sample_C++_code', 'build')):
+        os.mkdir(os.path.join('sample_C++_code', 'build'))
 
-    compile.build_executable_from_source([os.path.join('src', f'{file:s}.cpp') for file in cpp_files],
-                                         [os.path.join('build', f'{file:s}.o') for file in cpp_files],
-                                         os.path.join('build', executable_name),
+    compile.build_executable_from_source([os.path.join('sample_C++_code', 'src', f'{file:s}.cpp') for file in cpp_files],
+                                         [os.path.join('sample_C++_code', 'build', f'{file:s}.o') for file in cpp_files],
+                                         os.path.join('sample_C++_code', 'build', executable_name),
                                          'Debug',
                                          'C++ 2020',
                                          'Disable Compiler Extensions',
