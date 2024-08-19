@@ -7,6 +7,9 @@
 # Ignore any compiled executables
 *.exe
 
+# Ignore any Python Virtual Environments
+/*_venv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
