@@ -5,7 +5,8 @@ import flags
 from command import run_command
 
 
-def generate_object_files(source_file_paths: list[str],
+def generate_object_files(source_directory: str,
+                          relative_source_file_paths: list[str],
                           object_file_paths: list[str],
                           build_configuration: Optional[str] = None,
                           language_standard: Optional[str] = None,
@@ -22,11 +23,11 @@ def generate_object_files(source_file_paths: list[str],
 
     success: bool = True
 
-    for source_file_path, object_file_path in zip(source_file_paths, object_file_paths):
+    for relative_source_file_path, object_file_path in zip(relative_source_file_paths, object_file_paths):
 
         success = \
-            run_command(f'"{os.path.splitext(os.path.basename(source_file_path))[0]:s}" Compilation Results',
-                        compile_command_with_flags.format(source_file_path=source_file_path,
+            run_command(f'"{os.path.splitext(os.path.basename(relative_source_file_path))[0]:s}" Compilation Results',
+                        compile_command_with_flags.format(source_file_path=os.path.join(source_directory, relative_source_file_path),
                                                           object_file_path=object_file_path))
 
         if not success:
@@ -45,7 +46,8 @@ def link_object_files_into_executable(executable_path: str,
                                     object_files=' '.join(object_file_paths)))
 
 
-def build_executable_from_source(source_file_paths: list[str],
+def build_executable_from_source(source_directory: str,
+                                 relative_source_file_paths: list[str],
                                  object_file_paths: list[str],
                                  executable_path: str,
                                  build_configuration: Optional[str] = None,
@@ -54,7 +56,8 @@ def build_executable_from_source(source_file_paths: list[str],
                                  warnings: Optional[list[str]] = None) -> None:
 
     success: bool = \
-        generate_object_files(source_file_paths,
+        generate_object_files(source_directory,
+                              relative_source_file_paths,
                               object_file_paths,
                               build_configuration,
                               language_standard,
