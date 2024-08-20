@@ -6,8 +6,9 @@ from command import run_command
 
 
 def generate_object_files(source_directory: str,
+                          build_directory: str,
                           relative_source_file_paths: list[str],
-                          object_file_paths: list[str],
+                          relative_object_file_build_paths: list[str],
                           build_configuration: Optional[str] = None,
                           language_standard: Optional[str] = None,
                           miscellaneous: Optional[str] = None,
@@ -23,12 +24,12 @@ def generate_object_files(source_directory: str,
 
     success: bool = True
 
-    for relative_source_file_path, object_file_path in zip(relative_source_file_paths, object_file_paths):
+    for relative_source_file_path, relative_object_file_path in zip(relative_source_file_paths, relative_object_file_build_paths):
 
         success = \
             run_command(f'"{os.path.splitext(os.path.basename(relative_source_file_path))[0]:s}" Compilation Results',
                         compile_command_with_flags.format(source_file_path=os.path.join(source_directory, relative_source_file_path),
-                                                          object_file_path=object_file_path))
+                                                          object_file_path=os.path.join( build_directory, relative_object_file_path)))
 
         if not success:
             break
@@ -36,20 +37,22 @@ def generate_object_files(source_directory: str,
     return success
 
 
-def link_object_files_into_executable(executable_path: str,
-                                      object_file_paths: list[str]) -> None:
+def link_object_files_into_executable(build_directory: str,
+                                      executable_name: str,
+                                      relative_object_file_build_paths: list[str]) -> None:
 
     link_command: str = 'g++ -o {executable} {object_files:s}'
 
     run_command('Linking Results',
-                link_command.format(executable=executable_path,
-                                    object_files=' '.join(object_file_paths)))
+                link_command.format(executable=os.path.join(build_directory, f'{executable_name:s}.exe'),
+                                    object_files=' '.join([os.path.join(build_directory, file_build_path) for file_build_path in relative_object_file_build_paths])))
 
 
 def build_executable_from_source(source_directory: str,
+                                 build_directory: str, 
                                  relative_source_file_paths: list[str],
-                                 object_file_paths: list[str],
-                                 executable_path: str,
+                                 relative_object_file_build_paths: list[str],
+                                 executable_name: str,
                                  build_configuration: Optional[str] = None,
                                  language_standard: Optional[str] = None,
                                  miscellaneous: Optional[str] = None,
@@ -57,21 +60,24 @@ def build_executable_from_source(source_directory: str,
 
     success: bool = \
         generate_object_files(source_directory,
+                              build_directory,
                               relative_source_file_paths,
-                              object_file_paths,
+                              relative_object_file_build_paths,
                               build_configuration,
                               language_standard,
                               miscellaneous,
                               warnings)
 
     if success:
-        link_object_files_into_executable(executable_path,
-                                          object_file_paths)
+        link_object_files_into_executable(build_directory,
+                                          executable_name,
+                                          relative_object_file_build_paths)
 
 
-def test_executable(executable_path: str) -> None:
+def test_executable(build_directory: str,
+                    executable_name: str) -> None:
 
-    if os.path.exists(executable_path):
+    if os.path.exists(os.path.join(os.path.join(build_directory, f'{executable_name:s}.exe'))):
         _ = \
             run_command('Test Executable',
-                        f'{executable_path:s}')
+                        os.path.join(os.path.join(build_directory, f'{executable_name:s}.exe')))

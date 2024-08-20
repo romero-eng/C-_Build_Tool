@@ -12,17 +12,17 @@ if (__name__ == '__main__'):
     source_directory: str = os.path.join(os.getcwd(), 'sample_C++_code', 'src')
 
     (relative_source_file_paths,
-     object_file_paths,
-     executable_path) = \
-        repository.get_file_paths(source_directory,
-                                  executable_name)
+     relative_object_file_build_paths,
+     build_directory) = \
+        repository.get_file_paths(source_directory)
 
     try:
 
         compile.build_executable_from_source(source_directory,
+                                             build_directory,
                                              relative_source_file_paths,
-                                             object_file_paths,
-                                             executable_path,
+                                             relative_object_file_build_paths,
+                                             executable_name,
                                              'Debug',
                                              'C++ 2020',
                                              'Disable Compiler Extensions',
@@ -33,7 +33,7 @@ if (__name__ == '__main__'):
                                               'Avoid potentially value-changing implicit conversions',
                                               'Avoid potentially sign-changing implicit conversions for integers'])
 
-        compile.test_executable(executable_path)
+        compile.test_executable(build_directory, executable_name)
 
     except Exception:
         print(traceback.format_exc())
