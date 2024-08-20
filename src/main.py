@@ -27,3 +27,5 @@ if (__name__ == '__main__'):
                                           'Follow Effective C++ Style Guidelines',
                                           'Avoid potentially value-changing implicit conversions',
                                           'Avoid potentially sign-changing implicit conversions for integers'])
+
+    compile.test_executable(executable_path)

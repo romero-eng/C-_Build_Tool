@@ -64,3 +64,9 @@ def build_executable_from_source(source_file_paths: list[str],
     if success:
         link_object_files_into_executable(executable_path,
                                           object_file_paths)
+
+
+def test_executable(executable_path: str) -> None:
+
+    _ = run_command('Test Executable',
+                    f'{executable_path:s}')
