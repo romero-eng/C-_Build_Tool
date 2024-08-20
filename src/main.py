@@ -9,13 +9,13 @@ if (__name__ == '__main__'):
     executable_name: str = 'present_addition'
     source_directory: str = os.path.join(os.getcwd(), 'sample_C++_code', 'src')
 
-    (cpp_file_paths,
+    (source_file_paths,
      object_file_paths,
      executable_path) = \
         repository.get_file_paths(source_directory,
                                   executable_name)
 
-    compile.build_executable_from_source(cpp_file_paths,
+    compile.build_executable_from_source(source_file_paths,
                                          object_file_paths,
                                          executable_path,
                                          'Debug',
