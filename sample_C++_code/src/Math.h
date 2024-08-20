@@ -18,4 +18,16 @@ return_N add(first_N x, second_N y)
     return x + y;
 }
 
+template<IsANumber return_N, IsANumber first_N, IsANumber second_N>
+return_N subtract(first_N x, second_N y)
+{
+    return x - y;
+}
+
+template<IsANumber return_N, IsANumber first_N, IsANumber second_N>
+return_N multiply(first_N x, second_N y)
+{
+    return x * y;
+}
+
 #endif
