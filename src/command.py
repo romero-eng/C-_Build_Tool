@@ -29,6 +29,7 @@ def run_command(command_description: str,
     if results.stderr:
         formatted_results.append(f'\t Error:\n\n{results.stderr.decode('utf-8'):s}')
 
-    print(f'\n{command_description:s}: {'Succesful' if success else 'Failure':s}\n{'':{'-':s}>{len(command_description) + 1:d}s}\n{'\n'.join(formatted_results):s}\n')  # noqa: E231, E501
+    title: str = f'{command_description:s}: {'Succesful' if success else 'Failure':s}'
+    print(f'\n{title:s}\n{'':{'-':s}>{len(title):d}s}\n{'\n'.join(formatted_results):s}\n')  # noqa: E231, E501
 
     return success
