@@ -1,5 +1,5 @@
-#ifndef ADD_H
-#define ADD_H
+#ifndef MATH_H
+#define MATH_H
 
 int add(int x, int y);
 
