@@ -31,7 +31,7 @@ def _print_flag_statuses(title: str,
                          chosen_descriptions: list[str]) -> None:
 
     max_description_length: int = max([len(description) for description in known_flag_descriptions])
-    print(f'\n{title:s}\n{'':{'-':s}>{len(title) + 1:d}s}\n{'\n'.join([f'{description:>{max_description_length:d}s}: {'ON' if description in chosen_descriptions else 'OFF':s}' for description in known_flag_descriptions]):s}\n')  # noqa: E231, E501
+    print(f'\n{title:s} Options:\n{'':{'-':s}>{len(title) + 9:d}s}\n{'\n'.join([f'{description:>{max_description_length:d}s}: {'ON' if description in chosen_descriptions else 'OFF':s}' for description in known_flag_descriptions]):s}\n')  # noqa: E231, E501
 
 
 def _print_chosen_flag(flag_choice: str,
@@ -123,7 +123,7 @@ def get_compiler_warning_flags(user_chosen_warnings: Optional[str | list[str]] =
         if isinstance(user_chosen_warnings, str):
             user_chosen_warnings = [user_chosen_warnings]
 
-        _print_flag_statuses('Warnings',
+        _print_flag_statuses('Warning',
                              list(FLAG_PER_WARNING.keys()),
                              user_chosen_warnings)
 
