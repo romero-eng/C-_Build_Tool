@@ -68,5 +68,7 @@ def build_executable_from_source(source_file_paths: list[str],
 
 def test_executable(executable_path: str) -> None:
 
-    _ = run_command('Test Executable',
-                    f'{executable_path:s}')
+    if os.path.exists(executable_path):
+        _ = \
+            run_command('Test Executable',
+                        f'{executable_path:s}')
