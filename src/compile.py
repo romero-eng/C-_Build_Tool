@@ -23,13 +23,19 @@ def generate_object_files(source_directory: str,
                                      miscellaneous=flags.get_miscellaneous_flags(miscellaneous))                # noqa: E127, E501
 
     success: bool = True
+    common_directory: str = \
+        os.path.commonpath([source_directory,
+                            build_directory])
+    relative_source_directory: str = source_directory.split(f'{common_directory:s}{os.sep:s}')[1]
+    relative_build_directory: str = build_directory.split(f'{common_directory:s}{os.sep:s}')[1]
 
     for relative_source_file_path, relative_object_file_path in zip(relative_source_file_paths, relative_object_file_build_paths):
 
         success = \
             run_command(f'"{os.path.splitext(os.path.basename(relative_source_file_path))[0]:s}" Compilation Results',
-                        compile_command_with_flags.format(source_file_path=os.path.join(source_directory, relative_source_file_path),
-                                                          object_file_path=os.path.join( build_directory, relative_object_file_path)))
+                        compile_command_with_flags.format(source_file_path=os.path.join(relative_source_directory, relative_source_file_path),
+                                                          object_file_path=os.path.join( relative_build_directory, relative_object_file_path)),
+                        common_directory)
 
         if not success:
             break
@@ -44,8 +50,9 @@ def link_object_files_into_executable(build_directory: str,
     link_command: str = 'g++ -o {executable} {object_files:s}'
 
     run_command('Linking Results',
-                link_command.format(executable=os.path.join(build_directory, f'{executable_name:s}.exe'),
-                                    object_files=' '.join([os.path.join(build_directory, file_build_path) for file_build_path in relative_object_file_build_paths])))
+                link_command.format(executable=f'{executable_name:s}.exe',
+                                    object_files=' '.join(relative_object_file_build_paths)),
+                build_directory)
 
 
 def build_executable_from_source(source_directory: str,
@@ -80,4 +87,5 @@ def test_executable(build_directory: str,
     if os.path.exists(os.path.join(os.path.join(build_directory, f'{executable_name:s}.exe'))):
         _ = \
             run_command('Test Executable',
-                        os.path.join(os.path.join(build_directory, f'{executable_name:s}.exe')))
+                        f'{executable_name:s}.exe',
+                        build_directory)
