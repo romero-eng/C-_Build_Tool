@@ -4,8 +4,9 @@
 # Ignore Object files
 *.o
 
-# Ignore include directories
+# Ignore include and Library directories
 include/
+Library/
 
 # Ignore any compiled executables
 *.exe
