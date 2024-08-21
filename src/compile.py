@@ -31,7 +31,16 @@ def generate_object_files(source_directory: str,
                           warnings: Optional[list[str]] = None,
                           include_directories: Optional[list[str]] = None) -> bool:
 
-    compile_command: str = 'g++ -c {{source_file_path:s}} -o {{object_file_path:s}} {flags:s}'
+    if not os.path.exists(build_directory):
+        os.mkdir(build_directory)
+
+    common_directory: str = \
+        os.path.commonpath([source_directory,
+                            build_directory] + include_directories)
+
+    relative_source_directory: str = source_directory.split(f'{common_directory:s}{os.sep:s}')[1]
+    relative_build_directory: str = build_directory.split(f'{common_directory:s}{os.sep:s}')[1]
+    relative_include_directories: list[str] = [include_dir.split(f'{common_directory:s}{os.sep:s}')[1] for include_dir in include_directories]
 
     formatted_flags: list[str] = []
     if build_configuration:
@@ -43,20 +52,12 @@ def generate_object_files(source_directory: str,
     if miscellaneous:
         formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_miscellaneous_flags(miscellaneous)]))
     if include_directories:
-        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_include_directory_flags(include_directories)]))
+        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_include_directory_flags(relative_include_directories)]))
 
+    compile_command: str = 'g++ -c {{source_file_path:s}} -o {{object_file_path:s}} {flags:s}'
     compile_command: str = compile_command.format(flags=' '.join(formatted_flags))
 
-    if not os.path.exists(build_directory):
-        os.mkdir(build_directory)
-
     success: bool = True
-    common_directory: str = \
-        os.path.commonpath([source_directory,
-                            build_directory])
-
-    relative_source_directory: str = source_directory.split(f'{common_directory:s}{os.sep:s}')[1]
-    relative_build_directory: str = build_directory.split(f'{common_directory:s}{os.sep:s}')[1]
 
     for root, _, files in os.walk(source_directory):
         for file in files:
