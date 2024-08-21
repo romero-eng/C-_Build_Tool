@@ -142,6 +142,7 @@ def build_static_library_from_source(source_directory: str,
                                                      build_directory,
                                                      library_directory)
 
+
 def build_executable_from_source(source_directory: str,
                                  build_directory: str,
                                  executable_name: str,
