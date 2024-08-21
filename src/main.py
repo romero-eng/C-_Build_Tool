@@ -21,23 +21,6 @@ if (__name__ == '__main__'):
 
     try:
 
-        """
-        compile.build_executable_from_source(source_directory,
-                                             build_directory,
-                                             relative_source_file_paths,
-                                             relative_object_file_build_paths,
-                                             executable_name,
-                                             'Debug',
-                                             'C++ 2020',
-                                             'Disable Compiler Extensions',
-                                             ['Treat warnings as errors',
-                                              'Avoid a lot of questionable coding practices',
-                                              'Avoid even more questionable coding practices',
-                                              'Follow Effective C++ Style Guidelines',
-                                              'Avoid potentially value-changing implicit conversions',
-                                              'Avoid potentially sign-changing implicit conversions for integers'])
-        """
-
         compile.build_static_library_from_source(source_directory,
                                                  build_directory,
                                                  include_directory,
@@ -54,6 +37,22 @@ if (__name__ == '__main__'):
                                                   'Follow Effective C++ Style Guidelines',
                                                   'Avoid potentially value-changing implicit conversions',
                                                   'Avoid potentially sign-changing implicit conversions for integers'])
+        """
+        compile.build_executable_from_source(source_directory,
+                                             build_directory,
+                                             relative_source_file_paths,
+                                             relative_object_file_build_paths,
+                                             executable_name,
+                                             'Debug',
+                                             'C++ 2020',
+                                             'Disable Compiler Extensions',
+                                             ['Treat warnings as errors',
+                                              'Avoid a lot of questionable coding practices',
+                                              'Avoid even more questionable coding practices',
+                                              'Follow Effective C++ Style Guidelines',
+                                              'Avoid potentially value-changing implicit conversions',
+                                              'Avoid potentially sign-changing implicit conversions for integers'])
+        """
 
     except Exception:
         print(traceback.format_exc())
