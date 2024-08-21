@@ -18,9 +18,9 @@ def copy_header_files_from_source_into_include(source_directory: str,
             if not os.path.exists(dir):
                 os.mkdir(dir)
         for file in files:
-            if os.path.splitext(file) == '.h':
-                shutil.copyfile(os.path.join(root, file),
-                                os.path.join(include_directory, root, file))
+            if os.path.splitext(file)[1] == '.h':
+                shutil.copyfile(os.path.join(source_directory, root.split(source_directory)[1], file),
+                                os.path.join(include_directory, root.split(source_directory)[1], file))
 
 
 def generate_object_files(source_directory: str,
