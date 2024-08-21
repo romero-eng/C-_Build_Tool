@@ -23,7 +23,6 @@ def copy_header_files_from_source_into_include(source_directory: str,
 def generate_object_files(source_directory: str,
                           build_directory: str,
                           relative_source_file_paths: list[str],
-                          relative_object_file_build_paths: list[str],
                           build_configuration: Optional[str] = None,
                           language_standard: Optional[str] = None,
                           miscellaneous: Optional[str] = None,
@@ -54,12 +53,12 @@ def generate_object_files(source_directory: str,
     relative_source_directory: str = source_directory.split(f'{common_directory:s}{os.sep:s}')[1]
     relative_build_directory: str = build_directory.split(f'{common_directory:s}{os.sep:s}')[1]
 
-    for relative_source_file_path, relative_object_file_path in zip(relative_source_file_paths, relative_object_file_build_paths):  # noqa: E501
+    for relative_source_file_path in relative_source_file_paths:
 
         success = \
             run_command(f'"{os.path.splitext(os.path.basename(relative_source_file_path))[0]:s}" Compilation Results',
-                        compile_command.format(source_file_path=os.path.join(relative_source_directory, relative_source_file_path),   # noqa: E501
-                                               object_file_path=os.path.join( relative_build_directory, relative_object_file_path)),  # noqa: E201, E501
+                        compile_command.format(source_file_path=os.path.join(relative_source_directory, relative_source_file_path),
+                                               object_file_path=os.path.join(relative_build_directory, f'{os.path.splitext(os.path.basename(relative_source_file_path))[0]:s}.o')),
                         common_directory)
 
         if not success:
@@ -69,19 +68,17 @@ def generate_object_files(source_directory: str,
 
 
 def link_object_files_into_executable(build_directory: str,
-                                      executable_name: str,
-                                      relative_object_file_build_paths: list[str]) -> None:
+                                      executable_name: str) -> None:
 
     link_command: str = 'g++ -o {executable} {object_files:s}'
 
     run_command('Linking Results',
                 link_command.format(executable=f'{executable_name:s}.exe',
-                                    object_files=' '.join(relative_object_file_build_paths)),
+                                    object_files=' '.join([file_path for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o'])),
                 build_directory)
 
 
 def archive_object_files_into_static_library(library_name: str,
-                                             relative_object_file_build_paths: list[str],
                                              build_directory: str,
                                              library_directory: str) -> None:
 
@@ -100,7 +97,7 @@ def archive_object_files_into_static_library(library_name: str,
     run_command('Archiving into Static Library',
                 build_static_library_command.format(library_path=os.path.join(relative_library_directory,
                                                                               f'{library_name:s}.{'lib' if platform.system() == 'Windows' else 'a':s}'),
-                                                    object_file_build_paths=' '.join([os.path.join(relative_build_directory, file_path) for file_path in relative_object_file_build_paths])),
+                                                    object_file_build_paths=' '.join([os.path.join(relative_build_directory, file_path) for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o'])),
                 common_directory)
 
 
@@ -119,7 +116,6 @@ def build_static_library_from_source(source_directory: str,
                                      include_directory: str,
                                      library_directory: str,
                                      relative_source_file_paths: list[str],
-                                     relative_object_file_build_paths: list[str],
                                      library_name: str,
                                      build_configuration: Optional[str] = None,
                                      language_standard: Optional[str] = None,
@@ -130,7 +126,6 @@ def build_static_library_from_source(source_directory: str,
             generate_object_files(source_directory,
                                   build_directory,
                                   relative_source_file_paths,
-                                  relative_object_file_build_paths,
                                   build_configuration,
                                   language_standard,
                                   miscellaneous,
@@ -142,7 +137,6 @@ def build_static_library_from_source(source_directory: str,
                                                        include_directory)
 
             archive_object_files_into_static_library(library_name,
-                                                     relative_object_file_build_paths,
                                                      build_directory,
                                                      library_directory)
 
@@ -150,7 +144,6 @@ def build_static_library_from_source(source_directory: str,
 def build_executable_from_source(source_directory: str,
                                  build_directory: str,
                                  relative_source_file_paths: list[str],
-                                 relative_object_file_build_paths: list[str],
                                  executable_name: str,
                                  build_configuration: Optional[str] = None,
                                  language_standard: Optional[str] = None,
@@ -161,7 +154,6 @@ def build_executable_from_source(source_directory: str,
         generate_object_files(source_directory,
                               build_directory,
                               relative_source_file_paths,
-                              relative_object_file_build_paths,
                               build_configuration,
                               language_standard,
                               miscellaneous,
@@ -169,7 +161,6 @@ def build_executable_from_source(source_directory: str,
 
     if success:
         link_object_files_into_executable(build_directory,
-                                          executable_name,
-                                          relative_object_file_build_paths)
+                                          executable_name)
 
     test_executable(build_directory, executable_name)
