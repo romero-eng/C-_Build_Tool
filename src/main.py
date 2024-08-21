@@ -2,7 +2,6 @@ import os
 import traceback
 
 import compile
-import repository
 
 
 if (__name__ == '__main__'):
@@ -12,10 +11,9 @@ if (__name__ == '__main__'):
     #source_directory: str = os.path.join(os.getcwd(), 'sample_C++_code', 'src')
     source_directory: str = os.path.join(os.getcwd(), 'sample_C++_library', 'src')
 
-    (build_directory,
-     include_directory,
-     library_directory) = \
-        repository.get_file_paths(source_directory)
+    build_directory: str = os.path.join(os.path.dirname(source_directory), 'build')
+    include_directory: str = os.path.join(os.path.dirname(source_directory), 'include')
+    library_directory: str = os.path.join(os.path.dirname(source_directory), 'library')
 
     try:
 
