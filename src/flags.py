@@ -40,9 +40,9 @@ def _print_chosen_flag(flag_choice: str,
     print(f'\n{flag_choice:s}: {chosen_flag_description:s}')
 
 
-def get_build_configuration_flags(user_chosen_build_configuration: Optional[str] = None) -> str:
+def get_build_configuration_flags(user_chosen_build_configuration: Optional[str] = None) -> list[str]:
 
-    flags: str = ''
+    flags: list[str] = []
 
     if user_chosen_build_configuration:
 
@@ -51,14 +51,14 @@ def get_build_configuration_flags(user_chosen_build_configuration: Optional[str]
 
         _print_chosen_flag('Build', user_chosen_build_configuration)
 
-        flags = ' '.join([''] + [f'-{flag:s}' for flag in FLAGS_PER_BUILD_CONFIGURATION[user_chosen_build_configuration]])  # noqa: E501
+        flags = [f'-{flag:s}' for flag in FLAGS_PER_BUILD_CONFIGURATION[user_chosen_build_configuration]]
 
     return flags
 
 
-def get_language_standard_flag(user_specified_language_standard: Optional[str] = None) -> str:
+def get_language_standard_flag(user_specified_language_standard: Optional[str] = None) -> list[str]:
 
-    flags: str = ''
+    flags: list[str] = []
 
     if user_specified_language_standard:
 
@@ -77,14 +77,14 @@ def get_language_standard_flag(user_specified_language_standard: Optional[str] =
 
         _print_chosen_flag('Language Standard', user_specified_language_standard)
 
-        flags = f' -std=c++{language_standard_flag:s}'
+        flags = [f'-std=c++{language_standard_flag:s}']
 
     return flags
 
 
-def get_miscellaneous_flags(user_chosen_misc_decisions: Optional[str | list[str]] = None) -> str:
+def get_miscellaneous_flags(user_chosen_misc_decisions: Optional[str | list[str]] = None) -> list[str]:
 
-    flags: str = ''
+    flags: list[str] = []
 
     if user_chosen_misc_decisions:
 
@@ -105,14 +105,14 @@ def get_miscellaneous_flags(user_chosen_misc_decisions: Optional[str | list[str]
                              list(FLAG_PER_MISCELLANEOUS_DECISION.keys()),
                              user_chosen_misc_decisions)
 
-        flags = ' '.join([''] + [f'-{flag:s}' for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in user_chosen_misc_decisions])  # noqa: E501
+        flags = [f'-{flag:s}' for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in user_chosen_misc_decisions]
 
     return flags
 
 
-def get_compiler_warning_flags(user_chosen_warnings: Optional[str | list[str]] = None) -> str:
+def get_warning_flags(user_chosen_warnings: Optional[str | list[str]] = None) -> list[str]:
 
-    flags: str = ''
+    flags: list[str] = []
 
     if user_chosen_warnings:
 
@@ -127,6 +127,6 @@ def get_compiler_warning_flags(user_chosen_warnings: Optional[str | list[str]] =
                              list(FLAG_PER_WARNING.keys()),
                              user_chosen_warnings)
 
-        flags = ' '.join([''] + [f'-W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in user_chosen_warnings])  # noqa: E501
+        flags = [f'-W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in user_chosen_warnings]
 
     return flags

@@ -14,13 +14,19 @@ def generate_object_files(source_directory: str,
                           miscellaneous: Optional[str] = None,
                           warnings: Optional[list[str]] = None) -> bool:
 
-    compile_command: str = 'g++ -c {{source_file_path:s}} -o {{object_file_path:s}}{build_configuration:s}{language_standard:s}{warnings:s}{miscellaneous:s}'  # noqa: E501
+    compile_command: str = 'g++ -c {{source_file_path:s}} -o {{object_file_path:s}} {flags:s}'
 
-    compile_command_with_flags: str = \
-        compile_command.format(build_configuration=flags.get_build_configuration_flags(build_configuration),
-                                 language_standard=flags.get_language_standard_flag(language_standard),         # noqa: E127, E501
-                                          warnings=flags.get_compiler_warning_flags(warnings),                  # noqa: E127, E501
-                                     miscellaneous=flags.get_miscellaneous_flags(miscellaneous))                # noqa: E127, E501
+    formatted_flags: list[str] = []
+    if build_configuration:
+        formatted_flags.append(' '.join(flags.get_build_configuration_flags(build_configuration)))
+    if language_standard:
+        formatted_flags.append(' '.join(flags.get_language_standard_flag(language_standard)))
+    if warnings:
+        formatted_flags.append(' '.join(flags.get_warning_flags(warnings)))
+    if miscellaneous:
+        formatted_flags.append(' '.join(flags.get_miscellaneous_flags(miscellaneous)))
+
+    compile_command: str = compile_command.format(flags=' '.join(formatted_flags))
 
     success: bool = True
     common_directory: str = \
@@ -33,8 +39,8 @@ def generate_object_files(source_directory: str,
 
         success = \
             run_command(f'"{os.path.splitext(os.path.basename(relative_source_file_path))[0]:s}" Compilation Results',
-                        compile_command_with_flags.format(source_file_path=os.path.join(relative_source_directory, relative_source_file_path),   # noqa: E501
-                                                          object_file_path=os.path.join( relative_build_directory, relative_object_file_path)),  # noqa: E201, E501
+                        compile_command.format(source_file_path=os.path.join(relative_source_directory, relative_source_file_path),   # noqa: E501
+                                               object_file_path=os.path.join( relative_build_directory, relative_object_file_path)),  # noqa: E201, E501
                         common_directory)
 
         if not success:
