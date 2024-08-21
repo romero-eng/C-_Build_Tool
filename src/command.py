@@ -2,8 +2,6 @@ import subprocess
 from typing import Optional
 
 
-import os
-
 def run_command(command_description: str,
                 command: str,
                 working_directory: Optional[str] = None,

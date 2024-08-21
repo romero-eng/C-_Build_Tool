@@ -29,12 +29,12 @@ def generate_object_files(source_directory: str,
     relative_source_directory: str = source_directory.split(f'{common_directory:s}{os.sep:s}')[1]
     relative_build_directory: str = build_directory.split(f'{common_directory:s}{os.sep:s}')[1]
 
-    for relative_source_file_path, relative_object_file_path in zip(relative_source_file_paths, relative_object_file_build_paths):
+    for relative_source_file_path, relative_object_file_path in zip(relative_source_file_paths, relative_object_file_build_paths):  # noqa: E501
 
         success = \
             run_command(f'"{os.path.splitext(os.path.basename(relative_source_file_path))[0]:s}" Compilation Results',
-                        compile_command_with_flags.format(source_file_path=os.path.join(relative_source_directory, relative_source_file_path),
-                                                          object_file_path=os.path.join( relative_build_directory, relative_object_file_path)),
+                        compile_command_with_flags.format(source_file_path=os.path.join(relative_source_directory, relative_source_file_path),   # noqa: E501
+                                                          object_file_path=os.path.join( relative_build_directory, relative_object_file_path)),  # noqa: E201, E501
                         common_directory)
 
         if not success:
@@ -56,7 +56,7 @@ def link_object_files_into_executable(build_directory: str,
 
 
 def build_executable_from_source(source_directory: str,
-                                 build_directory: str, 
+                                 build_directory: str,
                                  relative_source_file_paths: list[str],
                                  relative_object_file_build_paths: list[str],
                                  executable_name: str,
