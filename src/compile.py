@@ -43,6 +43,9 @@ def generate_object_files(source_directory: str,
 
     compile_command: str = compile_command.format(flags=' '.join(formatted_flags))
 
+    if not os.path.exists(build_directory):
+        os.mkdir(build_directory)
+
     success: bool = True
     common_directory: str = \
         os.path.commonpath([source_directory,
