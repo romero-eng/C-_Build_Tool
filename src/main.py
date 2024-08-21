@@ -33,8 +33,6 @@ if (__name__ == '__main__'):
                                               'Avoid potentially value-changing implicit conversions',
                                               'Avoid potentially sign-changing implicit conversions for integers'])
 
-        compile.test_executable(build_directory, executable_name)
-
     except Exception:
         print(traceback.format_exc())
 

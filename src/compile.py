@@ -61,6 +61,16 @@ def link_object_files_into_executable(build_directory: str,
                 build_directory)
 
 
+def test_executable(executable_directory: str,
+                    executable_name: str) -> None:
+
+    if os.path.exists(os.path.join(os.path.join(executable_directory, f'{executable_name:s}.exe'))):
+        _ = \
+            run_command('Testing Executable',
+                        f'{executable_name:s}.exe',
+                        executable_directory)
+
+
 def build_executable_from_source(source_directory: str,
                                  build_directory: str,
                                  relative_source_file_paths: list[str],
@@ -86,12 +96,4 @@ def build_executable_from_source(source_directory: str,
                                           executable_name,
                                           relative_object_file_build_paths)
 
-
-def test_executable(build_directory: str,
-                    executable_name: str) -> None:
-
-    if os.path.exists(os.path.join(os.path.join(build_directory, f'{executable_name:s}.exe'))):
-        _ = \
-            run_command('Testing Executable',
-                        f'{executable_name:s}.exe',
-                        build_directory)
+    test_executable(build_directory, executable_name)
