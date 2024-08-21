@@ -22,7 +22,6 @@ def copy_header_files_from_source_into_include(source_directory: str,
 
 def generate_object_files(source_directory: str,
                           build_directory: str,
-                          relative_source_file_paths: list[str],
                           build_configuration: Optional[str] = None,
                           language_standard: Optional[str] = None,
                           miscellaneous: Optional[str] = None,
@@ -53,16 +52,18 @@ def generate_object_files(source_directory: str,
     relative_source_directory: str = source_directory.split(f'{common_directory:s}{os.sep:s}')[1]
     relative_build_directory: str = build_directory.split(f'{common_directory:s}{os.sep:s}')[1]
 
-    for relative_source_file_path in relative_source_file_paths:
+    for root, _, files in os.walk(source_directory):
+        for file in files:
+            if os.path.splitext(file)[1] == '.cpp':
 
-        success = \
-            run_command(f'"{os.path.splitext(os.path.basename(relative_source_file_path))[0]:s}" Compilation Results',
-                        compile_command.format(source_file_path=os.path.join(relative_source_directory, relative_source_file_path),
-                                               object_file_path=os.path.join(relative_build_directory, f'{os.path.splitext(os.path.basename(relative_source_file_path))[0]:s}.o')),
-                        common_directory)
+                success = \
+                    run_command(f'"{os.path.splitext(file)[0]:s}" Compilation Results',
+                                compile_command.format(source_file_path=os.path.join(relative_source_directory, root.split(source_directory)[1], file),
+                                                       object_file_path=os.path.join(relative_build_directory, f'{os.path.splitext(file)[0]:s}.o')),
+                                common_directory)
 
-        if not success:
-            break
+                if not success:
+                    break
 
     return success
 
@@ -115,7 +116,6 @@ def build_static_library_from_source(source_directory: str,
                                      build_directory: str,
                                      include_directory: str,
                                      library_directory: str,
-                                     relative_source_file_paths: list[str],
                                      library_name: str,
                                      build_configuration: Optional[str] = None,
                                      language_standard: Optional[str] = None,
@@ -125,7 +125,6 @@ def build_static_library_from_source(source_directory: str,
         success: bool = \
             generate_object_files(source_directory,
                                   build_directory,
-                                  relative_source_file_paths,
                                   build_configuration,
                                   language_standard,
                                   miscellaneous,
@@ -143,7 +142,6 @@ def build_static_library_from_source(source_directory: str,
 
 def build_executable_from_source(source_directory: str,
                                  build_directory: str,
-                                 relative_source_file_paths: list[str],
                                  executable_name: str,
                                  build_configuration: Optional[str] = None,
                                  language_standard: Optional[str] = None,
@@ -153,7 +151,6 @@ def build_executable_from_source(source_directory: str,
     success: bool = \
         generate_object_files(source_directory,
                               build_directory,
-                              relative_source_file_paths,
                               build_configuration,
                               language_standard,
                               miscellaneous,

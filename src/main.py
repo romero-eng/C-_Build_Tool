@@ -12,8 +12,7 @@ if (__name__ == '__main__'):
     #source_directory: str = os.path.join(os.getcwd(), 'sample_C++_code', 'src')
     source_directory: str = os.path.join(os.getcwd(), 'sample_C++_library', 'src')
 
-    (relative_source_file_paths,
-     build_directory,
+    (build_directory,
      include_directory,
      library_directory) = \
         repository.get_file_paths(source_directory)
@@ -24,7 +23,6 @@ if (__name__ == '__main__'):
                                                  build_directory,
                                                  include_directory,
                                                  library_directory,
-                                                 relative_source_file_paths,
                                                  library_name,
                                                  'Debug',
                                                  'C++ 2020',
@@ -38,7 +36,6 @@ if (__name__ == '__main__'):
         """
         compile.build_executable_from_source(source_directory,
                                              build_directory,
-                                             relative_source_file_paths,
                                              executable_name,
                                              'Debug',
                                              'C++ 2020',
