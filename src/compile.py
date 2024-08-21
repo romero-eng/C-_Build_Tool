@@ -81,6 +81,9 @@ def archive_object_files_into_static_library(library_name: str,
 
     build_static_library_command: str = 'ar rcs {library_path:s} {object_file_build_paths:s}'
 
+    if not os.path.exists(library_directory):
+        os.mkdir(library_directory)
+
     common_directory: str = \
         os.path.commonpath([build_directory,
                             library_directory])

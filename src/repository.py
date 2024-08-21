@@ -13,9 +13,6 @@ def get_file_paths(source_directory: str) -> tuple[list[str], list[str], str, st
     if not os.path.exists(include_directory):
         os.mkdir(include_directory)
 
-    if not os.path.exists(library_directory):
-        os.mkdir(library_directory)
-
     relative_source_file_paths: list[str] = [os.path.join(root.split(source_directory)[1], file) for root, _, files in os.walk(source_directory) for file in files if os.path.splitext(file)[1] == '.cpp']  # noqa: E501
     relative_object_file_build_paths: list[str] = [f'{os.path.splitext(os.path.basename(file_path))[0]:s}.o' for file_path in relative_source_file_paths]                                                   # noqa: E501
 
