@@ -1,3 +1,4 @@
+import os
 import re
 from typing import Optional
 
@@ -139,5 +140,21 @@ def get_include_directory_flags(include_directories: Optional[list[str]] = None)
     if include_directories:
         for include_dir in include_directories:
             flags.append(f'I {include_dir:s}')
+
+    return flags
+
+
+def get_library_flags(library_paths: list[str] = None) -> list[str]:
+
+    flags: list[str] = []
+
+    if library_paths:
+
+        [library_directory_flags,
+         library_name_flags] = \
+            list(zip(*[(f'L {os.path.dirname(library_path):s}',
+                    f'l{os.path.splitext(os.path.basename(library_path))[0]:s}') for library_path in library_paths]))
+
+        flags = list(library_directory_flags + library_name_flags)
 
     return flags
