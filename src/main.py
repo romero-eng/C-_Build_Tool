@@ -6,15 +6,15 @@ import compile
 
 if (__name__ == '__main__'):
 
-    #executable_name: str = 'present_addition'
-    #source_directory: str = os.path.join(os.getcwd(), 'sample_C++_code', 'src')
+    executable_name: str = 'present_addition'
+    source_directory: str = os.path.join(os.getcwd(), 'sample_C++_code', 'src')
 
-    library_name: str = 'Math'
-    source_directory: str = os.path.join(os.getcwd(), 'sample_C++_library', 'src')
+    #library_name: str = 'Math'
+    #source_directory: str = os.path.join(os.getcwd(), 'sample_C++_library', 'src')
 
     build_directory: str = os.path.join(os.path.dirname(source_directory), 'build')
-    include_directory: str = os.path.join(os.path.dirname(source_directory), 'include')
-    library_directory: str = os.path.join(os.path.dirname(source_directory), 'library')
+    #include_directory: str = os.path.join(os.path.dirname(source_directory), 'include')
+    #library_directory: str = os.path.join(os.path.dirname(source_directory), 'library')
 
     try:
 
