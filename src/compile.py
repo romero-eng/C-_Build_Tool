@@ -13,11 +13,14 @@ def copy_header_files_from_source_into_include(source_directory: str,
     if not os.path.exists(include_directory):
         os.mkdir(include_directory)
 
-    for relative_source_dir, _, files in os.walk(source_directory):
+    for root, dirs, files in os.walk(source_directory):
+        for dir in dirs:
+            if not os.path.exists(dir):
+                os.mkdir(dir)
         for file in files:
-            if os.path.splitext(file)[1] == '.h':
-                shutil.copyfile(os.path.join(relative_source_dir, file),
-                                os.path.join(  include_directory, file))
+            if os.path.splitext(file) == '.h':
+                shutil.copyfile(os.path.join(root, file),
+                                os.path.join(include_directory, root, file))
 
 
 def generate_object_files(source_directory: str,
@@ -138,7 +141,6 @@ def build_static_library_from_source(source_directory: str,
             archive_object_files_into_static_library(library_name,
                                                      build_directory,
                                                      library_directory)
-
 
 def build_executable_from_source(source_directory: str,
                                  build_directory: str,
