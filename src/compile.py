@@ -10,6 +10,9 @@ from command import run_command
 def copy_header_files_from_source_into_include(source_directory: str,
                                                include_directory: str) -> None:
 
+    if not os.path.exists(include_directory):
+        os.mkdir(include_directory)
+
     for relative_source_dir, _, files in os.walk(source_directory):
         for file in files:
             if os.path.splitext(file)[1] == '.h':
