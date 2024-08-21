@@ -18,7 +18,7 @@ if (__name__ == '__main__'):
 
     try:
 
-        #"""
+        """
         compile.build_static_library_from_source(source_directory,
                                                  build_directory,
                                                  include_directory,
@@ -46,7 +46,7 @@ if (__name__ == '__main__'):
                                               'Follow Effective C++ Style Guidelines',
                                               'Avoid potentially value-changing implicit conversions',
                                               'Avoid potentially sign-changing implicit conversions for integers'])
-        """
+        #"""
 
     except Exception:
         print(traceback.format_exc())
