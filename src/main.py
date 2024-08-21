@@ -6,9 +6,10 @@ import compile
 
 if (__name__ == '__main__'):
 
-    library_name: str = 'Math'
     executable_name: str = 'present_addition'
     #source_directory: str = os.path.join(os.getcwd(), 'sample_C++_code', 'src')
+
+    library_name: str = 'Math'
     source_directory: str = os.path.join(os.getcwd(), 'sample_C++_library', 'src')
 
     build_directory: str = os.path.join(os.path.dirname(source_directory), 'build')
@@ -17,6 +18,7 @@ if (__name__ == '__main__'):
 
     try:
 
+        """
         compile.build_static_library_from_source(source_directory,
                                                  build_directory,
                                                  include_directory,
@@ -44,7 +46,7 @@ if (__name__ == '__main__'):
                                               'Follow Effective C++ Style Guidelines',
                                               'Avoid potentially value-changing implicit conversions',
                                               'Avoid potentially sign-changing implicit conversions for integers'])
-        """
+        #"""
 
     except Exception:
         print(traceback.format_exc())
