@@ -34,13 +34,13 @@ def generate_object_files(source_directory: str,
 
     formatted_flags: list[str] = []
     if build_configuration:
-        formatted_flags.append(' '.join(flags.get_build_configuration_flags(build_configuration)))
+        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_build_configuration_flags(build_configuration)]))
     if language_standard:
-        formatted_flags.append(' '.join(flags.get_language_standard_flag(language_standard)))
+        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_language_standard_flag(language_standard)]))
     if warnings:
-        formatted_flags.append(' '.join(flags.get_warning_flags(warnings)))
+        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_warning_flags(warnings)]))
     if miscellaneous:
-        formatted_flags.append(' '.join(flags.get_miscellaneous_flags(miscellaneous)))
+        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_miscellaneous_flags(miscellaneous)]))
 
     compile_command: str = compile_command.format(flags=' '.join(formatted_flags))
 

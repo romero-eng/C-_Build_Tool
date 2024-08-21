@@ -6,7 +6,7 @@ import compile
 
 if (__name__ == '__main__'):
 
-    executable_name: str = 'present_addition'
+    #executable_name: str = 'present_addition'
     #source_directory: str = os.path.join(os.getcwd(), 'sample_C++_code', 'src')
 
     library_name: str = 'Math'
