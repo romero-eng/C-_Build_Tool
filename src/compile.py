@@ -28,7 +28,8 @@ def generate_object_files(source_directory: str,
                           build_configuration: Optional[str] = None,
                           language_standard: Optional[str] = None,
                           miscellaneous: Optional[str] = None,
-                          warnings: Optional[list[str]] = None) -> bool:
+                          warnings: Optional[list[str]] = None,
+                          include_directories: Optional[list[str]] = None) -> bool:
 
     compile_command: str = 'g++ -c {{source_file_path:s}} -o {{object_file_path:s}} {flags:s}'
 
@@ -41,6 +42,8 @@ def generate_object_files(source_directory: str,
         formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_warning_flags(warnings)]))
     if miscellaneous:
         formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_miscellaneous_flags(miscellaneous)]))
+    if include_directories:
+        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_include_directory_flags(include_directories)]))
 
     compile_command: str = compile_command.format(flags=' '.join(formatted_flags))
 
@@ -123,7 +126,8 @@ def build_static_library_from_source(source_directory: str,
                                      build_configuration: Optional[str] = None,
                                      language_standard: Optional[str] = None,
                                      miscellaneous: Optional[str] = None,
-                                     warnings: Optional[list[str]] = None) -> None:
+                                     warnings: Optional[list[str]] = None,
+                                     include_directories: Optional[list[str]] = None) -> None:
 
         success: bool = \
             generate_object_files(source_directory,
@@ -131,7 +135,8 @@ def build_static_library_from_source(source_directory: str,
                                   build_configuration,
                                   language_standard,
                                   miscellaneous,
-                                  warnings)
+                                  warnings,
+                                  include_directories)
 
         if success:
 
@@ -149,7 +154,8 @@ def build_executable_from_source(source_directory: str,
                                  build_configuration: Optional[str] = None,
                                  language_standard: Optional[str] = None,
                                  miscellaneous: Optional[str] = None,
-                                 warnings: Optional[list[str]] = None) -> None:
+                                 warnings: Optional[list[str]] = None,
+                                 include_directories: Optional[list[str]] = None) -> None:
 
     success: bool = \
         generate_object_files(source_directory,
@@ -157,7 +163,8 @@ def build_executable_from_source(source_directory: str,
                               build_configuration,
                               language_standard,
                               miscellaneous,
-                              warnings)
+                              warnings,
+                              include_directories)
 
     if success:
         link_object_files_into_executable(build_directory,

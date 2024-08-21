@@ -8,11 +8,14 @@ if (__name__ == '__main__'):
 
     executable_name: str = 'present_addition'
     source_directory: str = os.path.join(os.getcwd(), 'sample_C++_code', 'src')
+    
+    build_directory: str = os.path.join(os.path.dirname(source_directory), 'build')
+    math_include_directory: str = os.path.join(os.getcwd(), 'sample_C++_library', 'include')
 
     #library_name: str = 'Math'
     #source_directory: str = os.path.join(os.getcwd(), 'sample_C++_library', 'src')
 
-    build_directory: str = os.path.join(os.path.dirname(source_directory), 'build')
+    #build_directory: str = os.path.join(os.path.dirname(source_directory), 'build')
     #include_directory: str = os.path.join(os.path.dirname(source_directory), 'include')
     #library_directory: str = os.path.join(os.path.dirname(source_directory), 'library')
 
@@ -45,7 +48,8 @@ if (__name__ == '__main__'):
                                               'Avoid even more questionable coding practices',
                                               'Follow Effective C++ Style Guidelines',
                                               'Avoid potentially value-changing implicit conversions',
-                                              'Avoid potentially sign-changing implicit conversions for integers'])
+                                              'Avoid potentially sign-changing implicit conversions for integers'],
+                                              [math_include_directory])
         #"""
 
     except Exception:

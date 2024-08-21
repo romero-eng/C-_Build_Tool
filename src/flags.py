@@ -130,3 +130,14 @@ def get_warning_flags(user_chosen_warnings: Optional[str | list[str]] = None) ->
         flags = [f'W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in user_chosen_warnings]
 
     return flags
+
+
+def get_include_directory_flags(include_directories: Optional[list[str]] = None) -> list[str]:
+    
+    flags: list[str] = []
+
+    if include_directories:
+        for include_dir in include_directories:
+            flags.append(f'I {include_dir:s}')
+
+    return flags
