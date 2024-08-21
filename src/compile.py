@@ -1,8 +1,20 @@
 import os
+import shutil
+import platform
 from typing import Optional
 
 import flags
 from command import run_command
+
+
+def copy_header_files_from_source_into_include(source_directory: str,
+                                               include_directory: str) -> None:
+
+    for relative_source_dir, _, files in os.walk(source_directory):
+        for file in files:
+            if os.path.splitext(file)[1] == '.h':
+                shutil.copyfile(os.path.join(relative_source_dir, file),
+                                os.path.join(  include_directory, file))
 
 
 def generate_object_files(source_directory: str,
@@ -32,6 +44,7 @@ def generate_object_files(source_directory: str,
     common_directory: str = \
         os.path.commonpath([source_directory,
                             build_directory])
+
     relative_source_directory: str = source_directory.split(f'{common_directory:s}{os.sep:s}')[1]
     relative_build_directory: str = build_directory.split(f'{common_directory:s}{os.sep:s}')[1]
 
@@ -61,6 +74,27 @@ def link_object_files_into_executable(build_directory: str,
                 build_directory)
 
 
+def archive_object_files_into_static_library(library_name: str,
+                                             relative_object_file_build_paths: list[str],
+                                             build_directory: str,
+                                             library_directory: str) -> None:
+
+    build_static_library_command: str = 'ar rcs {library_path:s} {object_file_build_paths:s}'
+
+    common_directory: str = \
+        os.path.commonpath([build_directory,
+                            library_directory])
+
+    relative_build_directory: str = build_directory.split(f'{common_directory:s}{os.sep:s}')[1]
+    relative_library_directory: str = library_directory.split(f'{common_directory:s}{os.sep:s}')[1]
+
+    run_command('Archiving into Static Library',
+                build_static_library_command.format(library_path=os.path.join(relative_library_directory,
+                                                                              f'{library_name:s}.{'lib' if platform.system() == 'Windows' else 'a':s}'),
+                                                    object_file_build_paths=' '.join([os.path.join(relative_build_directory, file_path) for file_path in relative_object_file_build_paths])),
+                common_directory)
+
+
 def test_executable(executable_directory: str,
                     executable_name: str) -> None:
 
@@ -69,6 +103,39 @@ def test_executable(executable_directory: str,
             run_command('Testing Executable',
                         f'{executable_name:s}.exe',
                         executable_directory)
+
+
+def build_static_library_from_source(source_directory: str,
+                                     build_directory: str,
+                                     include_directory: str,
+                                     library_directory: str,
+                                     relative_source_file_paths: list[str],
+                                     relative_object_file_build_paths: list[str],
+                                     library_name: str,
+                                     build_configuration: Optional[str] = None,
+                                     language_standard: Optional[str] = None,
+                                     miscellaneous: Optional[str] = None,
+                                     warnings: Optional[list[str]] = None) -> None:
+
+        success: bool = \
+            generate_object_files(source_directory,
+                                  build_directory,
+                                  relative_source_file_paths,
+                                  relative_object_file_build_paths,
+                                  build_configuration,
+                                  language_standard,
+                                  miscellaneous,
+                                  warnings)
+
+        if success:
+
+            copy_header_files_from_source_into_include(source_directory,
+                                                       include_directory)
+
+            archive_object_files_into_static_library(library_name,
+                                                     relative_object_file_build_paths,
+                                                     build_directory,
+                                                     library_directory)
 
 
 def build_executable_from_source(source_directory: str,
