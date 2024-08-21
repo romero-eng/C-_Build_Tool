@@ -37,4 +37,4 @@ if (__name__ == '__main__'):
         print(traceback.format_exc())
 
     finally:
-        shutil.rmtree(os.path.join(os.getcwd(), 'sample_C++_code', 'build'))
+        shutil.rmtree(build_directory)
