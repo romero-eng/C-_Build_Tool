@@ -86,6 +86,6 @@ def test_executable(build_directory: str,
 
     if os.path.exists(os.path.join(os.path.join(build_directory, f'{executable_name:s}.exe'))):
         _ = \
-            run_command('Test Executable',
+            run_command('Testing Executable',
                         f'{executable_name:s}.exe',
                         build_directory)
