@@ -71,7 +71,7 @@ def link_object_files_into_executable(build_directory: str,
     if library_directories:
         formatted_flags += flags.get_library_directory_flags(library_directories)
 
-    if library_directories:
+    if library_names:
         formatted_flags += flags.get_library_name_flags(library_names)
 
     link_command: str = 'g++ -o {{executable:s}} {{object_files:s}} {flags:s}'
@@ -86,15 +86,19 @@ def link_object_files_into_executable(build_directory: str,
 def archive_object_files_into_static_library(library_name: str,
                                              build_directory: str,
                                              library_directory: str,
-                                             other_library_paths: list[str] | None = None) -> None:
+                                             other_library_directories: list[str] | None = None,
+                                             other_library_names: list[str] | None = None) -> None:
 
     formatted_flags: list[str] = []
 
-    if other_library_paths:
-        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_library_flags(other_library_paths)]))
+    if other_library_directories:
+        formatted_flags += flags.get_library_directory_flags(other_library_directories)
+
+    if other_library_names:
+        formatted_flags += flags.get_library_name_flags(other_library_names)
 
     build_static_library_command: str = 'ar rcs {{library_path:s}} {{object_file_build_paths:s}} {flags:s}'
-    build_static_library_command = build_static_library_command.format(flags=' '.join(formatted_flags))
+    build_static_library_command = build_static_library_command.format(flags=' '.join([f'-{flag:s}' for flag in formatted_flags]))
 
     if not os.path.exists(library_directory):
         os.mkdir(library_directory)
@@ -129,7 +133,8 @@ def build_static_library_from_source(source_directory: str,
                                      library_directory: str,
                                      library_name: str,
                                      other_include_directories: list[str] | None = None,
-                                     other_library_paths: list[str] | None = None) -> None:
+                                     other_library_directories: list[str] | None = None,
+                                     other_library_names: list[str] | None = None) -> None:
 
     success: bool = \
         generate_object_files(source_directory,
@@ -144,7 +149,8 @@ def build_static_library_from_source(source_directory: str,
         archive_object_files_into_static_library(library_name,
                                                  build_directory,
                                                  library_directory,
-                                                 other_library_paths)
+                                                 other_library_directories,
+                                                 other_library_names)
 
 
 def build_executable_from_source(source_directory: str,
