@@ -14,7 +14,7 @@ if (__name__ == '__main__'):
 
     executable_name: str = 'present_addition'
     source_directory: str = os.path.join(os.getcwd(), 'sample_C++_code', 'src')
-    
+
     build_directory: str = os.path.join(os.path.dirname(source_directory), 'build')
     math_library_path: str = os.path.join(math_library_directory, f'{math_library_name:s}.lib')
 
@@ -47,8 +47,8 @@ if (__name__ == '__main__'):
                                               'Follow Effective C++ Style Guidelines',
                                               'Avoid potentially value-changing implicit conversions',
                                               'Avoid potentially sign-changing implicit conversions for integers'],
-                                              [math_include_directory],
-                                              [math_library_path])
+                                             [math_include_directory],
+                                             [math_library_path])
 
     except Exception:
         print(traceback.format_exc())

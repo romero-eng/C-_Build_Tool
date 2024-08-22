@@ -41,7 +41,7 @@ def generate_object_files(source_directory: str,
 
     formatted_flags: list[str] = []
     if build_configuration:
-        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_build_configuration_flags(build_configuration)]))
+        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_build_configuration_flags(build_configuration)]))  # noqa: E501
     if language_standard:
         formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_language_standard_flag(language_standard)]))
     if warnings:
@@ -49,7 +49,7 @@ def generate_object_files(source_directory: str,
     if miscellaneous:
         formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_miscellaneous_flags(miscellaneous)]))
     if include_directories:
-        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_include_directory_flags(include_directories)]))
+        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_include_directory_flags(include_directories)]))  # noqa: E501
 
     compile_command: str = 'g++ -c {{source_file_path:s}} -o {{object_file_path:s}} {flags:s}'
     compile_command = compile_command.format(flags=' '.join(formatted_flags))
@@ -62,8 +62,8 @@ def generate_object_files(source_directory: str,
 
                 success = \
                     run_command(f'"{os.path.splitext(file)[0]:s}" Compilation Results',
-                                compile_command.format(source_file_path=os.path.join(relative_source_directory, root.split(source_directory)[1], file),
-                                                       object_file_path=os.path.join(relative_build_directory, f'{os.path.splitext(file)[0]:s}.o')),
+                                compile_command.format(source_file_path=os.path.join(relative_source_directory, root.split(source_directory)[1], file),  # noqa: E501
+                                                       object_file_path=os.path.join(relative_build_directory, f'{os.path.splitext(file)[0]:s}.o')),     # noqa: E501
                                 common_directory)
 
                 if not success:
@@ -83,10 +83,10 @@ def link_object_files_into_executable(build_directory: str,
 
     link_command: str = 'g++ -o {{executable:s}} {{object_files:s}} {flags:s}'
     link_command = link_command.format(flags=' '.join(formatted_flags))
-    
+
     run_command('Linking Results',
                 link_command.format(executable=f'{executable_name:s}.exe',
-                                    object_files=' '.join([file_path for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o'])),
+                                    object_files=' '.join([file_path for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o'])),  # noqa: E501
                 build_directory)
 
 
@@ -115,8 +115,8 @@ def archive_object_files_into_static_library(library_name: str,
 
     run_command('Archiving into Static Library',
                 build_static_library_command.format(library_path=os.path.join(relative_library_directory,
-                                                                              f'{library_name:s}.{'lib' if platform.system() == 'Windows' else 'a':s}'),
-                                                    object_file_build_paths=' '.join([os.path.join(relative_build_directory, file_path) for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o'])),
+                                                                              f'{library_name:s}.{'lib' if platform.system() == 'Windows' else 'a':s}'),                                                                            # noqa: E501
+                                                    object_file_build_paths=' '.join([os.path.join(relative_build_directory, file_path) for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o'])),  # noqa: E501
                 common_directory)
 
 
@@ -142,24 +142,24 @@ def build_static_library_from_source(source_directory: str,
                                      include_directories: Optional[list[str]] = None,
                                      library_paths: Optional[list[str]] = None) -> None:
 
-        success: bool = \
-            generate_object_files(source_directory,
-                                  build_directory,
-                                  build_configuration,
-                                  language_standard,
-                                  miscellaneous,
-                                  warnings,
-                                  include_directories)
+    success: bool = \
+        generate_object_files(source_directory,
+                              build_directory,
+                              build_configuration,
+                              language_standard,
+                              miscellaneous,
+                              warnings,
+                              include_directories)
 
-        if success:
+    if success:
 
-            copy_header_files_from_source_into_include(source_directory,
-                                                       include_directory)
+        copy_header_files_from_source_into_include(source_directory,
+                                                   include_directory)
 
-            archive_object_files_into_static_library(library_name,
-                                                     build_directory,
-                                                     library_directory,
-                                                     library_paths)
+        archive_object_files_into_static_library(library_name,
+                                                 build_directory,
+                                                 library_directory,
+                                                 library_paths)
 
 
 def build_executable_from_source(source_directory: str,

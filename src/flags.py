@@ -106,7 +106,7 @@ def get_miscellaneous_flags(user_chosen_misc_decisions: Optional[str | list[str]
                              list(FLAG_PER_MISCELLANEOUS_DECISION.keys()),
                              user_chosen_misc_decisions)
 
-        flags = [flag for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in user_chosen_misc_decisions]
+        flags = [flag for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in user_chosen_misc_decisions]  # noqa: E501
 
     return flags
 
@@ -134,7 +134,7 @@ def get_warning_flags(user_chosen_warnings: Optional[str | list[str]] = None) ->
 
 
 def get_include_directory_flags(include_directories: Optional[list[str]] = None) -> list[str]:
-    
+
     flags: list[str] = []
 
     if include_directories:
@@ -144,7 +144,7 @@ def get_include_directory_flags(include_directories: Optional[list[str]] = None)
     return flags
 
 
-def get_library_flags(library_paths: list[str] = None) -> list[str]:
+def get_library_flags(library_paths: Optional[list[str]] = None) -> list[str]:
 
     flags: list[str] = []
 
@@ -153,7 +153,7 @@ def get_library_flags(library_paths: list[str] = None) -> list[str]:
         [library_directory_flags,
          library_name_flags] = \
             list(zip(*[(f'L {os.path.dirname(library_path):s}',
-                    f'l{os.path.splitext(os.path.basename(library_path))[0]:s}') for library_path in library_paths]))
+                        f'l{os.path.splitext(os.path.basename(library_path))[0]:s}') for library_path in library_paths]))  # noqa: E501
 
         flags = list(library_directory_flags + library_name_flags)
 
