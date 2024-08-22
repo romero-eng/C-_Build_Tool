@@ -42,7 +42,7 @@ def _print_chosen_flag(flag_choice: str,
     print(f'\n{flag_choice:s}: {chosen_flag_description:s}')
 
 
-def get_build_configuration_flags(user_chosen_build_configuration: Optional[str] = None) -> list[str]:
+def _get_build_configuration_flags(user_chosen_build_configuration: Optional[str] = None) -> list[str]:
 
     flags: list[str] = []
 
@@ -58,7 +58,7 @@ def get_build_configuration_flags(user_chosen_build_configuration: Optional[str]
     return flags
 
 
-def get_language_standard_flag(user_specified_language_standard: Optional[str] = None) -> list[str]:
+def _get_language_standard_flag(user_specified_language_standard: Optional[str] = None) -> list[str]:
 
     flags: list[str] = []
 
@@ -84,7 +84,7 @@ def get_language_standard_flag(user_specified_language_standard: Optional[str] =
     return flags
 
 
-def get_miscellaneous_flags(user_chosen_misc_decisions: Optional[str | list[str]] = None) -> list[str]:
+def _get_miscellaneous_flags(user_chosen_misc_decisions: Optional[str | list[str]] = None) -> list[str]:
 
     flags: list[str] = []
 
@@ -112,7 +112,7 @@ def get_miscellaneous_flags(user_chosen_misc_decisions: Optional[str | list[str]
     return flags
 
 
-def get_warning_flags(user_chosen_warnings: Optional[str | list[str]] = None) -> list[str]:
+def _get_warning_flags(user_chosen_warnings: Optional[str | list[str]] = None) -> list[str]:
 
     flags: list[str] = []
 
@@ -160,13 +160,13 @@ def retrieve_compilation_flags(src_dir: str) -> list[str]:
     formatted_flags: list[str] = []
 
     if 'Build Configuration' in settings:
-        formatted_flags += get_build_configuration_flags(settings['Build Configuration'])
+        formatted_flags += _get_build_configuration_flags(settings['Build Configuration'])
     if 'Language Standard' in settings:
-        formatted_flags += get_language_standard_flag(settings['Language Standard'])
+        formatted_flags += _get_language_standard_flag(settings['Language Standard'])
     if 'Warnings' in settings:
-        formatted_flags += get_warning_flags(settings['Warnings'])
+        formatted_flags += _get_warning_flags(settings['Warnings'])
     if 'Miscellaneous' in settings:
-        formatted_flags += get_miscellaneous_flags(settings['Miscellaneous'])
+        formatted_flags += _get_miscellaneous_flags(settings['Miscellaneous'])
 
     return formatted_flags
 
