@@ -26,21 +26,22 @@ def generate_object_files(source_directory: str,
                           build_directory: str,
                           include_directories: list[str] | None = None) -> bool:
 
-    if not os.path.exists(build_directory):
-        os.mkdir(build_directory)
-
-    common_directory: str = os.path.commonpath([source_directory, build_directory])
-
-    relative_source_directory: str = source_directory.split(f'{common_directory:s}{os.sep:s}')[1]
-    relative_build_directory: str = build_directory.split(f'{common_directory:s}{os.sep:s}')[1]
-
     formatted_flags: list[str] = flags.retrieve_compilation_flags(source_directory)
 
     if include_directories:
         formatted_flags += flags.get_include_directory_flags(include_directories)
 
-    compile_command: str = 'g++ -c {{source_file_path:s}} -o {{object_file_path:s}} {flags:s}'
-    compile_command = compile_command.format(flags=' '.join([f'-{flag:s}' for flag in formatted_flags]))
+    compile_command: str = 'g++ -c {source_file_path:s} -o {object_file_path:s} {flags:s}'
+
+    if not os.path.exists(build_directory):
+        os.mkdir(build_directory)
+
+    common_directory: str = f'{os.path.commonpath([source_directory, build_directory]):s}{os.sep:s}'
+
+    compile_command = \
+        compile_command.format(source_file_path=os.path.join(source_directory.split(common_directory)[1], '{relative_source_file_path:s}'),
+                               object_file_path=os.path.join(build_directory.split(common_directory)[1], '{object_file_name:s}.o'),
+                               flags=' '.join([f'-{flag:s}' for flag in formatted_flags]))
 
     success: bool = True
 
@@ -50,8 +51,8 @@ def generate_object_files(source_directory: str,
 
                 success = \
                     run_command(f'"{os.path.splitext(file)[0]:s}" Compilation Results',
-                                compile_command.format(source_file_path=os.path.join(relative_source_directory, root.split(source_directory)[1], file),  # noqa: E501
-                                                       object_file_path=os.path.join(relative_build_directory, f'{os.path.splitext(file)[0]:s}.o')),     # noqa: E501
+                                compile_command.format(relative_source_file_path=os.path.join(root.split(source_directory)[1], file),
+                                                       object_file_name=os.path.splitext(file)[0]),
                                 common_directory)
 
                 if not success:
