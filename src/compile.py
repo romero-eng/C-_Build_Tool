@@ -1,7 +1,6 @@
 import os
 import shutil
 import platform
-from typing import Optional
 
 import flags
 from command import run_command
@@ -25,7 +24,7 @@ def copy_header_files_from_source_into_include(source_directory: str,
 
 def generate_object_files(source_directory: str,
                           build_directory: str,
-                          include_directories: Optional[list[str]] = None) -> bool:
+                          include_directories: list[str] | None = None) -> bool:
 
     if not os.path.exists(build_directory):
         os.mkdir(build_directory)
@@ -63,7 +62,7 @@ def generate_object_files(source_directory: str,
 
 def link_object_files_into_executable(build_directory: str,
                                       executable_name: str,
-                                      library_paths: Optional[list[str]] = None) -> None:
+                                      library_paths: list[str] | None = None) -> None:
 
     formatted_flags: list[str] = []
 
@@ -82,7 +81,7 @@ def link_object_files_into_executable(build_directory: str,
 def archive_object_files_into_static_library(library_name: str,
                                              build_directory: str,
                                              library_directory: str,
-                                             other_library_paths: Optional[list[str]] = None) -> None:
+                                             other_library_paths: list[str] | None = None) -> None:
 
     formatted_flags: list[str] = []
 
@@ -124,8 +123,8 @@ def build_static_library_from_source(source_directory: str,
                                      include_directory: str,
                                      library_directory: str,
                                      library_name: str,
-                                     other_include_directories: Optional[list[str]] = None,
-                                     other_library_paths: Optional[list[str]] = None) -> None:
+                                     other_include_directories: list[str] | None = None,
+                                     other_library_paths: list[str] | None = None) -> None:
 
     success: bool = \
         generate_object_files(source_directory,
@@ -146,8 +145,8 @@ def build_static_library_from_source(source_directory: str,
 def build_executable_from_source(source_directory: str,
                                  build_directory: str,
                                  executable_name: str,
-                                 include_directories: Optional[list[str]] = None,
-                                 library_paths: Optional[list[str]] = None) -> None:
+                                 include_directories: list[str] | None = None,
+                                 library_paths: list[str] | None = None) -> None:
 
     success: bool = \
         generate_object_files(source_directory,

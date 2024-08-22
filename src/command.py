@@ -1,10 +1,9 @@
 import subprocess
-from typing import Optional
 
 
 def run_command(command_description: str,
                 command: str,
-                working_directory: Optional[str] = None,
+                working_directory: str | None = None,
                 successful_return_code: int = 0) -> bool:
 
     results: subprocess.CompletedProcess[bytes] = \

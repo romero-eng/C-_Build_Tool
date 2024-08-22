@@ -1,7 +1,6 @@
 import os
 import re
 import json
-from typing import Optional
 
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-build-configurations/
@@ -42,7 +41,7 @@ def _print_chosen_flag(flag_choice: str,
     print(f'\n{flag_choice:s}: {chosen_flag_description:s}')
 
 
-def _get_build_configuration_flags(user_chosen_build_configuration: Optional[str] = None) -> list[str]:
+def _get_build_configuration_flags(user_chosen_build_configuration: str | None = None) -> list[str]:
 
     flags: list[str] = []
 
@@ -58,7 +57,7 @@ def _get_build_configuration_flags(user_chosen_build_configuration: Optional[str
     return flags
 
 
-def _get_language_standard_flag(user_specified_language_standard: Optional[str] = None) -> list[str]:
+def _get_language_standard_flag(user_specified_language_standard: str | None = None) -> list[str]:
 
     flags: list[str] = []
 
@@ -84,7 +83,7 @@ def _get_language_standard_flag(user_specified_language_standard: Optional[str] 
     return flags
 
 
-def _get_miscellaneous_flags(user_chosen_misc_decisions: Optional[str | list[str]] = None) -> list[str]:
+def _get_miscellaneous_flags(user_chosen_misc_decisions: str | list[str] | None = None) -> list[str]:
 
     flags: list[str] = []
 
@@ -112,7 +111,7 @@ def _get_miscellaneous_flags(user_chosen_misc_decisions: Optional[str | list[str
     return flags
 
 
-def _get_warning_flags(user_chosen_warnings: Optional[str | list[str]] = None) -> list[str]:
+def _get_warning_flags(user_chosen_warnings: str | list[str] | None = None) -> list[str]:
 
     flags: list[str] = []
 
@@ -171,7 +170,7 @@ def retrieve_compilation_flags(src_dir: str) -> list[str]:
     return formatted_flags
 
 
-def get_include_directory_flags(include_directories: Optional[list[str]] = None) -> list[str]:
+def get_include_directory_flags(include_directories: list[str] | None = None) -> list[str]:
 
     flags: list[str] = []
 
@@ -182,7 +181,7 @@ def get_include_directory_flags(include_directories: Optional[list[str]] = None)
     return flags
 
 
-def get_library_flags(library_paths: Optional[list[str]] = None) -> list[str]:
+def get_library_flags(library_paths: list[str] | None = None) -> list[str]:
 
     flags: list[str] = []
 
