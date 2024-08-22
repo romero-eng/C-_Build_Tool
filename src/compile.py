@@ -24,44 +24,6 @@ def copy_header_files_from_source_into_include(source_directory: str,
                                 os.path.join(include_directory, root.split(source_directory)[1], file))
 
 
-def retrieve_compilation_flags(src_dir: str) -> list[str]:
-
-    settings_path: str = os.path.join(src_dir, 'compilation_settings.json')
-
-    settings: dict[str, str | list[str]]
-
-    if os.path.exists(src_dir):
-        if os.path.isdir(src_dir):
-            if not os.path.exists(settings_path):
-
-                settings = \
-                    {'Build Configuration': list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
-                     'Language Standard': f'C++ {2011 + 3*flags.LANGUAGE_STANDARDS.index('2a'):d}',
-                     'Warnings': list(flags.FLAG_PER_WARNING.keys()),
-                     'Miscellaneous': list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys())}
-
-                with open(settings_path, 'w') as json_file:
-                    json.dump(settings, json_file)
-
-            else:
-                with open(settings_path, 'r') as json_file:
-                    settings = json.load(json_file)
-
-    formatted_flags: list[str] = []
-
-    if 'Build Configuration' in settings:
-        formatted_flags += flags.get_build_configuration_flags(settings['Build Configuration'])
-    if 'Language Standard' in settings:
-        formatted_flags += flags.get_language_standard_flag(settings['Language Standard'])
-    if 'Warnings' in settings:
-        formatted_flags += flags.get_warning_flags(settings['Warnings'])
-    if 'Miscellaneous' in settings:
-        formatted_flags += flags.get_miscellaneous_flags(settings['Miscellaneous'])
-
-    return formatted_flags
-
-
-
 def generate_object_files(source_directory: str,
                           build_directory: str,
                           include_directories: Optional[list[str]] = None) -> bool:
@@ -74,7 +36,7 @@ def generate_object_files(source_directory: str,
     relative_source_directory: str = source_directory.split(f'{common_directory:s}{os.sep:s}')[1]
     relative_build_directory: str = build_directory.split(f'{common_directory:s}{os.sep:s}')[1]
 
-    formatted_flags: list[str] = retrieve_compilation_flags(source_directory)
+    formatted_flags: list[str] = flags.retrieve_compilation_flags(source_directory)
 
     if include_directories:
         formatted_flags += flags.get_include_directory_flags(include_directories)

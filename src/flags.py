@@ -1,5 +1,6 @@
 import os
 import re
+import json
 from typing import Optional
 
 
@@ -131,6 +132,43 @@ def get_warning_flags(user_chosen_warnings: Optional[str | list[str]] = None) ->
         flags = [f'W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in user_chosen_warnings]
 
     return flags
+
+
+def retrieve_compilation_flags(src_dir: str) -> list[str]:
+
+    settings_path: str = os.path.join(src_dir, 'compilation_settings.json')
+
+    settings: dict[str, str | list[str]]
+
+    if os.path.exists(src_dir):
+        if os.path.isdir(src_dir):
+            if not os.path.exists(settings_path):
+
+                settings = \
+                    {'Build Configuration': list(FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
+                     'Language Standard': f'C++ {2011 + 3*LANGUAGE_STANDARDS.index('2a'):d}',
+                     'Warnings': list(FLAG_PER_WARNING.keys()),
+                     'Miscellaneous': list(FLAG_PER_MISCELLANEOUS_DECISION.keys())}
+
+                with open(settings_path, 'w') as json_file:
+                    json.dump(settings, json_file)
+
+            else:
+                with open(settings_path, 'r') as json_file:
+                    settings = json.load(json_file)
+
+    formatted_flags: list[str] = []
+
+    if 'Build Configuration' in settings:
+        formatted_flags += get_build_configuration_flags(settings['Build Configuration'])
+    if 'Language Standard' in settings:
+        formatted_flags += get_language_standard_flag(settings['Language Standard'])
+    if 'Warnings' in settings:
+        formatted_flags += get_warning_flags(settings['Warnings'])
+    if 'Miscellaneous' in settings:
+        formatted_flags += get_miscellaneous_flags(settings['Miscellaneous'])
+
+    return formatted_flags
 
 
 def get_include_directory_flags(include_directories: Optional[list[str]] = None) -> list[str]:
