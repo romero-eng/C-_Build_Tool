@@ -47,7 +47,7 @@ def generate_object_files(source_directory: str,
 
     for root, _, files in os.walk(source_directory):
         for file in files:
-            if os.path.splitext(file)[1] == '.cpp':
+            if os.path.splitext(file)[1] in ['.cc', '.cxx', '.cpp']:
 
                 success = \
                     run_command(f'"{os.path.splitext(file)[0]:s}" Compilation Results',
