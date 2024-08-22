@@ -24,29 +24,11 @@ if (__name__ == '__main__'):
                                                  math_build_directory,
                                                  math_include_directory,
                                                  math_library_directory,
-                                                 math_library_name,
-                                                 'Debug',
-                                                 'C++ 2020',
-                                                 'Disable Compiler Extensions',
-                                                 ['Treat warnings as errors',
-                                                  'Avoid a lot of questionable coding practices',
-                                                  'Avoid even more questionable coding practices',
-                                                  'Follow Effective C++ Style Guidelines',
-                                                  'Avoid potentially value-changing implicit conversions',
-                                                  'Avoid potentially sign-changing implicit conversions for integers'])
+                                                 math_library_name)
 
         compile.build_executable_from_source(source_directory,
                                              build_directory,
                                              executable_name,
-                                             'Debug',
-                                             'C++ 2020',
-                                             'Disable Compiler Extensions',
-                                             ['Treat warnings as errors',
-                                              'Avoid a lot of questionable coding practices',
-                                              'Avoid even more questionable coding practices',
-                                              'Follow Effective C++ Style Guidelines',
-                                              'Avoid potentially value-changing implicit conversions',
-                                              'Avoid potentially sign-changing implicit conversions for integers'],
                                              [math_include_directory],
                                              [math_library_path])
 

@@ -1,4 +1,5 @@
 import os
+import json
 import shutil
 import platform
 from typing import Optional
@@ -23,12 +24,45 @@ def copy_header_files_from_source_into_include(source_directory: str,
                                 os.path.join(include_directory, root.split(source_directory)[1], file))
 
 
+def retrieve_compilation_settings(src_dir: str) -> tuple[Optional[str],
+                                                         Optional[str],
+                                                         Optional[str],
+                                                         Optional[list[str]]]:
+
+    settings_path: str = os.path.join(src_dir, 'compilation_settings.json')
+
+    settings: dict[str, str | list[str]]
+
+    if os.path.exists(src_dir):
+        if os.path.isdir(src_dir):
+            if not os.path.exists(settings_path):
+
+                settings = \
+                    {'Build': list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
+                     'Language': f'C++ {2011 + 3*flags.LANGUAGE_STANDARDS.index('2a'):d}',
+                     'Warnings': list(flags.FLAG_PER_WARNING.keys()),
+                     'Miscellaneous': list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys())}
+
+                with open(settings_path, 'w') as json_file:
+                    json.dump(settings, json_file)
+
+            else:
+                with open(settings_path, 'r') as json_file:
+                    settings = json.load(json_file)
+
+    build_configuration: Optional[str] = settings['Build'] if 'Build' in settings else None
+    language_standard: Optional[str] = settings['Language'] if 'Language' in settings else None
+    miscellaneous: Optional[str] = settings['Miscellaneous'] if 'Miscellaneous' in settings else None
+    warnings: Optional[list[str]] = settings['Warnings'] if 'Warnings' in settings else None
+
+    return (build_configuration,
+            language_standard,
+            miscellaneous,
+            warnings)
+
+
 def generate_object_files(source_directory: str,
                           build_directory: str,
-                          build_configuration: Optional[str] = None,
-                          language_standard: Optional[str] = None,
-                          miscellaneous: Optional[str] = None,
-                          warnings: Optional[list[str]] = None,
                           include_directories: Optional[list[str]] = None) -> bool:
 
     if not os.path.exists(build_directory):
@@ -38,6 +72,12 @@ def generate_object_files(source_directory: str,
 
     relative_source_directory: str = source_directory.split(f'{common_directory:s}{os.sep:s}')[1]
     relative_build_directory: str = build_directory.split(f'{common_directory:s}{os.sep:s}')[1]
+
+    (build_configuration,
+     language_standard,
+     miscellaneous,
+     warnings) = \
+        retrieve_compilation_settings(source_directory)
 
     formatted_flags: list[str] = []
     if build_configuration:
@@ -135,21 +175,13 @@ def build_static_library_from_source(source_directory: str,
                                      include_directory: str,
                                      library_directory: str,
                                      library_name: str,
-                                     build_configuration: Optional[str] = None,
-                                     language_standard: Optional[str] = None,
-                                     miscellaneous: Optional[str] = None,
-                                     warnings: Optional[list[str]] = None,
-                                     include_directories: Optional[list[str]] = None,
-                                     library_paths: Optional[list[str]] = None) -> None:
+                                     other_include_directories: Optional[list[str]] = None,
+                                     other_library_paths: Optional[list[str]] = None) -> None:
 
     success: bool = \
         generate_object_files(source_directory,
                               build_directory,
-                              build_configuration,
-                              language_standard,
-                              miscellaneous,
-                              warnings,
-                              include_directories)
+                              other_include_directories)
 
     if success:
 
@@ -159,26 +191,18 @@ def build_static_library_from_source(source_directory: str,
         archive_object_files_into_static_library(library_name,
                                                  build_directory,
                                                  library_directory,
-                                                 library_paths)
+                                                 other_library_paths)
 
 
 def build_executable_from_source(source_directory: str,
                                  build_directory: str,
                                  executable_name: str,
-                                 build_configuration: Optional[str] = None,
-                                 language_standard: Optional[str] = None,
-                                 miscellaneous: Optional[str] = None,
-                                 warnings: Optional[list[str]] = None,
                                  include_directories: Optional[list[str]] = None,
                                  library_paths: Optional[list[str]] = None) -> None:
 
     success: bool = \
         generate_object_files(source_directory,
                               build_directory,
-                              build_configuration,
-                              language_standard,
-                              miscellaneous,
-                              warnings,
                               include_directories)
 
     if success:
