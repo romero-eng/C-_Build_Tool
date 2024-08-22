@@ -39,8 +39,8 @@ def generate_object_files(source_directory: str,
     common_directory: str = f'{os.path.commonpath([source_directory, build_directory]):s}{os.sep:s}'
 
     compile_command = \
-        compile_command.format(source_file_path=os.path.join(source_directory.split(common_directory)[1], '{relative_source_file_path:s}'),
-                               object_file_path=os.path.join(build_directory.split(common_directory)[1], '{object_file_name:s}.o'),
+        compile_command.format(source_file_path=os.path.join(source_directory.split(common_directory)[1], '{relative_source_file_path:s}'),  # noqa: E501
+                               object_file_path=os.path.join(build_directory.split(common_directory)[1], '{object_file_name:s}.o'),          # noqa: E501
                                flags=' '.join([f'-{flag:s}' for flag in formatted_flags]))
 
     success: bool = True
@@ -51,7 +51,7 @@ def generate_object_files(source_directory: str,
 
                 success = \
                     run_command(f'"{os.path.splitext(file)[0]:s}" Compilation Results',
-                                compile_command.format(relative_source_file_path=os.path.join(root.split(source_directory)[1], file),
+                                compile_command.format(relative_source_file_path=os.path.join(root.split(source_directory)[1], file),  # noqa: E501
                                                        object_file_name=os.path.splitext(file)[0]),
                                 common_directory)
 
@@ -98,7 +98,8 @@ def archive_object_files_into_static_library(library_name: str,
         formatted_flags += flags.get_library_name_flags(other_library_names)
 
     build_static_library_command: str = 'ar rcs {{library_path:s}} {{object_file_build_paths:s}} {flags:s}'
-    build_static_library_command = build_static_library_command.format(flags=' '.join([f'-{flag:s}' for flag in formatted_flags]))
+    build_static_library_command = \
+        build_static_library_command.format(flags=' '.join([f'-{flag:s}' for flag in formatted_flags]))
 
     if not os.path.exists(library_directory):
         os.mkdir(library_directory)
