@@ -34,11 +34,7 @@ def generate_object_files(source_directory: str,
     if not os.path.exists(build_directory):
         os.mkdir(build_directory)
 
-    all_dirs: list[str] = [source_directory, build_directory]
-    if include_directories:
-        all_dirs += include_directories
-
-    common_directory: str = os.path.commonpath(all_dirs)
+    common_directory: str = os.path.commonpath([source_directory, build_directory])
 
     relative_source_directory: str = source_directory.split(f'{common_directory:s}{os.sep:s}')[1]
     relative_build_directory: str = build_directory.split(f'{common_directory:s}{os.sep:s}')[1]
@@ -53,8 +49,7 @@ def generate_object_files(source_directory: str,
     if miscellaneous:
         formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_miscellaneous_flags(miscellaneous)]))
     if include_directories:
-        relative_include_directories: list[str] = [include_dir.split(f'{common_directory:s}{os.sep:s}')[1] for include_dir in include_directories]
-        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_include_directory_flags(relative_include_directories)]))
+        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_include_directory_flags(include_directories)]))
 
     compile_command: str = 'g++ -c {{source_file_path:s}} -o {{object_file_path:s}} {flags:s}'
     compile_command = compile_command.format(flags=' '.join(formatted_flags))
