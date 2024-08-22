@@ -159,9 +159,9 @@ def retrieve_compilation_flags(src_dir: str) -> list[str]:
     formatted_flags: list[str] = []
 
     if 'Build Configuration' in settings:
-        formatted_flags += _get_build_configuration_flags(settings['Build Configuration'])
+        formatted_flags += _get_build_configuration_flags(settings['Build Configuration'])  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
     if 'Language Standard' in settings:
-        formatted_flags += _get_language_standard_flag(settings['Language Standard'])
+        formatted_flags += _get_language_standard_flag(settings['Language Standard'])  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
     if 'Warnings' in settings:
         formatted_flags += _get_warning_flags(settings['Warnings'])
     if 'Miscellaneous' in settings:
