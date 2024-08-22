@@ -63,15 +63,19 @@ def generate_object_files(source_directory: str,
 
 def link_object_files_into_executable(build_directory: str,
                                       executable_name: str,
-                                      library_paths: list[str] | None = None) -> None:
+                                      library_directories: list[str] | None = None,
+                                      library_names: list[str] | None = None) -> None:
 
     formatted_flags: list[str] = []
 
-    if library_paths:
-        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_library_flags(library_paths)]))
+    if library_directories:
+        formatted_flags += flags.get_library_directory_flags(library_directories)
+
+    if library_directories:
+        formatted_flags += flags.get_library_name_flags(library_names)
 
     link_command: str = 'g++ -o {{executable:s}} {{object_files:s}} {flags:s}'
-    link_command = link_command.format(flags=' '.join(formatted_flags))
+    link_command = link_command.format(flags=' '.join([f'-{flag:s}' for flag in formatted_flags]))
 
     run_command('Linking Results',
                 link_command.format(executable=f'{executable_name:s}.exe',
@@ -147,7 +151,8 @@ def build_executable_from_source(source_directory: str,
                                  build_directory: str,
                                  executable_name: str,
                                  include_directories: list[str] | None = None,
-                                 library_paths: list[str] | None = None) -> None:
+                                 library_directories: list[str] | None = None,
+                                 library_names: list[str] | None = None) -> None:
 
     success: bool = \
         generate_object_files(source_directory,
@@ -157,6 +162,7 @@ def build_executable_from_source(source_directory: str,
     if success:
         link_object_files_into_executable(build_directory,
                                           executable_name,
-                                          library_paths)
+                                          library_directories,
+                                          library_names)
 
     test_executable(build_directory, executable_name)

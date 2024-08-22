@@ -181,17 +181,21 @@ def get_include_directory_flags(include_directories: list[str] | None = None) ->
     return flags
 
 
-def get_library_flags(library_paths: list[str] | None = None) -> list[str]:
+def get_library_directory_flags(library_directories: list[str] | None = None) -> list[str]:
 
     flags: list[str] = []
 
-    if library_paths:
+    if library_directories:
+        flags += [f'L {library_directory:s}' for library_directory in library_directories]
 
-        [library_directory_flags,
-         library_name_flags] = \
-            list(zip(*[(f'L {os.path.dirname(library_path):s}',
-                        f'l{os.path.splitext(os.path.basename(library_path))[0]:s}') for library_path in library_paths]))  # noqa: E501
+    return flags
 
-        flags = list(library_directory_flags + library_name_flags)
+
+def get_library_name_flags(library_names: list[str] | None = None) -> list[str]:
+
+    flags: list[str] = []
+
+    if library_names:
+        flags += [f'l{library_name:s}' for library_name in library_names]
 
     return flags
