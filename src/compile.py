@@ -24,10 +24,7 @@ def copy_header_files_from_source_into_include(source_directory: str,
                                 os.path.join(include_directory, root.split(source_directory)[1], file))
 
 
-def retrieve_compilation_settings(src_dir: str) -> tuple[Optional[str],
-                                                         Optional[str],
-                                                         Optional[str],
-                                                         Optional[list[str]]]:
+def retrieve_compilation_flags(src_dir: str) -> list[str]:
 
     settings_path: str = os.path.join(src_dir, 'compilation_settings.json')
 
@@ -38,8 +35,8 @@ def retrieve_compilation_settings(src_dir: str) -> tuple[Optional[str],
             if not os.path.exists(settings_path):
 
                 settings = \
-                    {'Build': list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
-                     'Language': f'C++ {2011 + 3*flags.LANGUAGE_STANDARDS.index('2a'):d}',
+                    {'Build Configuration': list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
+                     'Language Standard': f'C++ {2011 + 3*flags.LANGUAGE_STANDARDS.index('2a'):d}',
                      'Warnings': list(flags.FLAG_PER_WARNING.keys()),
                      'Miscellaneous': list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys())}
 
@@ -50,15 +47,19 @@ def retrieve_compilation_settings(src_dir: str) -> tuple[Optional[str],
                 with open(settings_path, 'r') as json_file:
                     settings = json.load(json_file)
 
-    build_configuration: Optional[str] = settings['Build'] if 'Build' in settings else None
-    language_standard: Optional[str] = settings['Language'] if 'Language' in settings else None
-    miscellaneous: Optional[str] = settings['Miscellaneous'] if 'Miscellaneous' in settings else None
-    warnings: Optional[list[str]] = settings['Warnings'] if 'Warnings' in settings else None
+    formatted_flags: list[str] = []
 
-    return (build_configuration,
-            language_standard,
-            miscellaneous,
-            warnings)
+    if 'Build Configuration' in settings:
+        formatted_flags += flags.get_build_configuration_flags(settings['Build Configuration'])
+    if 'Language Standard' in settings:
+        formatted_flags += flags.get_language_standard_flag(settings['Language Standard'])
+    if 'Warnings' in settings:
+        formatted_flags += flags.get_warning_flags(settings['Warnings'])
+    if 'Miscellaneous' in settings:
+        formatted_flags += flags.get_miscellaneous_flags(settings['Miscellaneous'])
+
+    return formatted_flags
+
 
 
 def generate_object_files(source_directory: str,
@@ -73,26 +74,13 @@ def generate_object_files(source_directory: str,
     relative_source_directory: str = source_directory.split(f'{common_directory:s}{os.sep:s}')[1]
     relative_build_directory: str = build_directory.split(f'{common_directory:s}{os.sep:s}')[1]
 
-    (build_configuration,
-     language_standard,
-     miscellaneous,
-     warnings) = \
-        retrieve_compilation_settings(source_directory)
+    formatted_flags: list[str] = retrieve_compilation_flags(source_directory)
 
-    formatted_flags: list[str] = []
-    if build_configuration:
-        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_build_configuration_flags(build_configuration)]))  # noqa: E501
-    if language_standard:
-        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_language_standard_flag(language_standard)]))
-    if warnings:
-        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_warning_flags(warnings)]))
-    if miscellaneous:
-        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_miscellaneous_flags(miscellaneous)]))
     if include_directories:
-        formatted_flags.append(' '.join([f'-{flag:s}' for flag in flags.get_include_directory_flags(include_directories)]))  # noqa: E501
+        formatted_flags += flags.get_include_directory_flags(include_directories)
 
     compile_command: str = 'g++ -c {{source_file_path:s}} -o {{object_file_path:s}} {flags:s}'
-    compile_command = compile_command.format(flags=' '.join(formatted_flags))
+    compile_command = compile_command.format(flags=' '.join([f'-{flag:s}' for flag in formatted_flags]))
 
     success: bool = True
 
