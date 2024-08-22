@@ -150,7 +150,7 @@ def retrieve_compilation_flags(src_dir: str) -> list[str]:
                      'Miscellaneous': list(FLAG_PER_MISCELLANEOUS_DECISION.keys())}
 
                 with open(settings_path, 'w') as json_file:
-                    json.dump(settings, json_file)
+                    json.dump(settings, json_file, indent=4)
 
             else:
                 with open(settings_path, 'r') as json_file:
