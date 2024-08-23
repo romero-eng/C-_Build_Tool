@@ -53,7 +53,7 @@ def generate_object_files(repo_directory: str,
 
                 success = \
                     run_command(f'"{os.path.splitext(file)[0]:s}" Compilation Results',
-                                compile_command.format(relative_source_file_path=os.path.join(root.split(source_directory)[1], file),
+                                compile_command.format(relative_source_file_path=os.path.join(root.split(source_directory)[1], file),  # noqa: E501
                                                        object_file_name=os.path.splitext(file)[0]),
                                 repo_directory)
 
