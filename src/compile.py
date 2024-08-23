@@ -1,5 +1,6 @@
 import os
 import shutil
+import platform
 
 import flags
 from command import run_command
@@ -128,7 +129,7 @@ def archive_object_files_into_static_library(library_name: str,
 
     success: bool = \
         run_command('Archiving into Static Library',
-                    build_static_library_command.format(library_path=os.path.join('lib', f'{library_name:s}.lib'),
+                    build_static_library_command.format(library_path=os.path.join('lib', f'{library_name:s}.{'lib' if platform.system() == 'Windows' else 'a':s}'),
                                                         object_file_build_paths=' '.join(object_file_names)),
                     build_directory)
     if success:
