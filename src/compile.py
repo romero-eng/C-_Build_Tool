@@ -240,7 +240,6 @@ def build_dynamic_library_from_source(repo_directory: str,
                                other_library_names)
 
 
-
 def build_executable_from_source(repo_directory: str,
                                  executable_name: str,
                                  include_directories: list[str] | None = None,
