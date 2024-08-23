@@ -6,11 +6,14 @@ import flags
 from command import run_command
 
 
-def copy_header_files_from_source_into_include(source_directory: str,
-                                               include_directory: str) -> None:
+def copy_header_files_from_source_into_include(repo_directory: str) -> None:
 
+    source_directory: str = os.path.join(repo_directory, 'src')
+    include_directory: str = os.path.join(repo_directory, 'build', 'include')
     if not os.path.exists(include_directory):
         os.mkdir(include_directory)
+
+    relative_root: str
 
     for root, dirs, files in os.walk(source_directory):
         for dir in dirs:
@@ -18,29 +21,29 @@ def copy_header_files_from_source_into_include(source_directory: str,
                 os.mkdir(dir)
         for file in files:
             if os.path.splitext(file)[1] == '.h':
-                shutil.copyfile(os.path.join(source_directory, root.split(source_directory)[1], file),
-                                os.path.join(include_directory, root.split(source_directory)[1], file))
+                relative_root = root.split(source_directory)[1]
+                shutil.copyfile(os.path.join(source_directory, relative_root, file),
+                                os.path.join(include_directory, relative_root, file))
 
 
-def generate_object_files(source_directory: str,
-                          build_directory: str,
+def generate_object_files(repo_directory: str,
                           include_directories: list[str] | None = None) -> bool:
 
-    formatted_flags: list[str] = flags.retrieve_compilation_flags(source_directory)
+    formatted_flags: list[str] = flags.retrieve_compilation_flags(repo_directory)
 
     if include_directories:
         formatted_flags += flags.get_include_directory_flags(include_directories)
 
     compile_command: str = 'g++ -c {source_file_path:s} -o {object_file_path:s} {flags:s}'
 
+    source_directory: str = os.path.join(repo_directory, 'src')
+    build_directory: str = os.path.join(repo_directory, 'build')
     if not os.path.exists(build_directory):
         os.mkdir(build_directory)
 
-    common_directory: str = f'{os.path.commonpath([source_directory, build_directory]):s}{os.sep:s}'
-
     compile_command = \
-        compile_command.format(source_file_path=os.path.join(source_directory.split(common_directory)[1], '{relative_source_file_path:s}'),  # noqa: E501
-                               object_file_path=os.path.join(build_directory.split(common_directory)[1], '{object_file_name:s}.o'),          # noqa: E501
+        compile_command.format(source_file_path=os.path.join(source_directory, '{relative_source_file_path:s}'),
+                               object_file_path=os.path.join(build_directory, '{object_file_name:s}.o'),
                                flags=' '.join([f'-{flag:s}' for flag in formatted_flags]))
 
     success: bool = True
@@ -51,9 +54,9 @@ def generate_object_files(source_directory: str,
 
                 success = \
                     run_command(f'"{os.path.splitext(file)[0]:s}" Compilation Results',
-                                compile_command.format(relative_source_file_path=os.path.join(root.split(source_directory)[1], file),  # noqa: E501
+                                compile_command.format(relative_source_file_path=os.path.join(root.split(source_directory)[1], file),
                                                        object_file_name=os.path.splitext(file)[0]),
-                                common_directory)
+                                repo_directory)
 
                 if not success:
                     break
@@ -61,7 +64,7 @@ def generate_object_files(source_directory: str,
     return success
 
 
-def link_object_files_into_executable(build_directory: str,
+def link_object_files_into_executable(repo_directory: str,
                                       executable_name: str,
                                       library_directories: list[str] | None = None,
                                       library_names: list[str] | None = None) -> None:
@@ -77,15 +80,27 @@ def link_object_files_into_executable(build_directory: str,
     link_command: str = 'g++ -o {{executable:s}} {{object_files:s}} {flags:s}'
     link_command = link_command.format(flags=' '.join([f'-{flag:s}' for flag in formatted_flags]))
 
-    run_command('Linking Results',
-                link_command.format(executable=f'{executable_name:s}.exe',
-                                    object_files=' '.join([file_path for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o'])),  # noqa: E501
-                build_directory)
+    build_directory: str = os.path.join(repo_directory, 'build')
+    bin_directory: str = os.path.join(build_directory, 'bin')
+    if not os.path.exists(bin_directory):
+        os.mkdir(bin_directory)
+
+    object_file_names: list[str] = \
+        [file_path for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o']
+
+    success: bool = \
+        run_command('Linking Results',
+                    link_command.format(executable=os.path.join('bin', f'{executable_name:s}.exe'),
+                                        object_files=' '.join(object_file_names)),
+                    build_directory)
+
+    if success:
+        for file_name in object_file_names:
+            os.remove(os.path.join(build_directory, file_name))
 
 
 def archive_object_files_into_static_library(library_name: str,
-                                             build_directory: str,
-                                             library_directory: str,
+                                             repo_directory: str,
                                              other_library_directories: list[str] | None = None,
                                              other_library_names: list[str] | None = None) -> None:
 
@@ -101,75 +116,69 @@ def archive_object_files_into_static_library(library_name: str,
     build_static_library_command = \
         build_static_library_command.format(flags=' '.join([f'-{flag:s}' for flag in formatted_flags]))
 
+    build_directory: str = os.path.join(repo_directory, 'build')
+    library_directory: str = os.path.join(build_directory, 'lib')
     if not os.path.exists(library_directory):
         os.mkdir(library_directory)
 
-    common_directory: str = \
-        os.path.commonpath([build_directory,
-                            library_directory])
+    object_file_names: list[str] = \
+        [file_path for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o']
 
-    relative_build_directory: str = build_directory.split(f'{common_directory:s}{os.sep:s}')[1]
-    relative_library_directory: str = library_directory.split(f'{common_directory:s}{os.sep:s}')[1]
+    success: bool = \
+        run_command('Archiving into Static Library',
+                    build_static_library_command.format(library_path=os.path.join('lib', f'{library_name:s}.lib'),
+                                                        object_file_build_paths=' '.join(object_file_names)),
+                    build_directory)
+    if success:
+        for file_name in object_file_names:
+            os.remove(os.path.join(build_directory, file_name))
 
-    run_command('Archiving into Static Library',
-                build_static_library_command.format(library_path=os.path.join(relative_library_directory,
-                                                                              f'{library_name:s}.{'lib' if platform.system() == 'Windows' else 'a':s}'),                                                                            # noqa: E501
-                                                    object_file_build_paths=' '.join([os.path.join(relative_build_directory, file_path) for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o'])),  # noqa: E501
-                common_directory)
 
-
-def test_executable(executable_directory: str,
+def test_executable(repo_directory: str,
                     executable_name: str) -> None:
 
-    if os.path.exists(os.path.join(os.path.join(executable_directory, f'{executable_name:s}.exe'))):
+    bin_directory = os.path.join(repo_directory, 'build', 'bin')
+    if os.path.exists(os.path.join(os.path.join(bin_directory, f'{executable_name:s}.exe'))):
         _ = \
             run_command('Testing Executable',
                         f'{executable_name:s}.exe',
-                        executable_directory)
+                        bin_directory)
 
 
-def build_static_library_from_source(source_directory: str,
-                                     build_directory: str,
-                                     include_directory: str,
-                                     library_directory: str,
+def build_static_library_from_source(repo_directory: str,
                                      library_name: str,
                                      other_include_directories: list[str] | None = None,
                                      other_library_directories: list[str] | None = None,
                                      other_library_names: list[str] | None = None) -> None:
 
     success: bool = \
-        generate_object_files(source_directory,
-                              build_directory,
+        generate_object_files(repo_directory,
                               other_include_directories)
 
     if success:
 
-        copy_header_files_from_source_into_include(source_directory,
-                                                   include_directory)
+        copy_header_files_from_source_into_include(repo_directory)
 
         archive_object_files_into_static_library(library_name,
-                                                 build_directory,
-                                                 library_directory,
+                                                 repo_directory,
                                                  other_library_directories,
                                                  other_library_names)
 
 
-def build_executable_from_source(source_directory: str,
-                                 build_directory: str,
+def build_executable_from_source(repo_directory: str,
                                  executable_name: str,
                                  include_directories: list[str] | None = None,
                                  library_directories: list[str] | None = None,
                                  library_names: list[str] | None = None) -> None:
 
     success: bool = \
-        generate_object_files(source_directory,
-                              build_directory,
+        generate_object_files(repo_directory,
                               include_directories)
 
     if success:
-        link_object_files_into_executable(build_directory,
+        link_object_files_into_executable(repo_directory,
                                           executable_name,
                                           library_directories,
                                           library_names)
 
-    test_executable(build_directory, executable_name)
+    test_executable(repo_directory, executable_name)

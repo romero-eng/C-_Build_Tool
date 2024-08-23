@@ -133,14 +133,14 @@ def _get_warning_flags(user_chosen_warnings: str | list[str] | None = None) -> l
     return flags
 
 
-def retrieve_compilation_flags(src_dir: str) -> list[str]:
+def retrieve_compilation_flags(repo_directory: str) -> list[str]:
 
-    settings_path: str = os.path.join(src_dir, 'compilation_settings.json')
+    settings_path: str = os.path.join(repo_directory, 'compilation_settings.json')
 
     settings: dict[str, str | list[str]]
 
-    if os.path.exists(src_dir):
-        if os.path.isdir(src_dir):
+    if os.path.exists(repo_directory):
+        if os.path.isdir(repo_directory):
             if not os.path.exists(settings_path):
 
                 settings = \
