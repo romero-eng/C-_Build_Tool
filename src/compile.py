@@ -45,8 +45,8 @@ def generate_object_files(repo_directory: str,
     compile_command: str = 'g++ -c {source_file_path:s} -o {object_file_path:s} {flags:s}'
 
     compile_command = \
-        compile_command.format(source_file_path=os.path.join(source_directory, '{relative_source_file_path:s}'),
-                               object_file_path=os.path.join(build_directory, '{object_file_name:s}.o'),
+        compile_command.format(source_file_path=os.path.join('src', '{relative_source_file_path:s}'),
+                               object_file_path=os.path.join('build', '{object_file_name:s}.o'),
                                flags=' '.join([f'-{flag:s}' for flag in formatted_flags]))
 
     success: bool = True
