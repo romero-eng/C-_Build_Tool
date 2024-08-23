@@ -72,6 +72,11 @@ def link_object_files_into_executable(repo_directory: str,
                                       library_directories: list[str] | None = None,
                                       library_names: list[str] | None = None) -> None:
 
+    build_directory: str = os.path.join(repo_directory, 'build')
+    bin_directory: str = os.path.join(build_directory, 'bin')
+    if not os.path.exists(bin_directory):
+        os.mkdir(bin_directory)
+
     formatted_flags: list[str] = []
 
     if library_directories:
@@ -80,24 +85,12 @@ def link_object_files_into_executable(repo_directory: str,
     if library_names:
         formatted_flags += flags.get_library_name_flags(library_names)
 
-    link_command: str = 'g++ -o {{executable:s}} {{object_files:s}} {flags:s}'
-    link_command = link_command.format(flags=' '.join([f'-{flag:s}' for flag in formatted_flags]))
-
-    build_directory: str = os.path.join(repo_directory, 'build')
-    bin_directory: str = os.path.join(build_directory, 'bin')
-    if not os.path.exists(bin_directory):
-        os.mkdir(bin_directory)
-
     object_file_names: list[str] = \
         [file_path for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o']
 
-    success: bool = \
-        run_command('Linking Results',
-                    link_command.format(executable=os.path.join('bin', f'{executable_name:s}.exe'),
-                                        object_files=' '.join(object_file_names)),
-                    build_directory)
-
-    if success:
+    if run_command('Linking Results',
+                   f'g++ -o {os.path.join('bin', executable_name):s}.exe {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',
+                   build_directory):
         for file_name in object_file_names:
             os.remove(os.path.join(build_directory, file_name))
 
@@ -107,6 +100,11 @@ def archive_object_files_into_static_library(library_name: str,
                                              other_library_directories: list[str] | None = None,
                                              other_library_names: list[str] | None = None) -> None:
 
+    build_directory: str = os.path.join(repo_directory, 'build')
+    library_directory: str = os.path.join(build_directory, 'lib')
+    if not os.path.exists(library_directory):
+        os.mkdir(library_directory)
+
     formatted_flags: list[str] = []
 
     if other_library_directories:
@@ -115,24 +113,12 @@ def archive_object_files_into_static_library(library_name: str,
     if other_library_names:
         formatted_flags += flags.get_library_name_flags(other_library_names)
 
-    build_static_library_command: str = 'ar rcs {{library_path:s}} {{object_file_build_paths:s}} {flags:s}'
-    build_static_library_command = \
-        build_static_library_command.format(flags=' '.join([f'-{flag:s}' for flag in formatted_flags]))
-
-    build_directory: str = os.path.join(repo_directory, 'build')
-    library_directory: str = os.path.join(build_directory, 'lib')
-    if not os.path.exists(library_directory):
-        os.mkdir(library_directory)
-
     object_file_names: list[str] = \
         [file_path for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o']
 
-    success: bool = \
-        run_command('Archiving into Static Library',
-                    build_static_library_command.format(library_path=os.path.join('lib', f'{library_name:s}.{'lib' if platform.system() == 'Windows' else 'a':s}'),
-                                                        object_file_build_paths=' '.join(object_file_names)),
-                    build_directory)
-    if success:
+    if run_command('Archiving into Static Library',
+                   f'ar rcs {os.path.join('lib', library_name):s}.{'lib' if platform.system() == 'Windows' else 'a':s} {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',
+                   build_directory):
         for file_name in object_file_names:
             os.remove(os.path.join(build_directory, file_name))
 
