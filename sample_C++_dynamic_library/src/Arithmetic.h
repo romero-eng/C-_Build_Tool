@@ -1,10 +1,14 @@
 #ifndef ARITHMETIC_H
 #define ARITHMETIC_H
 
-#ifdef ADD_EXPORTS
-  #define ADDAPI __declspec(dllexport)
+#ifdef _WIN32
+  #ifdef ADD_EXPORTS
+    #define ADDAPI __declspec(dllexport)
+  #else
+    #define ADDAPI __declspec(dllimport)
+  #endif
 #else
-  #define ADDAPI __declspec(dllimport)
+  #define ADDAPI
 #endif
 
 namespace Arithmetic
