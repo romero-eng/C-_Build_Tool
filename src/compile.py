@@ -1,4 +1,5 @@
 import os
+import json
 import shutil
 import platform
 
@@ -26,6 +27,32 @@ def copy_header_files_from_source_into_include(repo_directory: str) -> None:
                                 os.path.join(include_directory, relative_root, file))
 
 
+def retrieve_compilation_settings(repo_directory) -> dict[str, str | list[str]]:
+
+    settings_path: str = os.path.join(repo_directory, 'build', 'compilation_settings.json')
+
+    settings: dict[str, str | list[str]]
+
+    if os.path.exists(repo_directory):
+        if os.path.isdir(repo_directory):
+            if not os.path.exists(settings_path):
+
+                settings = \
+                    {'Build Configuration': list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
+                     'Language Standard': f'C++ {2011 + 3*flags.LANGUAGE_STANDARDS.index('2a'):d}',
+                     'Warnings': list(flags.FLAG_PER_WARNING.keys()),
+                     'Miscellaneous': list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys())}
+
+                with open(settings_path, 'w') as json_file:
+                    json.dump(settings, json_file, indent=4)
+
+            else:
+                with open(settings_path, 'r') as json_file:
+                    settings = json.load(json_file)
+
+    return settings
+
+
 def generate_object_files(repo_directory: str,
                           include_directories: list[str] | None = None,
                           preprocessor_variables: list[str] | None = None) -> bool:
@@ -35,10 +62,20 @@ def generate_object_files(repo_directory: str,
     if not os.path.exists(build_directory):
         os.mkdir(build_directory)
 
-    formatted_flags: list[str] = \
-        flags.retrieve_compilation_flags(repo_directory,
-                                         preprocessor_variables)
+    settings: dict[str, str | list[str]] = retrieve_compilation_settings(repo_directory)
 
+    formatted_flags: list[str] = []
+
+    if 'Build Configuration' in settings:
+        formatted_flags += flags.get_build_configuration_flags(settings['Build Configuration'])  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
+    if 'Language Standard' in settings:
+        formatted_flags += flags.get_language_standard_flag(settings['Language Standard'])  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
+    if 'Warnings' in settings:
+        formatted_flags += flags.get_warning_flags(settings['Warnings'])
+    if 'Miscellaneous' in settings:
+        formatted_flags += flags.get_miscellaneous_flags(settings['Miscellaneous'])
+    if preprocessor_variables:
+        formatted_flags += flags.get_preprocessor_variable_flags(preprocessor_variables)
     if include_directories:
         formatted_flags += flags.get_include_directory_flags(include_directories)
 
@@ -81,7 +118,6 @@ def link_object_files_into_executable(repo_directory: str,
 
     if library_directories:
         formatted_flags += flags.get_library_directory_flags(library_directories)
-
     if library_names:
         formatted_flags += flags.get_library_name_flags(library_names)
 
@@ -109,7 +145,6 @@ def archive_object_files_into_static_library(library_name: str,
 
     if other_library_directories:
         formatted_flags += flags.get_library_directory_flags(other_library_directories)
-
     if other_library_names:
         formatted_flags += flags.get_library_name_flags(other_library_names)
 

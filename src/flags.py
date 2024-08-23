@@ -41,7 +41,7 @@ def _print_chosen_flag(flag_choice: str,
     print(f'\n{flag_choice:s}: {chosen_flag_description:s}')
 
 
-def _get_build_configuration_flags(user_chosen_build_configuration: str | None = None) -> list[str]:
+def get_build_configuration_flags(user_chosen_build_configuration: str | None = None) -> list[str]:
 
     flags: list[str] = []
 
@@ -57,7 +57,7 @@ def _get_build_configuration_flags(user_chosen_build_configuration: str | None =
     return flags
 
 
-def _get_language_standard_flag(user_specified_language_standard: str | None = None) -> list[str]:
+def get_language_standard_flag(user_specified_language_standard: str | None = None) -> list[str]:
 
     flags: list[str] = []
 
@@ -83,7 +83,7 @@ def _get_language_standard_flag(user_specified_language_standard: str | None = N
     return flags
 
 
-def _get_miscellaneous_flags(user_chosen_misc_decisions: str | list[str] | None = None) -> list[str]:
+def get_miscellaneous_flags(user_chosen_misc_decisions: str | list[str] | None = None) -> list[str]:
 
     flags: list[str] = []
 
@@ -111,7 +111,7 @@ def _get_miscellaneous_flags(user_chosen_misc_decisions: str | list[str] | None 
     return flags
 
 
-def _get_warning_flags(user_chosen_warnings: str | list[str] | None = None) -> list[str]:
+def get_warning_flags(user_chosen_warnings: str | list[str] | None = None) -> list[str]:
 
     flags: list[str] = []
 
@@ -133,7 +133,7 @@ def _get_warning_flags(user_chosen_warnings: str | list[str] | None = None) -> l
     return flags
 
 
-def _get_preprocessor_variable_flags(preprocessor_variables: list[str] | None) -> list[str]:
+def get_preprocessor_variable_flags(preprocessor_variables: list[str] | None) -> list[str]:
 
     flags: list[str] = []
 
@@ -142,46 +142,6 @@ def _get_preprocessor_variable_flags(preprocessor_variables: list[str] | None) -
         flags = [f'D {variable:s}' for variable in preprocessor_variables]
 
     return flags
-
-
-def retrieve_compilation_flags(repo_directory: str,
-                               preprocessor_variables: list[str] | None) -> list[str]:
-
-    settings_path: str = os.path.join(repo_directory, 'build', 'compilation_settings.json')
-
-    settings: dict[str, str | list[str]]
-
-    if os.path.exists(repo_directory):
-        if os.path.isdir(repo_directory):
-            if not os.path.exists(settings_path):
-
-                settings = \
-                    {'Build Configuration': list(FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
-                     'Language Standard': f'C++ {2011 + 3*LANGUAGE_STANDARDS.index('2a'):d}',
-                     'Warnings': list(FLAG_PER_WARNING.keys()),
-                     'Miscellaneous': list(FLAG_PER_MISCELLANEOUS_DECISION.keys())}
-
-                with open(settings_path, 'w') as json_file:
-                    json.dump(settings, json_file, indent=4)
-
-            else:
-                with open(settings_path, 'r') as json_file:
-                    settings = json.load(json_file)
-
-    formatted_flags: list[str] = []
-
-    if 'Build Configuration' in settings:
-        formatted_flags += _get_build_configuration_flags(settings['Build Configuration'])  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
-    if 'Language Standard' in settings:
-        formatted_flags += _get_language_standard_flag(settings['Language Standard'])  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
-    if 'Warnings' in settings:
-        formatted_flags += _get_warning_flags(settings['Warnings'])
-    if 'Miscellaneous' in settings:
-        formatted_flags += _get_miscellaneous_flags(settings['Miscellaneous'])
-    if preprocessor_variables:
-        formatted_flags += _get_preprocessor_variable_flags(preprocessor_variables)
-
-    return formatted_flags
 
 
 def get_include_directory_flags(include_directories: list[str] | None = None) -> list[str]:
