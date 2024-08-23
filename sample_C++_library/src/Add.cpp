@@ -1,21 +1,21 @@
-#include "Add.h"
+#include "Arithmetic.h"
 
-int Math::add(int x, int y)
+int Arithmetic::add(int x, int y)
 {
     return x + y;
 }
 
-double Math::add(double x, double y)
+double Arithmetic::add(double x, double y)
 {
     return x + y;
 }
 
-double Math::add(double x, int y)
+double Arithmetic::add(double x, int y)
 {
-    return add(x, (double) y);
+    return Arithmetic::add(x, (double) y);
 }
 
-double Math::add(int x, double y)
+double Arithmetic::add(int x, double y)
 {
-    return add((double) x, y);
+    return Arithmetic::add((double) x, y);
 }

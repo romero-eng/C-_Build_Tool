@@ -1,17 +1,17 @@
-#include "Divide.h"
+#include "Arithmetic.h"
 
 
-double Math::divide(double x, double y)
+double Arithmetic::divide(double x, double y)
 {
     return x / y;
 }
 
-double Math::divide(double x, int y)
+double Arithmetic::divide(double x, int y)
 {
-    return divide(x, (double) y);
+    return Arithmetic::divide(x, (double) y);
 }
 
-double Math::divide(int x, double y)
+double Arithmetic::divide(int x, double y)
 {
-    return divide((double) x, y);
+    return Arithmetic::divide((double) x, y);
 }

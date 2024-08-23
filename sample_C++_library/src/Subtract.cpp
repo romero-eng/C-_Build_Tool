@@ -1,21 +1,21 @@
-#include "Subtract.h"
+#include "Arithmetic.h"
 
-int Math::subtract(int x, int y)
+int Arithmetic::subtract(int x, int y)
 {
     return x - y;
 }
 
-double Math::subtract(double x, double y)
+double Arithmetic::subtract(double x, double y)
 {
     return x - y;
 }
 
-double Math::subtract(double x, int y)
+double Arithmetic::subtract(double x, int y)
 {
-    return subtract(x, (double) y);
+    return Arithmetic::subtract(x, (double) y);
 }
 
-double Math::subtract(int x, double y)
+double Arithmetic::subtract(int x, double y)
 {
-    return subtract((double) x, y);
+    return Arithmetic::subtract((double) x, y);
 }

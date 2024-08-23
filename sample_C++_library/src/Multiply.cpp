@@ -1,21 +1,21 @@
-#include "Multiply.h"
+#include "Arithmetic.h"
 
-int Math::multiply(int x, int y)
+int Arithmetic::multiply(int x, int y)
 {
     return x * y;
 }
 
-double Math::multiply(double x, double y)
+double Arithmetic::multiply(double x, double y)
 {
     return x * y;
 }
 
-double Math::multiply(double x, int y)
+double Arithmetic::multiply(double x, int y)
 {
-    return multiply(x, (double) y);
+    return Arithmetic::multiply(x, (double) y);
 }
 
-double Math::multiply(int x, double y)
+double Arithmetic::multiply(int x, double y)
 {
-    return multiply((double) x, y);
+    return Arithmetic::multiply((double) x, y);
 }
