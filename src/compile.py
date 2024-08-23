@@ -1,6 +1,5 @@
 import os
 import shutil
-import platform
 
 import flags
 from command import run_command
