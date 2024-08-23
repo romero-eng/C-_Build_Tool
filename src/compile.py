@@ -158,6 +158,35 @@ def archive_object_files_into_static_library(library_name: str,
             os.remove(os.path.join(build_directory, file_name))
 
 
+def create_dynamic_library(library_name: str,
+                           repo_directory: str,
+                           other_library_directories: list[str] | None = None,
+                           other_library_names: list[str] | None = None) -> None:
+
+    build_directory: str = os.path.join(repo_directory, 'build')
+    library_directory: str = os.path.join(build_directory, 'lib')
+    if not os.path.exists(library_directory):
+        os.mkdir(library_directory)
+
+
+    formatted_flags: list[str] = \
+        flags.get_dynamic_library_creation_flags(retrieve_compilation_settings(repo_directory))
+
+    if other_library_directories:
+        formatted_flags += flags.get_library_directory_flags(other_library_directories)
+    if other_library_names:
+        formatted_flags += flags.get_library_name_flags(other_library_names)
+
+    object_file_names: list[str] = \
+        [file_path for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o']
+
+    if run_command('Creating Dynamic Library',
+                   f'ld -o {os.path.join('lib', library_name):s}.{'dll' if platform.system() == 'Windows' else 'so':s} {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',
+                   build_directory):
+        for file_name in object_file_names:
+            os.remove(os.path.join(build_directory, file_name))
+
+
 def test_executable(repo_directory: str,
                     executable_name: str) -> None:
 
@@ -187,6 +216,29 @@ def build_static_library_from_source(repo_directory: str,
                                                  repo_directory,
                                                  other_library_directories,
                                                  other_library_names)
+
+
+def build_dynamic_library_from_source(repo_directory: str,
+                                      library_name: str,
+                                      preprocessor_variables: list[str] | None = None,
+                                      other_include_directories: list[str] | None = None,
+                                      other_library_directories: list[str] | None = None,
+                                      other_library_names: list[str] | None = None) -> None:
+
+    success: bool = \
+        generate_object_files(repo_directory,
+                              other_include_directories,
+                              preprocessor_variables)
+
+    if success:
+
+        copy_header_files_from_source_into_include(repo_directory)
+
+        create_dynamic_library(library_name,
+                               repo_directory,
+                               other_library_directories,
+                               other_library_names)
+
 
 
 def build_executable_from_source(repo_directory: str,

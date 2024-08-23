@@ -173,3 +173,14 @@ def get_library_name_flags(library_names: list[str] | None = None) -> list[str]:
         flags += [f'l{library_name:s}' for library_name in library_names]
 
     return flags
+
+
+def get_dynamic_library_creation_flags(settings: dict[str, str | list[str]]) -> list[str]:
+
+    flags = ['shared']
+
+    if 'Build Configuration' in settings:
+        if settings['Build Configuration'] == 'Release':
+            flags.append('s')
+
+    return flags
