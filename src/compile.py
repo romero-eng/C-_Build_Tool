@@ -28,17 +28,17 @@ def copy_header_files_from_source_into_include(repo_directory: str) -> None:
 def generate_object_files(repo_directory: str,
                           include_directories: list[str] | None = None) -> bool:
 
+    source_directory: str = os.path.join(repo_directory, 'src')
+    build_directory: str = os.path.join(repo_directory, 'build')
+    if not os.path.exists(build_directory):
+        os.mkdir(build_directory)
+
     formatted_flags: list[str] = flags.retrieve_compilation_flags(repo_directory)
 
     if include_directories:
         formatted_flags += flags.get_include_directory_flags(include_directories)
 
     compile_command: str = 'g++ -c {source_file_path:s} -o {object_file_path:s} {flags:s}'
-
-    source_directory: str = os.path.join(repo_directory, 'src')
-    build_directory: str = os.path.join(repo_directory, 'build')
-    if not os.path.exists(build_directory):
-        os.mkdir(build_directory)
 
     compile_command = \
         compile_command.format(source_file_path=os.path.join(source_directory, '{relative_source_file_path:s}'),

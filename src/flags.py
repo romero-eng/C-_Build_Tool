@@ -135,7 +135,7 @@ def _get_warning_flags(user_chosen_warnings: str | list[str] | None = None) -> l
 
 def retrieve_compilation_flags(repo_directory: str) -> list[str]:
 
-    settings_path: str = os.path.join(repo_directory, 'compilation_settings.json')
+    settings_path: str = os.path.join(repo_directory, 'build', 'compilation_settings.json')
 
     settings: dict[str, str | list[str]]
 
