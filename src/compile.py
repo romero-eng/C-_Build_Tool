@@ -26,14 +26,17 @@ def copy_header_files_from_source_into_include(repo_directory: str) -> None:
 
 
 def generate_object_files(repo_directory: str,
-                          include_directories: list[str] | None = None) -> bool:
+                          include_directories: list[str] | None = None,
+                          preprocessor_variables: list[str] | None = None) -> bool:
 
     source_directory: str = os.path.join(repo_directory, 'src')
     build_directory: str = os.path.join(repo_directory, 'build')
     if not os.path.exists(build_directory):
         os.mkdir(build_directory)
 
-    formatted_flags: list[str] = flags.retrieve_compilation_flags(repo_directory)
+    formatted_flags: list[str] = \
+        flags.retrieve_compilation_flags(repo_directory,
+                                         preprocessor_variables)
 
     if include_directories:
         formatted_flags += flags.get_include_directory_flags(include_directories)

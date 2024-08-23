@@ -133,7 +133,19 @@ def _get_warning_flags(user_chosen_warnings: str | list[str] | None = None) -> l
     return flags
 
 
-def retrieve_compilation_flags(repo_directory: str) -> list[str]:
+def _get_preprocessor_variable_flags(preprocessor_variables: list[str] | None) -> list[str]:
+
+    flags: list[str] = []
+
+    if preprocessor_variables:
+
+        flags = [f'D {variable:s}' for variable in preprocessor_variables]
+
+    return flags
+
+
+def retrieve_compilation_flags(repo_directory: str,
+                               preprocessor_variables: list[str] | None) -> list[str]:
 
     settings_path: str = os.path.join(repo_directory, 'build', 'compilation_settings.json')
 
@@ -166,6 +178,8 @@ def retrieve_compilation_flags(repo_directory: str) -> list[str]:
         formatted_flags += _get_warning_flags(settings['Warnings'])
     if 'Miscellaneous' in settings:
         formatted_flags += _get_miscellaneous_flags(settings['Miscellaneous'])
+    if preprocessor_variables:
+        formatted_flags += _get_preprocessor_variable_flags(preprocessor_variables)
 
     return formatted_flags
 
