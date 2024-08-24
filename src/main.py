@@ -20,7 +20,7 @@ if (__name__ == '__main__'):
 
     try:
 
-        """
+        #"""
         compile.build_static_library_from_source(static_arithmetic)
         compile.build_executable_from_source(present_arithmetic,
                                              [os.path.join(static_arithmetic.repository_directory, 'build', 'include')],
@@ -30,10 +30,10 @@ if (__name__ == '__main__'):
         compile.build_dynamic_library_from_source(dynamic_arithmetic,
                                                   ['ADD_EXPORTS'])
         compile.build_executable_from_source(present_arithmetic,
-                                             [os.path.join(dynamic_arithmetic.repository_directory, 'build', 'include')],  # noqa: E501
+                                             [os.path.join(dynamic_arithmetic.repository_directory, 'build', 'include')],
                                              [os.path.join(dynamic_arithmetic.repository_directory, 'build', 'lib')],
                                              [dynamic_arithmetic.name])
-        #"""  # noqa: E265
+        #"""
 
     except Exception:
         print(traceback.format_exc())
