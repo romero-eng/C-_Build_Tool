@@ -16,6 +16,11 @@ class CodeBase:
         self._name: str = name
         self._repository_directory: str = repository_directory
 
+        repository_exists: bool = os.path.isdir(self._repository_directory) if os.path.exists(self._repository_directory) else False
+
+        if not repository_exists:
+            raise ValueError(f'The repository for the \'{name:s}\' code base does not exist')
+
     @property
     def name(self) -> str:
         return self._name
@@ -51,22 +56,20 @@ def retrieve_compilation_settings(codebase: CodeBase) -> dict[str, str | list[st
 
     settings: dict[str, str | list[str]]
 
-    if os.path.exists(codebase.repository_directory):
-        if os.path.isdir(codebase.repository_directory):
-            if not os.path.exists(settings_path):
+    if not os.path.exists(settings_path):
 
-                settings = \
-                    {'Build Configuration': list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
-                     'Language Standard': f'C++ {2011 + 3*flags.LANGUAGE_STANDARDS.index('2a'):d}',
-                     'Warnings': list(flags.FLAG_PER_WARNING.keys()),
-                     'Miscellaneous': list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys())}
+        settings = \
+            {'Build Configuration': list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
+             'Language Standard': f'C++ {2011 + 3*flags.LANGUAGE_STANDARDS.index('2a'):d}',
+             'Warnings': list(flags.FLAG_PER_WARNING.keys()),
+             'Miscellaneous': list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys())}
 
-                with open(settings_path, 'w') as json_file:
-                    json.dump(settings, json_file, indent=4)
+        with open(settings_path, 'w') as json_file:
+            json.dump(settings, json_file, indent=4)
 
-            else:
-                with open(settings_path, 'r') as json_file:
-                    settings = json.load(json_file)
+    else:
+        with open(settings_path, 'r') as json_file:
+            settings = json.load(json_file)
 
     return settings
 
