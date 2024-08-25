@@ -16,6 +16,7 @@ class CodeBase:
         self._name: str = name
         self._repository_directory: str = repository_directory
         self._source_directory: str = os.path.join(self._repository_directory, 'src')
+        self._build_directory: str = os.path.join(self._repository_directory, 'build')
 
         repository_exists: bool = os.path.isdir(self._repository_directory) if os.path.exists(self._repository_directory) else False
         if not repository_exists:
@@ -24,6 +25,9 @@ class CodeBase:
         source_code_exists: bool = os.path.isdir(self._source_directory) if os.path.exists(self._source_directory) else False
         if not source_code_exists:
             raise ValueError(f'No directory labelled \'src\' was found in the \'{self._name:s}\' repository, please create it and put your source code to be compiled there')
+
+        if not os.path.exists(self._build_directory):
+            os.mkdir(self._build_directory)
 
     @property
     def name(self) -> str:
@@ -37,10 +41,14 @@ class CodeBase:
     def source_directory(self) -> str:
         return self._source_directory
 
+    @property
+    def build_directory(self) -> str:
+        return self._build_directory
+
 
 def copy_header_files_from_source_into_include(codebase: CodeBase) -> None:
 
-    include_directory: str = os.path.join(codebase.repository_directory, 'build', 'include')
+    include_directory: str = os.path.join(codebase.build_directory, 'include')
     if not os.path.exists(include_directory):
         os.mkdir(include_directory)
 
@@ -59,7 +67,7 @@ def copy_header_files_from_source_into_include(codebase: CodeBase) -> None:
 
 def retrieve_compilation_settings(codebase: CodeBase) -> dict[str, str | list[str]]:
 
-    settings_path: str = os.path.join(codebase.repository_directory, 'build', 'compilation_settings.json')
+    settings_path: str = os.path.join(codebase.build_directory, 'compilation_settings.json')
 
     settings: dict[str, str | list[str]]
 
@@ -84,10 +92,6 @@ def retrieve_compilation_settings(codebase: CodeBase) -> dict[str, str | list[st
 def generate_object_files(codebase: CodeBase,
                           include_directories: list[str] | None = None,
                           preprocessor_variables: list[str] | None = None) -> bool:
-
-    build_directory: str = os.path.join(codebase.repository_directory, 'build')
-    if not os.path.exists(build_directory):
-        os.mkdir(build_directory)
 
     settings: dict[str, str | list[str]] = retrieve_compilation_settings(codebase)
 
@@ -135,8 +139,7 @@ def link_object_files_into_executable(codebase: CodeBase,
                                       library_directories: list[str] | None = None,
                                       library_names: list[str] | None = None) -> None:
 
-    build_directory: str = os.path.join(codebase.repository_directory, 'build')
-    bin_directory: str = os.path.join(build_directory, 'bin')
+    bin_directory: str = os.path.join(codebase.build_directory, 'bin')
     if not os.path.exists(bin_directory):
         os.mkdir(bin_directory)
 
@@ -148,21 +151,20 @@ def link_object_files_into_executable(codebase: CodeBase,
         formatted_flags += flags.get_library_name_flags(library_names)
 
     object_file_names: list[str] = \
-        [file_path for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o']
+        [file_path for file_path in os.listdir(codebase.build_directory) if os.path.splitext(file_path)[1] == '.o']
 
     if run_command('Linking Results',
                    f'g++ -o {os.path.join('bin', codebase.name):s}.exe {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
-                   build_directory):
+                   codebase.build_directory):
         for file_name in object_file_names:
-            os.remove(os.path.join(build_directory, file_name))
+            os.remove(os.path.join(codebase.build_directory, file_name))
 
 
 def archive_object_files_into_static_library(codebase: CodeBase,
                                              other_library_directories: list[str] | None = None,
                                              other_library_names: list[str] | None = None) -> None:
 
-    build_directory: str = os.path.join(codebase.repository_directory, 'build')
-    library_directory: str = os.path.join(build_directory, 'lib')
+    library_directory: str = os.path.join(codebase.build_directory, 'lib')
     if not os.path.exists(library_directory):
         os.mkdir(library_directory)
 
@@ -174,21 +176,20 @@ def archive_object_files_into_static_library(codebase: CodeBase,
         formatted_flags += flags.get_library_name_flags(other_library_names)
 
     object_file_names: list[str] = \
-        [file_path for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o']
+        [file_path for file_path in os.listdir(codebase.build_directory) if os.path.splitext(file_path)[1] == '.o']
 
     if run_command('Archiving into Static Library',
                    f'ar rcs {os.path.join('lib', codebase.name):s}.{'lib' if platform.system() == 'Windows' else 'a':s} {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
-                   build_directory):
+                   codebase.build_directory):
         for file_name in object_file_names:
-            os.remove(os.path.join(build_directory, file_name))
+            os.remove(os.path.join(codebase.build_directory, file_name))
 
 
 def create_dynamic_library(codebase: CodeBase,
                            other_library_directories: list[str] | None = None,
                            other_library_names: list[str] | None = None) -> None:
 
-    build_directory: str = os.path.join(codebase.repository_directory, 'build')
-    library_directory: str = os.path.join(build_directory, 'lib')
+    library_directory: str = os.path.join(codebase.build_directory, 'lib')
     if not os.path.exists(library_directory):
         os.mkdir(library_directory)
 
@@ -201,18 +202,18 @@ def create_dynamic_library(codebase: CodeBase,
         formatted_flags += flags.get_library_name_flags(other_library_names)
 
     object_file_names: list[str] = \
-        [file_path for file_path in os.listdir(build_directory) if os.path.splitext(file_path)[1] == '.o']
+        [file_path for file_path in os.listdir(codebase.build_directory) if os.path.splitext(file_path)[1] == '.o']
 
     if run_command('Creating Dynamic Library',
                    f'ld -o {os.path.join('lib', codebase.name):s}.{'dll' if platform.system() == 'Windows' else 'so':s} {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
-                   build_directory):
+                   codebase.build_directory):
         for file_name in object_file_names:
-            os.remove(os.path.join(build_directory, file_name))
+            os.remove(os.path.join(codebase.build_directory, file_name))
 
 
 def test_executable(codebase: CodeBase) -> None:
 
-    bin_directory = os.path.join(codebase.repository_directory, 'build', 'bin')
+    bin_directory = os.path.join(codebase.build_directory, 'bin')
     if os.path.exists(os.path.join(os.path.join(bin_directory, f'{codebase.name:s}.exe'))):
         _ = \
             run_command('Testing Executable',
