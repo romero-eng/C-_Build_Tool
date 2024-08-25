@@ -1,9 +1,10 @@
 import subprocess
+from pathlib import Path
 
 
 def run_command(command_description: str,
                 command: str,
-                working_directory: str | None = None,
+                working_directory: Path | None = None,
                 successful_return_code: int = 0) -> bool:
 
     results: subprocess.CompletedProcess[bytes] = \
@@ -17,7 +18,7 @@ def run_command(command_description: str,
 
     success: bool = results.returncode == successful_return_code
 
-    formatted_results: list[str] = [f'\tWorking directory: {working_directory:s}'] if working_directory else []
+    formatted_results: list[str] = [f'\tWorking directory: {str(working_directory):s}'] if working_directory else []
     formatted_results.append(f'\tCommand: {command:s}')
 
     if results.stdout:
