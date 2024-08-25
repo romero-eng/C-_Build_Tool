@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-build-configurations/
@@ -142,23 +143,22 @@ def get_preprocessor_variable_flags(preprocessor_variables: list[str] | None) ->
     return flags
 
 
-def get_include_directory_flags(include_directories: list[str] | None = None) -> list[str]:
+def get_include_directory_flags(include_directories: list[Path] | None = None) -> list[str]:
 
     flags: list[str] = []
 
     if include_directories:
-        for include_dir in include_directories:
-            flags.append(f'I {include_dir:s}')
+        flags += [f'I {str(include_dir):s}' for include_dir in include_directories]
 
     return flags
 
 
-def get_library_directory_flags(library_directories: list[str] | None = None) -> list[str]:
+def get_library_directory_flags(library_directories: list[Path] | None = None) -> list[str]:
 
     flags: list[str] = []
 
     if library_directories:
-        flags += [f'L {library_directory:s}' for library_directory in library_directories]
+        flags += [f'L {str(library_directory):s}' for library_directory in library_directories]
 
     return flags
 

@@ -100,7 +100,7 @@ def retrieve_compilation_settings(codebase: CodeBase) -> dict[str, str | list[st
 
 
 def generate_object_files(codebase: CodeBase,
-                          include_directories: list[str] | None = None,
+                          include_directories: list[Path] | None = None,
                           preprocessor_variables: list[str] | None = None) -> bool:
 
     settings: dict[str, str | list[str]] = retrieve_compilation_settings(codebase)
@@ -144,7 +144,7 @@ def generate_object_files(codebase: CodeBase,
 
 
 def link_object_files_into_executable(codebase: CodeBase,
-                                      library_directories: list[str] | None = None,
+                                      library_directories: list[Path] | None = None,
                                       library_names: list[str] | None = None) -> None:
 
     formatted_flags: list[str] = []
@@ -265,8 +265,8 @@ def build_dynamic_library_from_source(codebase: CodeBase,
 
 
 def build_executable_from_source(codebase: CodeBase,
-                                 include_directories: list[str] | None = None,
-                                 library_directories: list[str] | None = None,
+                                 include_directories: list[Path] | None = None,
+                                 library_directories: list[Path] | None = None,
                                  library_names: list[str] | None = None) -> None:
 
     success: bool = \

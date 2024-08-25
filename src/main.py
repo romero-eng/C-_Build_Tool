@@ -12,15 +12,15 @@ if (__name__ == '__main__'):
 
     try:
 
-        #"""
+        """
         arithmetic_library: compile.CodeBase = \
             compile.CodeBase('Arithmetic',
                              os.path.join(os.getcwd(), 'sample_C++_static_library'))
 
         compile.build_static_library_from_source(arithmetic_library)
         compile.build_executable_from_source(present_arithmetic,
-                                             [os.path.join(arithmetic_library.repository_directory, 'build', 'include')],
-                                             [os.path.join(arithmetic_library.repository_directory, 'build', 'lib')],
+                                             [arithmetic_library.build_directory/'include'],
+                                             [arithmetic_library.build_directory/'lib'],
                                              [arithmetic_library.name])
         """
         arithmetic_library: compile.CodeBase = \
@@ -30,8 +30,8 @@ if (__name__ == '__main__'):
         compile.build_dynamic_library_from_source(arithmetic_library,
                                                   ['ADD_EXPORTS'])
         compile.build_executable_from_source(present_arithmetic,
-                                             [os.path.join(arithmetic_library.repository_directory, 'build', 'include')],
-                                             [os.path.join(arithmetic_library.repository_directory, 'build', 'lib')],
+                                             [arithmetic_library.build_directory/'include'],
+                                             [arithmetic_library.build_directory/'lib'],
                                              [arithmetic_library.name])
         #"""
 
