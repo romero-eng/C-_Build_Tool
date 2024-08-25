@@ -17,6 +17,7 @@ class CodeBase:
         self._repository_directory: str = repository_directory
         self._source_directory: str = os.path.join(self._repository_directory, 'src')
         self._build_directory: str = os.path.join(self._repository_directory, 'build')
+        self._binary_directory: str = os.path.join(self._build_directory, 'bin')
 
         repository_exists: bool = os.path.isdir(self._repository_directory) if os.path.exists(self._repository_directory) else False
         if not repository_exists:
@@ -28,6 +29,9 @@ class CodeBase:
 
         if not os.path.exists(self._build_directory):
             os.mkdir(self._build_directory)
+
+        if not os.path.exists(self._binary_directory):
+            os.mkdir(self._binary_directory)
 
     @property
     def name(self) -> str:
@@ -44,6 +48,10 @@ class CodeBase:
     @property
     def build_directory(self) -> str:
         return self._build_directory
+
+    @property
+    def binary_directory(self) -> str:
+        return self._binary_directory
 
 
 def copy_header_files_from_source_into_include(codebase: CodeBase) -> None:
@@ -125,7 +133,7 @@ def generate_object_files(codebase: CodeBase,
 
                 success = \
                     run_command(f'"{os.path.splitext(file)[0]:s}" Compilation Results',
-                                compile_command.format(relative_source_file_path=os.path.join(root.split(codebase.source_directory)[1], file),  # noqa: E501
+                                compile_command.format(relative_source_file_path=os.path.join(os.path.relpath(codebase.source_directory, root), file),  # noqa: E501
                                                        object_file_name=os.path.splitext(file)[0]),
                                 codebase.repository_directory)
 
@@ -138,10 +146,6 @@ def generate_object_files(codebase: CodeBase,
 def link_object_files_into_executable(codebase: CodeBase,
                                       library_directories: list[str] | None = None,
                                       library_names: list[str] | None = None) -> None:
-
-    bin_directory: str = os.path.join(codebase.build_directory, 'bin')
-    if not os.path.exists(bin_directory):
-        os.mkdir(bin_directory)
 
     formatted_flags: list[str] = []
 
@@ -213,12 +217,11 @@ def create_dynamic_library(codebase: CodeBase,
 
 def test_executable(codebase: CodeBase) -> None:
 
-    bin_directory = os.path.join(codebase.build_directory, 'bin')
-    if os.path.exists(os.path.join(os.path.join(bin_directory, f'{codebase.name:s}.exe'))):
+    if os.path.exists(os.path.join(os.path.join(codebase.binary_directory, f'{codebase.name:s}.exe'))):
         _ = \
             run_command('Testing Executable',
                         f'{codebase.name:s}.exe',
-                        bin_directory)
+                        codebase.binary_directory)
 
 
 def build_static_library_from_source(codebase: CodeBase,
