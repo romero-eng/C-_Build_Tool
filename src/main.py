@@ -12,7 +12,7 @@ if (__name__ == '__main__'):
 
     try:
 
-        """
+        #"""
         arithmetic_library: compile.CodeBase = \
             compile.CodeBase('Arithmetic',
                              os.path.join(os.getcwd(), 'sample_C++_static_library'))
