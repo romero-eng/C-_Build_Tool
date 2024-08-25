@@ -165,7 +165,7 @@ def link_object_files_into_executable(codebase: CodeBase,
 
 
 def archive_object_files_into_static_library(codebase: CodeBase,
-                                             other_library_directories: list[str] | None = None,
+                                             other_library_directories: list[Path] | None = None,
                                              other_library_names: list[str] | None = None) -> None:
 
     library_directory: Path = codebase.build_directory/'lib'
@@ -190,7 +190,7 @@ def archive_object_files_into_static_library(codebase: CodeBase,
 
 
 def create_dynamic_library(codebase: CodeBase,
-                           other_library_directories: list[str] | None = None,
+                           other_library_directories: list[Path] | None = None,
                            other_library_names: list[str] | None = None) -> None:
 
     library_directory: Path = codebase.build_directory/'lib'
@@ -227,8 +227,8 @@ def test_executable(codebase: CodeBase) -> None:
 
 
 def build_static_library_from_source(codebase: CodeBase,
-                                     other_include_directories: list[str] | None = None,
-                                     other_library_directories: list[str] | None = None,
+                                     other_include_directories: list[Path] | None = None,
+                                     other_library_directories: list[Path] | None = None,
                                      other_library_names: list[str] | None = None) -> None:
 
     success: bool = \
@@ -246,8 +246,8 @@ def build_static_library_from_source(codebase: CodeBase,
 
 def build_dynamic_library_from_source(codebase: CodeBase,
                                       preprocessor_variables: list[str] | None = None,
-                                      other_include_directories: list[str] | None = None,
-                                      other_library_directories: list[str] | None = None,
+                                      other_include_directories: list[Path] | None = None,
+                                      other_library_directories: list[Path] | None = None,
                                       other_library_names: list[str] | None = None) -> None:
 
     success: bool = \
