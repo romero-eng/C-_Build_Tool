@@ -51,7 +51,7 @@ def get_build_configuration_flags(user_chosen_build_configuration: str | None = 
 
         _print_chosen_flag('Build', user_chosen_build_configuration)
 
-        flags = FLAGS_PER_BUILD_CONFIGURATION[user_chosen_build_configuration]
+        flags += FLAGS_PER_BUILD_CONFIGURATION[user_chosen_build_configuration]
 
     return flags
 
@@ -77,7 +77,7 @@ def get_language_standard_flag(user_specified_language_standard: str | None = No
 
         _print_chosen_flag('Language Standard', user_specified_language_standard)
 
-        flags = [f'std=c++{language_standard_flag:s}']
+        flags += [f'std=c++{language_standard_flag:s}']
 
     return flags
 
@@ -105,7 +105,7 @@ def get_miscellaneous_flags(user_chosen_misc_decisions: str | list[str] | None =
                              list(FLAG_PER_MISCELLANEOUS_DECISION.keys()),
                              user_chosen_misc_decisions)
 
-        flags = [flag for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in user_chosen_misc_decisions]  # noqa: E501
+        flags += [flag for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in user_chosen_misc_decisions]  # noqa: E501
 
     return flags
 
@@ -127,7 +127,7 @@ def get_warning_flags(user_chosen_warnings: str | list[str] | None = None) -> li
                              list(FLAG_PER_WARNING.keys()),
                              user_chosen_warnings)
 
-        flags = [f'W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in user_chosen_warnings]
+        flags += [f'W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in user_chosen_warnings]
 
     return flags
 
@@ -138,7 +138,7 @@ def get_preprocessor_variable_flags(preprocessor_variables: list[str] | None) ->
 
     if preprocessor_variables:
 
-        flags = [f'D {variable:s}' for variable in preprocessor_variables]
+        flags += [f'D {variable:s}' for variable in preprocessor_variables]
 
     return flags
 
