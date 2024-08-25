@@ -15,11 +15,15 @@ class CodeBase:
 
         self._name: str = name
         self._repository_directory: str = repository_directory
+        self._source_directory: str = os.path.join(self._repository_directory, 'src')
 
         repository_exists: bool = os.path.isdir(self._repository_directory) if os.path.exists(self._repository_directory) else False
-
         if not repository_exists:
             raise ValueError(f'The repository for the \'{name:s}\' code base does not exist')
+
+        source_code_exists: bool = os.path.isdir(self._source_directory) if os.path.exists(self._source_directory) else False
+        if not source_code_exists:
+            raise ValueError(f'No directory labelled \'src\' was found in the \'{self._name:s}\' repository, please create it and put your source code to be compiled there')
 
     @property
     def name(self) -> str:
@@ -29,24 +33,27 @@ class CodeBase:
     def repository_directory(self) -> str:
         return self._repository_directory
 
+    @property
+    def source_directory(self) -> str:
+        return self._source_directory
+
 
 def copy_header_files_from_source_into_include(codebase: CodeBase) -> None:
 
-    source_directory: str = os.path.join(codebase.repository_directory, 'src')
     include_directory: str = os.path.join(codebase.repository_directory, 'build', 'include')
     if not os.path.exists(include_directory):
         os.mkdir(include_directory)
 
     relative_root: str
 
-    for root, dirs, files in os.walk(source_directory):
+    for root, dirs, files in os.walk(codebase.source_directory):
         for dir in dirs:
             if not os.path.exists(dir):
                 os.mkdir(dir)
         for file in files:
             if os.path.splitext(file)[1] == '.h':
-                relative_root = root.split(source_directory)[1]
-                shutil.copyfile(os.path.join(source_directory, relative_root, file),
+                relative_root = root.split(codebase.source_directory)[1]
+                shutil.copyfile(os.path.join(codebase.source_directory, relative_root, file),
                                 os.path.join(include_directory, relative_root, file))
 
 
@@ -78,7 +85,6 @@ def generate_object_files(codebase: CodeBase,
                           include_directories: list[str] | None = None,
                           preprocessor_variables: list[str] | None = None) -> bool:
 
-    source_directory: str = os.path.join(codebase.repository_directory, 'src')
     build_directory: str = os.path.join(codebase.repository_directory, 'build')
     if not os.path.exists(build_directory):
         os.mkdir(build_directory)
@@ -109,13 +115,13 @@ def generate_object_files(codebase: CodeBase,
 
     success: bool = True
 
-    for root, _, files in os.walk(source_directory):
+    for root, _, files in os.walk(codebase.source_directory):
         for file in files:
             if os.path.splitext(file)[1] in ['.cc', '.cxx', '.cpp']:
 
                 success = \
                     run_command(f'"{os.path.splitext(file)[0]:s}" Compilation Results',
-                                compile_command.format(relative_source_file_path=os.path.join(root.split(source_directory)[1], file),  # noqa: E501
+                                compile_command.format(relative_source_file_path=os.path.join(root.split(codebase.source_directory)[1], file),  # noqa: E501
                                                        object_file_name=os.path.splitext(file)[0]),
                                 codebase.repository_directory)
 
