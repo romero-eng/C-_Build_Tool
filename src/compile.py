@@ -56,6 +56,36 @@ class CodeBase:
         return self._binary_directory
 
 
+class Dependency:
+
+    def __init__(self,
+                 name: str,
+                 include_directory: str | Path,
+                 library_directory: str | Path) -> None:
+
+        self._name = name
+        self._include_directory: Path = Path(include_directory) if isinstance(include_directory, str) else include_directory
+        self._library_directory: Path = Path(library_directory) if isinstance(library_directory, str) else library_directory
+
+        if not self._include_directory.exists():
+            raise ValueError(f'Please make sure the include directory for the \'{self._name:s}\' Dependency exists before instantiating it as a Dependency object')
+
+        if not self._library_directory.exists():
+            raise ValueError(f'Please make sure the library directory for the \'{self._name:s}\' Dependency exists before instantiating it as a Dependency object')
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def include_directory(self) -> Path:
+        return self._include_directory
+
+    @property
+    def library_directory(self) -> Path:
+        return self._library_directory
+
+
 def copy_header_files_from_source_into_include(codebase: CodeBase) -> None:
 
     include_directory: Path = codebase.build_directory/'include'
@@ -166,11 +196,16 @@ def link_object_files_into_executable(codebase: CodeBase,
 
 def archive_object_files_into_static_library(codebase: CodeBase,
                                              other_library_directories: list[Path] | None = None,
-                                             other_library_names: list[str] | None = None) -> None:
+                                             other_library_names: list[str] | None = None) -> Dependency:
 
     library_directory: Path = codebase.build_directory/'lib'
     if not library_directory.exists():
         library_directory.mkdir()
+    
+    static_library: Dependency = \
+            Dependency(codebase.name,
+                       codebase.build_directory/'include',
+                       library_directory)
 
     formatted_flags: list[str] = []
 
@@ -183,19 +218,26 @@ def archive_object_files_into_static_library(codebase: CodeBase,
         [str(file_path) for file_path in codebase.build_directory.iterdir() if file_path.suffix == '.o']
 
     if run_command('Archiving into Static Library',
-                   f'ar rcs {str(library_directory.relative_to(codebase.build_directory)/codebase.name):s}.{'lib' if platform.system() == 'Windows' else 'a':s} {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
+                   f'ar rcs {str(static_library.library_directory.relative_to(codebase.build_directory)/codebase.name):s}.{'lib' if platform.system() == 'Windows' else 'a':s} {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
                    codebase.build_directory):
         for file_name in object_file_names:
             Path.unlink(codebase.build_directory/file_name)
 
+    return static_library
+
 
 def create_dynamic_library(codebase: CodeBase,
                            other_library_directories: list[Path] | None = None,
-                           other_library_names: list[str] | None = None) -> None:
+                           other_library_names: list[str] | None = None) -> Dependency:
 
     library_directory: Path = codebase.build_directory/'lib'
     if not library_directory.exists():
         library_directory.mkdir()
+    
+    dynamic_library: Dependency = \
+            Dependency(codebase.name,
+                       codebase.build_directory/'include',
+                       library_directory)
 
     formatted_flags: list[str] = \
         flags.get_dynamic_library_creation_flags(retrieve_compilation_settings(codebase))
@@ -209,10 +251,12 @@ def create_dynamic_library(codebase: CodeBase,
         [str(file_path) for file_path in codebase.build_directory.iterdir() if file_path.suffix == '.o']
 
     if run_command('Creating Dynamic Library',
-                   f'ld -o {str(library_directory.relative_to(codebase.build_directory)/codebase.name):s}.{'dll' if platform.system() == 'Windows' else 'so':s} {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
+                   f'ld -o {str(dynamic_library.library_directory.relative_to(codebase.build_directory)/codebase.name):s}.{'dll' if platform.system() == 'Windows' else 'so':s} {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
                    codebase.build_directory):
         for file_name in object_file_names:
             Path.unlink(codebase.build_directory/file_name)
+
+    return dynamic_library
 
 
 def test_executable(codebase: CodeBase) -> None:
@@ -229,7 +273,7 @@ def test_executable(codebase: CodeBase) -> None:
 def build_static_library_from_source(codebase: CodeBase,
                                      other_include_directories: list[Path] | None = None,
                                      other_library_directories: list[Path] | None = None,
-                                     other_library_names: list[str] | None = None) -> None:
+                                     other_library_names: list[str] | None = None) -> Dependency | None:
 
     success: bool = \
         generate_object_files(codebase,
@@ -239,16 +283,22 @@ def build_static_library_from_source(codebase: CodeBase,
 
         copy_header_files_from_source_into_include(codebase)
 
-        archive_object_files_into_static_library(codebase,
-                                                 other_library_directories,
-                                                 other_library_names)
+        static_library: Dependency = \
+            archive_object_files_into_static_library(codebase,
+                                                     other_library_directories,
+                                                     other_library_names)
+
+    else: 
+        static_library = None
+
+    return static_library
 
 
 def build_dynamic_library_from_source(codebase: CodeBase,
                                       preprocessor_variables: list[str] | None = None,
                                       other_include_directories: list[Path] | None = None,
                                       other_library_directories: list[Path] | None = None,
-                                      other_library_names: list[str] | None = None) -> None:
+                                      other_library_names: list[str] | None = None) -> Dependency | None:
 
     success: bool = \
         generate_object_files(codebase,
@@ -259,23 +309,28 @@ def build_dynamic_library_from_source(codebase: CodeBase,
 
         copy_header_files_from_source_into_include(codebase)
 
-        create_dynamic_library(codebase,
-                               other_library_directories,
-                               other_library_names)
+        dynamic_library: Dependency = \
+            create_dynamic_library(codebase,
+                                   other_library_directories,
+                                   other_library_names)
+
+    else:
+
+        dynamic_library = None
+
+    return dynamic_library
 
 
 def build_executable_from_source(codebase: CodeBase,
-                                 include_directories: list[Path] | None = None,
-                                 library_directories: list[Path] | None = None,
-                                 library_names: list[str] | None = None) -> None:
+                                 dependencies: list[Dependency] = None) -> None:
 
     success: bool = \
         generate_object_files(codebase,
-                              include_directories)
+                              [dependency.include_directory for dependency in dependencies] if dependencies else None)
 
     if success:
         link_object_files_into_executable(codebase,
-                                          library_directories,
-                                          library_names)
+                                          [dependency.library_directory for dependency in dependencies] if dependencies else None,
+                                          [dependency.name              for dependency in dependencies] if dependencies else None)
 
     test_executable(codebase)
