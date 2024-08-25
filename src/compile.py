@@ -27,12 +27,6 @@ class CodeBase:
         if not source_code_exists:
             raise ValueError(f'No directory labelled \'src\' was found in the \'{self._name:s}\' repository, please create it and put your source code to be compiled there')  # noqa: E501
 
-        if not self._build_directory.exists():
-            self._build_directory.mkdir()
-
-        if not self._binary_directory.exists():
-            self._binary_directory.mkdir()
-
     @property
     def name(self) -> str:
         return self._name
@@ -47,10 +41,18 @@ class CodeBase:
 
     @property
     def build_directory(self) -> Path:
+
+        if not self._build_directory.exists():
+            self._build_directory.mkdir()
+
         return self._build_directory
 
     @property
     def binary_directory(self) -> Path:
+
+        if not self._binary_directory.exists():
+            self._binary_directory.mkdir()
+
         return self._binary_directory
 
 
