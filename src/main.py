@@ -26,6 +26,7 @@ if (__name__ == '__main__'):
         arithmetic_library: compile.CodeBase = \
             compile.CodeBase('Arithmetic',
                              os.path.join(os.getcwd(), 'sample_C++_dynamic_library'))
+
         compile.build_dynamic_library_from_source(arithmetic_library,
                                                   ['ADD_EXPORTS'])
         compile.build_executable_from_source(present_arithmetic,
