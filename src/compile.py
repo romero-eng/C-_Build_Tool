@@ -44,6 +44,11 @@ class Dependency:
 
 class CodeBase:
 
+    """
+    A code base is the collection of files, paths, settings and dependencies under
+    which compilation takes place.
+    """
+
     def __init__(self,
                  name: str,
                  repository_directory: str,
@@ -273,7 +278,7 @@ def test_executable(codebase: CodeBase) -> None:
 def build_static_library_from_source(codebase: CodeBase) -> Dependency | None:
 
     static_library: Dependency | None = \
-        archive_object_files_into_static_library(codebase) if generate_object_files(codebase) else None  # noqa: E501
+        archive_object_files_into_static_library(codebase) if generate_object_files(codebase) else None
 
     return static_library
 
