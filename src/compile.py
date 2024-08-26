@@ -200,14 +200,14 @@ def link_object_files_into_executable(codebase: CodeBase) -> None:
         formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in codebase.dependencies])  # noqa: E501
         formatted_flags += flags.get_library_name_flags([dependency.name for dependency in codebase.dependencies])                    # noqa: E501
 
-    object_file_names: list[str] = \
-        [str(file_path) for file_path in codebase.build_directory.iterdir() if file_path.suffix == '.o']
+    executable_path: str = str(codebase.binary_directory.relative_to(codebase.build_directory)/f'{codebase.name:s}.exe')
+    object_file_names: str = ' '.join([object_file_path.name for object_file_path in codebase.build_directory.glob('*.o')])
 
     if run_command('Linking Results',
-                   f'g++ -o {str(codebase.binary_directory.relative_to(codebase.build_directory)/codebase.name):s}.exe {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
+                   f'g++ -o {executable_path:s} {object_file_names:s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
                    codebase.build_directory):
-        for file_name in object_file_names:
-            Path.unlink(codebase.build_directory/file_name)
+        for object_file_path in codebase.build_directory.glob('*.o'):
+            Path.unlink(object_file_path)
 
 
 def archive_object_files_into_static_library(codebase: CodeBase) -> Dependency:
@@ -218,16 +218,16 @@ def archive_object_files_into_static_library(codebase: CodeBase) -> Dependency:
         formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in codebase.dependencies])  # noqa: E501
         formatted_flags += flags.get_library_name_flags([dependency.name for dependency in codebase.dependencies])                    # noqa: E501
 
-    object_file_names: list[str] = \
-        [str(file_path) for file_path in codebase.build_directory.iterdir() if file_path.suffix == '.o']
-
     static_library: Dependency = codebase.generate_as_dependency(False)
 
+    library_path: str = str(static_library.library_directory.relative_to(codebase.build_directory)/f'{codebase.name:s}.{'lib' if platform.system() == 'Windows' else 'a':s}')
+    object_file_names: str = ' '.join([object_file_path.name for object_file_path in codebase.build_directory.glob('*.o')])
+
     if run_command('Archiving into Static Library',
-                   f'ar rcs {str(static_library.library_directory.relative_to(codebase.build_directory)/codebase.name):s}.{'lib' if platform.system() == 'Windows' else 'a':s} {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
+                   f'ar rcs {library_path:s} {object_file_names:s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
                    codebase.build_directory):
-        for file_name in object_file_names:
-            Path.unlink(codebase.build_directory/file_name)
+        for object_file_path in codebase.build_directory.glob('*.o'):
+            Path.unlink(object_file_path)
 
     return static_library
 
@@ -240,16 +240,16 @@ def create_dynamic_library(codebase: CodeBase) -> Dependency:
         formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in codebase.dependencies])  # noqa: E501
         formatted_flags += flags.get_library_name_flags([dependency.name for dependency in codebase.dependencies])                    # noqa: E501
 
-    object_file_names: list[str] = \
-        [str(file_path) for file_path in codebase.build_directory.iterdir() if file_path.suffix == '.o']
-
     dynamic_library: Dependency = codebase.generate_as_dependency(True)
 
+    library_path: str = str(dynamic_library.library_directory.relative_to(codebase.build_directory)/f'{codebase.name:s}.{'dll' if platform.system() == 'Windows' else 'so':s}')
+    object_file_names: str = ' '.join([object_file_path.name for object_file_path in codebase.build_directory.glob('*.o')])
+
     if run_command('Creating Dynamic Library',
-                   f'ld -o {str(dynamic_library.library_directory.relative_to(codebase.build_directory)/codebase.name):s}.{'dll' if platform.system() == 'Windows' else 'so':s} {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
+                   f'ld -o {str(library_path):s} {object_file_names:s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
                    codebase.build_directory):
-        for file_name in object_file_names:
-            Path.unlink(codebase.build_directory/file_name)
+        for object_file_path in codebase.build_directory.glob('*.o'):
+            Path.unlink(object_file_path)
 
     return dynamic_library
 
