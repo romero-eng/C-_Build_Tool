@@ -258,6 +258,12 @@ def test_executable(codebase: CodeBase) -> None:
     executable_path: Path = codebase.binary_directory/f'{codebase.name:s}.exe'
 
     if executable_path.exists():
+
+        for dependency in codebase.dependencies:
+            if dependency.is_dynamic:
+                shutil.copyfile(dependency.library_directory/f'{dependency.name:s}.{'dll' if platform.system() == 'Windows' else 'so'}',
+                                codebase.binary_directory/f'{dependency.name:s}.{'dll' if platform.system() == 'Windows' else 'so'}')
+
         _ = \
             run_command('Testing Executable',
                         f'{executable_path.stem:s}.exe',
