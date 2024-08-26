@@ -175,7 +175,6 @@ def generate_object_files(codebase: CodeBase,
 
     current_source_file_path: Path
     corresponding_object_file_path: Path
-    success: bool = True
 
     for root, _, files in codebase.source_directory.walk():
         for file in files:
@@ -185,15 +184,12 @@ def generate_object_files(codebase: CodeBase,
 
             if current_source_file_path.suffix in ['.cc', '.cxx', '.cpp']:
 
-                success = \
-                    run_command(f'"{current_source_file_path.stem:s}" Compilation Results',
-                                f'g++ -c {str(current_source_file_path):s} -o {str(corresponding_object_file_path):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
-                                codebase.repository_directory)
+                if not run_command(f'"{current_source_file_path.stem:s}" Compilation Results',
+                                   f'g++ -c {str(current_source_file_path):s} -o {str(corresponding_object_file_path):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
+                                   codebase.repository_directory):
+                    return False
 
-                if not success:
-                    break
-
-    return success
+    return True
 
 
 def link_object_files_into_executable(codebase: CodeBase) -> None:
