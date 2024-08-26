@@ -51,25 +51,25 @@ class CodeBase:
 
     def __init__(self,
                  name: str,
-                 repository_directory: str,
+                 repository_directory: Path,
                  build_configuration: str = list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
                  language_standard: str = f'C++ {2011 + 3*flags.LANGUAGE_STANDARDS.index('2a'):d}',
                  warnings: list[str] = list(flags.FLAG_PER_WARNING.keys()),
                  miscellaneous: list[str] = list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys())) -> None:
 
         self._name: str = name
-        self._repository_directory: Path = Path(repository_directory)
+        self._repository_directory: Path = repository_directory
 
         repository_exists: bool = self._repository_directory.is_dir() if self._repository_directory.exists() else False
         if not repository_exists:
             raise ValueError(f'The repository for the \'{name:s}\' code base does not exist')
-        
+
         self._build_configuration: str = build_configuration
         self._language_standard: str = language_standard
         self._warnings: list[str] = warnings
         self._miscellaneous: list[str] = miscellaneous
 
-        self._dependencies: list[str] = []
+        self._dependencies: list[Dependency] = []
 
     @property
     def name(self) -> str:
@@ -164,8 +164,8 @@ def generate_object_files(codebase: CodeBase,
 
     formatted_flags: list[str] = []
 
-    formatted_flags += flags.get_build_configuration_flags(codebase.build_configuration)  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
-    formatted_flags += flags.get_language_standard_flag(codebase.language_standard)  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
+    formatted_flags += flags.get_build_configuration_flags(codebase.build_configuration)
+    formatted_flags += flags.get_language_standard_flag(codebase.language_standard)
     formatted_flags += flags.get_warning_flags(codebase.warnings)
     formatted_flags += flags.get_miscellaneous_flags(codebase.miscellaneous)
     if preprocessor_variables:
@@ -201,10 +201,10 @@ def link_object_files_into_executable(codebase: CodeBase) -> None:
         formatted_flags += flags.get_library_name_flags([dependency.name for dependency in codebase.dependencies])                    # noqa: E501
 
     executable_path: str = str(codebase.binary_directory.relative_to(codebase.build_directory)/f'{codebase.name:s}.exe')
-    object_file_names: str = ' '.join([object_file_path.name for object_file_path in codebase.build_directory.glob('*.o')])
+    object_file_names: str = ' '.join([object_file_path.name for object_file_path in codebase.build_directory.glob('*.o')])           # noqa: E501
 
     if run_command('Linking Results',
-                   f'g++ -o {executable_path:s} {object_file_names:s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
+                   f'g++ -o {executable_path:s} {object_file_names:s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',      # noqa: E501
                    codebase.build_directory):
         for object_file_path in codebase.build_directory.glob('*.o'):
             Path.unlink(object_file_path)
@@ -220,8 +220,8 @@ def archive_object_files_into_static_library(codebase: CodeBase) -> Dependency:
 
     static_library: Dependency = codebase.generate_as_dependency(False)
 
-    library_path: str = str(static_library.library_directory.relative_to(codebase.build_directory)/f'{codebase.name:s}.{'lib' if platform.system() == 'Windows' else 'a':s}')
-    object_file_names: str = ' '.join([object_file_path.name for object_file_path in codebase.build_directory.glob('*.o')])
+    library_path: str = str(static_library.library_directory.relative_to(codebase.build_directory)/f'{codebase.name:s}.{'lib' if platform.system() == 'Windows' else 'a':s}')  # noqa: E501
+    object_file_names: str = ' '.join([object_file_path.name for object_file_path in codebase.build_directory.glob('*.o')])  # noqa: E501
 
     if run_command('Archiving into Static Library',
                    f'ar rcs {library_path:s} {object_file_names:s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
@@ -242,8 +242,8 @@ def create_dynamic_library(codebase: CodeBase) -> Dependency:
 
     dynamic_library: Dependency = codebase.generate_as_dependency(True)
 
-    library_path: str = str(dynamic_library.library_directory.relative_to(codebase.build_directory)/f'{codebase.name:s}.{'dll' if platform.system() == 'Windows' else 'so':s}')
-    object_file_names: str = ' '.join([object_file_path.name for object_file_path in codebase.build_directory.glob('*.o')])
+    library_path: str = str(dynamic_library.library_directory.relative_to(codebase.build_directory)/f'{codebase.name:s}.{'dll' if platform.system() == 'Windows' else 'so':s}')  # noqa: E501
+    object_file_names: str = ' '.join([object_file_path.name for object_file_path in codebase.build_directory.glob('*.o')])  # noqa: E501
 
     if run_command('Creating Dynamic Library',
                    f'ld -o {str(library_path):s} {object_file_names:s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
@@ -262,8 +262,8 @@ def test_executable(codebase: CodeBase) -> None:
 
         for dependency in codebase.dependencies:
             if dependency.is_dynamic:
-                shutil.copyfile(dependency.library_directory/f'{dependency.name:s}.{'dll' if platform.system() == 'Windows' else 'so'}',
-                                codebase.binary_directory/f'{dependency.name:s}.{'dll' if platform.system() == 'Windows' else 'so'}')
+                shutil.copyfile(dependency.library_directory/f'{dependency.name:s}.{'dll' if platform.system() == 'Windows' else 'so'}',  # noqa: E501
+                                codebase.binary_directory/f'{dependency.name:s}.{'dll' if platform.system() == 'Windows' else 'so'}')     # noqa: E501
 
         _ = \
             run_command('Testing Executable',
