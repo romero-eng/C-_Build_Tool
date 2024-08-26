@@ -155,7 +155,6 @@ class CodeBase:
 
 
 def generate_object_files(codebase: CodeBase,
-                          dependencies: list[Dependency] | None = None,
                           preprocessor_variables: list[str] | None = None) -> bool:
 
     formatted_flags: list[str] = []
@@ -166,8 +165,8 @@ def generate_object_files(codebase: CodeBase,
     formatted_flags += flags.get_miscellaneous_flags(codebase.miscellaneous)
     if preprocessor_variables:
         formatted_flags += flags.get_preprocessor_variable_flags(preprocessor_variables)
-    if dependencies:
-        formatted_flags += flags.get_include_directory_flags([dependency.include_directory for dependency in dependencies])  # noqa: E501
+    if codebase.dependencies:
+        formatted_flags += flags.get_include_directory_flags([dependency.include_directory for dependency in codebase.dependencies])  # noqa: E501
 
     current_source_file_path: Path
     corresponding_object_file_path: Path
@@ -272,8 +271,7 @@ def build_static_library_from_source(codebase: CodeBase) -> Dependency | None:
 
     static_library: Dependency | None = \
         archive_object_files_into_static_library(codebase,
-                                                 codebase.dependencies) if generate_object_files(codebase,
-                                                                                                 codebase.dependencies) else None  # noqa: E501
+                                                 codebase.dependencies) if generate_object_files(codebase) else None  # noqa: E501
 
     return static_library
 
@@ -284,7 +282,6 @@ def build_dynamic_library_from_source(codebase: CodeBase,
     dynamic_library: Dependency | None = \
         create_dynamic_library(codebase,
                                codebase.dependencies) if generate_object_files(codebase,
-                                                                               codebase.dependencies,
                                                                                preprocessor_variables) else None
 
     return dynamic_library
@@ -292,11 +289,7 @@ def build_dynamic_library_from_source(codebase: CodeBase,
 
 def build_executable_from_source(codebase: CodeBase) -> None:
 
-    success: bool = \
-        generate_object_files(codebase,
-                              codebase.dependencies)
-
-    if success:
+    if generate_object_files(codebase):
         link_object_files_into_executable(codebase,
                                           codebase.dependencies)
 
