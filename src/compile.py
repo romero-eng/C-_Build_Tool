@@ -48,6 +48,7 @@ class CodeBase:
         self._source_directory: Path = self._repository_directory/'src'
         self._build_directory: Path = self._repository_directory/'build'
         self._binary_directory: Path = self._build_directory/'bin'
+        self._settings_path: Path = self.build_directory/'compilation_settings.json'
 
         repository_exists: bool = self._repository_directory.is_dir() if self._repository_directory.exists() else False
         if not repository_exists:
@@ -85,6 +86,28 @@ class CodeBase:
 
         return self._binary_directory
 
+    @property
+    def settings(self) -> dict[str, str | list[str]]:
+
+        settings: dict[str, str | list[str]]
+
+        if not self._settings_path.exists():
+
+            settings = \
+                {'Build Configuration': list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
+                 'Language Standard': f'C++ {2011 + 3*flags.LANGUAGE_STANDARDS.index('2a'):d}',
+                 'Warnings': list(flags.FLAG_PER_WARNING.keys()),
+                 'Miscellaneous': list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys())}
+
+            with open(self._settings_path, 'w') as json_file:
+                json.dump(settings, json_file, indent=4)
+
+        else:
+            with open(self._settings_path, 'r') as json_file:
+                settings = json.load(json_file)
+
+        return settings
+
     def generate_dependency(self) -> Dependency:
 
         library_directory: Path = self._build_directory/'lib'
@@ -112,46 +135,20 @@ class CodeBase:
                           library_directory)
 
 
-def retrieve_compilation_settings(codebase: CodeBase) -> dict[str, str | list[str]]:
-
-    settings_path: Path = codebase.build_directory/'compilation_settings.json'
-
-    settings: dict[str, str | list[str]]
-
-    if not settings_path.exists():
-
-        settings = \
-            {'Build Configuration': list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
-             'Language Standard': f'C++ {2011 + 3*flags.LANGUAGE_STANDARDS.index('2a'):d}',
-             'Warnings': list(flags.FLAG_PER_WARNING.keys()),
-             'Miscellaneous': list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys())}
-
-        with open(settings_path, 'w') as json_file:
-            json.dump(settings, json_file, indent=4)
-
-    else:
-        with open(settings_path, 'r') as json_file:
-            settings = json.load(json_file)
-
-    return settings
-
-
 def generate_object_files(codebase: CodeBase,
                           dependencies: list[Dependency] | None = None,
                           preprocessor_variables: list[str] | None = None) -> bool:
 
-    settings: dict[str, str | list[str]] = retrieve_compilation_settings(codebase)
-
     formatted_flags: list[str] = []
 
-    if 'Build Configuration' in settings:
-        formatted_flags += flags.get_build_configuration_flags(settings['Build Configuration'])  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
-    if 'Language Standard' in settings:
-        formatted_flags += flags.get_language_standard_flag(settings['Language Standard'])  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
-    if 'Warnings' in settings:
-        formatted_flags += flags.get_warning_flags(settings['Warnings'])
-    if 'Miscellaneous' in settings:
-        formatted_flags += flags.get_miscellaneous_flags(settings['Miscellaneous'])
+    if 'Build Configuration' in codebase.settings:
+        formatted_flags += flags.get_build_configuration_flags(codebase.settings['Build Configuration'])  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
+    if 'Language Standard' in codebase.settings:
+        formatted_flags += flags.get_language_standard_flag(codebase.settings['Language Standard'])  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
+    if 'Warnings' in codebase.settings:
+        formatted_flags += flags.get_warning_flags(codebase.settings['Warnings'])
+    if 'Miscellaneous' in codebase.settings:
+        formatted_flags += flags.get_miscellaneous_flags(codebase.settings['Miscellaneous'])
     if preprocessor_variables:
         formatted_flags += flags.get_preprocessor_variable_flags(preprocessor_variables)
     if dependencies:
@@ -225,8 +222,7 @@ def archive_object_files_into_static_library(codebase: CodeBase,
 def create_dynamic_library(codebase: CodeBase,
                            secondary_dependencies: list[Dependency] | None = None) -> Dependency:
 
-    formatted_flags: list[str] = \
-        flags.get_dynamic_library_creation_flags(retrieve_compilation_settings(codebase))
+    formatted_flags: list[str] = flags.get_dynamic_library_creation_flags(codebase.settings)
 
     if secondary_dependencies:
         formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in secondary_dependencies] if secondary_dependencies else None)  # noqa: E501
