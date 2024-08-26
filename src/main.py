@@ -6,11 +6,6 @@ import compile
 
 if (__name__ == '__main__'):
     try:
-
-        present_arithmetic: compile.CodeBase = \
-            compile.CodeBase('present_arithmetic',
-                             os.path.join(os.getcwd(), 'sample_C++_code'))
-
         #"""
         arithmetic_library: compile.Dependency | None = \
             compile.build_static_library_from_source(compile.CodeBase('Arithmetic',
@@ -21,9 +16,16 @@ if (__name__ == '__main__'):
                                                                        os.path.join(os.getcwd(), 'sample_C++_dynamic_library')),  # noqa: E501
                                                       ['ADD_EXPORTS'])
         #"""
+
         if arithmetic_library:
-            compile.build_executable_from_source(present_arithmetic,
-                                                 [arithmetic_library])
+
+            present_arithmetic_exec: compile.CodeBase = \
+                compile.CodeBase('present_arithmetic',
+                                 os.path.join(os.getcwd(), 'sample_C++_code'))
+
+            present_arithmetic_exec.dependencies.append(arithmetic_library)
+
+            compile.build_executable_from_source(present_arithmetic_exec)
 
     except Exception:
         print(traceback.format_exc())

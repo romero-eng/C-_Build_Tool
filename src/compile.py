@@ -64,6 +64,8 @@ class CodeBase:
         self._warnings: list[str] = warnings
         self._miscellaneous: list[str] = miscellaneous
 
+        self._dependencies: list[str] = []
+
     @property
     def name(self) -> str:
         return self._name
@@ -118,6 +120,10 @@ class CodeBase:
     @property
     def miscellaneous(self) -> list[str]:
         return self._miscellaneous
+
+    @property
+    def dependencies(self) -> list[Dependency]:
+        return self._dependencies
 
     def generate_as_dependency(self,
                             is_dynamic: bool) -> Dependency:
@@ -262,39 +268,36 @@ def test_executable(codebase: CodeBase) -> None:
                         codebase.binary_directory)
 
 
-def build_static_library_from_source(codebase: CodeBase,
-                                     secondary_dependencies: list[Dependency] | None = None) -> Dependency | None:
+def build_static_library_from_source(codebase: CodeBase) -> Dependency | None:
 
     static_library: Dependency | None = \
         archive_object_files_into_static_library(codebase,
-                                                 secondary_dependencies) if generate_object_files(codebase,
-                                                                                                  secondary_dependencies) else None  # noqa: E501
+                                                 codebase.dependencies) if generate_object_files(codebase,
+                                                                                                 codebase.dependencies) else None  # noqa: E501
 
     return static_library
 
 
 def build_dynamic_library_from_source(codebase: CodeBase,
-                                      preprocessor_variables: list[str] | None = None,
-                                      secondary_dependencies: list[Dependency] | None = None) -> Dependency | None:
+                                      preprocessor_variables: list[str] | None = None) -> Dependency | None:
 
     dynamic_library: Dependency | None = \
         create_dynamic_library(codebase,
-                               secondary_dependencies) if generate_object_files(codebase,
-                                                                                secondary_dependencies,
-                                                                                preprocessor_variables) else None
+                               codebase.dependencies) if generate_object_files(codebase,
+                                                                               codebase.dependencies,
+                                                                               preprocessor_variables) else None
 
     return dynamic_library
 
 
-def build_executable_from_source(codebase: CodeBase,
-                                 dependencies: list[Dependency] | None = None) -> None:
+def build_executable_from_source(codebase: CodeBase) -> None:
 
     success: bool = \
         generate_object_files(codebase,
-                              dependencies)
+                              codebase.dependencies)
 
     if success:
         link_object_files_into_executable(codebase,
-                                          dependencies)
+                                          codebase.dependencies)
 
     test_executable(codebase)
