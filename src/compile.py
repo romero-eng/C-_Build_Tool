@@ -64,12 +64,6 @@ class CodeBase:
         self._warnings: list[str] = warnings
         self._miscellaneous: list[str] = miscellaneous
 
-        self._settings: dict[str, str | list[str]] = \
-                {'Build Configuration': self._build_configuration,
-                 'Language Standard':  self._language_standard,
-                 'Warnings': self._warnings,
-                 'Miscellaneous': self._miscellaneous}
-
     @property
     def name(self) -> str:
         return self._name
