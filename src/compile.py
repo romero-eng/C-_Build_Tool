@@ -191,14 +191,13 @@ def generate_object_files(codebase: CodeBase,
     return success
 
 
-def link_object_files_into_executable(codebase: CodeBase,
-                                      dependencies: list[Dependency] | None = None) -> None:
+def link_object_files_into_executable(codebase: CodeBase) -> None:
 
     formatted_flags: list[str] = []
 
-    if dependencies:
-        formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in dependencies] if dependencies else None)  # noqa: E501
-        formatted_flags += flags.get_library_name_flags([dependency.name for dependency in dependencies] if dependencies else None)                    # noqa: E501
+    if codebase.dependencies:
+        formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in codebase.dependencies])  # noqa: E501
+        formatted_flags += flags.get_library_name_flags([dependency.name for dependency in codebase.dependencies])                    # noqa: E501
 
     object_file_names: list[str] = \
         [str(file_path) for file_path in codebase.build_directory.iterdir() if file_path.suffix == '.o']
@@ -210,14 +209,13 @@ def link_object_files_into_executable(codebase: CodeBase,
             Path.unlink(codebase.build_directory/file_name)
 
 
-def archive_object_files_into_static_library(codebase: CodeBase,
-                                             secondary_dependencies: list[Dependency] | None = None) -> Dependency:
+def archive_object_files_into_static_library(codebase: CodeBase) -> Dependency:
 
     formatted_flags: list[str] = []
 
-    if secondary_dependencies:
-        formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in secondary_dependencies])  # noqa: E501
-        formatted_flags += flags.get_library_name_flags([dependency.name for dependency in secondary_dependencies])                    # noqa: E501
+    if codebase.dependencies:
+        formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in codebase.dependencies])  # noqa: E501
+        formatted_flags += flags.get_library_name_flags([dependency.name for dependency in codebase.dependencies])                    # noqa: E501
 
     object_file_names: list[str] = \
         [str(file_path) for file_path in codebase.build_directory.iterdir() if file_path.suffix == '.o']
@@ -233,14 +231,13 @@ def archive_object_files_into_static_library(codebase: CodeBase,
     return static_library
 
 
-def create_dynamic_library(codebase: CodeBase,
-                           secondary_dependencies: list[Dependency] | None = None) -> Dependency:
+def create_dynamic_library(codebase: CodeBase) -> Dependency:
 
     formatted_flags: list[str] = flags.get_dynamic_library_creation_flags(codebase.build_configuration)
 
-    if secondary_dependencies:
-        formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in secondary_dependencies])  # noqa: E501
-        formatted_flags += flags.get_library_name_flags([dependency.name for dependency in secondary_dependencies])                    # noqa: E501
+    if codebase.dependencies:
+        formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in codebase.dependencies])  # noqa: E501
+        formatted_flags += flags.get_library_name_flags([dependency.name for dependency in codebase.dependencies])                    # noqa: E501
 
     object_file_names: list[str] = \
         [str(file_path) for file_path in codebase.build_directory.iterdir() if file_path.suffix == '.o']
@@ -270,8 +267,7 @@ def test_executable(codebase: CodeBase) -> None:
 def build_static_library_from_source(codebase: CodeBase) -> Dependency | None:
 
     static_library: Dependency | None = \
-        archive_object_files_into_static_library(codebase,
-                                                 codebase.dependencies) if generate_object_files(codebase) else None  # noqa: E501
+        archive_object_files_into_static_library(codebase) if generate_object_files(codebase) else None  # noqa: E501
 
     return static_library
 
@@ -280,9 +276,8 @@ def build_dynamic_library_from_source(codebase: CodeBase,
                                       preprocessor_variables: list[str] | None = None) -> Dependency | None:
 
     dynamic_library: Dependency | None = \
-        create_dynamic_library(codebase,
-                               codebase.dependencies) if generate_object_files(codebase,
-                                                                               preprocessor_variables) else None
+        create_dynamic_library(codebase) if generate_object_files(codebase,
+                                                                  preprocessor_variables) else None
 
     return dynamic_library
 
@@ -290,7 +285,6 @@ def build_dynamic_library_from_source(codebase: CodeBase,
 def build_executable_from_source(codebase: CodeBase) -> None:
 
     if generate_object_files(codebase):
-        link_object_files_into_executable(codebase,
-                                          codebase.dependencies)
+        link_object_files_into_executable(codebase)
 
     test_executable(codebase)
