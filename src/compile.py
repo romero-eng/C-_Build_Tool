@@ -217,8 +217,8 @@ def archive_object_files_into_static_library(codebase: CodeBase,
     formatted_flags: list[str] = []
 
     if secondary_dependencies:
-        formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in secondary_dependencies] if secondary_dependencies else None)  # noqa: E501
-        formatted_flags += flags.get_library_name_flags([dependency.name for dependency in secondary_dependencies] if secondary_dependencies else None)                    # noqa: E501
+        formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in secondary_dependencies])  # noqa: E501
+        formatted_flags += flags.get_library_name_flags([dependency.name for dependency in secondary_dependencies])                    # noqa: E501
 
     object_file_names: list[str] = \
         [str(file_path) for file_path in codebase.build_directory.iterdir() if file_path.suffix == '.o']
@@ -240,8 +240,8 @@ def create_dynamic_library(codebase: CodeBase,
     formatted_flags: list[str] = flags.get_dynamic_library_creation_flags(codebase.build_configuration)
 
     if secondary_dependencies:
-        formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in secondary_dependencies] if secondary_dependencies else None)  # noqa: E501
-        formatted_flags += flags.get_library_name_flags([dependency.name for dependency in secondary_dependencies] if secondary_dependencies else None)                    # noqa: E501
+        formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in secondary_dependencies])  # noqa: E501
+        formatted_flags += flags.get_library_name_flags([dependency.name for dependency in secondary_dependencies])                    # noqa: E501
 
     object_file_names: list[str] = \
         [str(file_path) for file_path in codebase.build_directory.iterdir() if file_path.suffix == '.o']
