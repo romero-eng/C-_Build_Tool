@@ -1,4 +1,3 @@
-import json
 import shutil
 import platform
 from pathlib import Path
@@ -41,7 +40,11 @@ class CodeBase:
 
     def __init__(self,
                  name: str,
-                 repository_directory: str) -> None:
+                 repository_directory: str,
+                 build_configuration: str = list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
+                 language_standard: str = f'C++ {2011 + 3*flags.LANGUAGE_STANDARDS.index('2a'):d}',
+                 warnings: list[str] = list(flags.FLAG_PER_WARNING.keys()),
+                 miscellaneous: list[str] = list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys())) -> None:
 
         self._name: str = name
         self._repository_directory: Path = Path(repository_directory)
@@ -49,6 +52,17 @@ class CodeBase:
         repository_exists: bool = self._repository_directory.is_dir() if self._repository_directory.exists() else False
         if not repository_exists:
             raise ValueError(f'The repository for the \'{name:s}\' code base does not exist')
+        
+        self._build_configuration: str = build_configuration
+        self._language_standard: str = language_standard
+        self._warnings: list[str] = warnings
+        self._miscellaneous: list[str] = miscellaneous
+
+        self._settings: dict[str, str | list[str]] = \
+                {'Build Configuration': self._build_configuration,
+                 'Language Standard':  self._language_standard,
+                 'Warnings': self._warnings,
+                 'Miscellaneous': self._miscellaneous}
 
     @property
     def name(self) -> str:
@@ -90,28 +104,20 @@ class CodeBase:
         return self._binary_directory
 
     @property
-    def settings(self) -> dict[str, str | list[str]]:
+    def build_configuration(self) -> str:
+        return self._build_configuration
 
-        self._settings_path: Path = self.build_directory/'compilation_settings.json'
+    @property
+    def language_standard(self) -> str:
+        return self._language_standard
 
-        settings: dict[str, str | list[str]]
+    @property
+    def warnings(self) -> list[str]:
+        return self._warnings
 
-        if not self._settings_path.exists():
-
-            settings = \
-                {'Build Configuration': list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
-                 'Language Standard': f'C++ {2011 + 3*flags.LANGUAGE_STANDARDS.index('2a'):d}',
-                 'Warnings': list(flags.FLAG_PER_WARNING.keys()),
-                 'Miscellaneous': list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys())}
-
-            with open(self._settings_path, 'w') as json_file:
-                json.dump(settings, json_file, indent=4)
-
-        else:
-            with open(self._settings_path, 'r') as json_file:
-                settings = json.load(json_file)
-
-        return settings
+    @property
+    def miscellaneous(self) -> list[str]:
+        return self._miscellaneous
 
     def generate_dependency(self) -> Dependency:
 
@@ -146,14 +152,10 @@ def generate_object_files(codebase: CodeBase,
 
     formatted_flags: list[str] = []
 
-    if 'Build Configuration' in codebase.settings:
-        formatted_flags += flags.get_build_configuration_flags(codebase.settings['Build Configuration'])  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
-    if 'Language Standard' in codebase.settings:
-        formatted_flags += flags.get_language_standard_flag(codebase.settings['Language Standard'])  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
-    if 'Warnings' in codebase.settings:
-        formatted_flags += flags.get_warning_flags(codebase.settings['Warnings'])
-    if 'Miscellaneous' in codebase.settings:
-        formatted_flags += flags.get_miscellaneous_flags(codebase.settings['Miscellaneous'])
+    formatted_flags += flags.get_build_configuration_flags(codebase.build_configuration)  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
+    formatted_flags += flags.get_language_standard_flag(codebase.language_standard)  # type: ignore[arg-type]  # noqa: E501  # this is all here because mypy apparently can't handle type narrowing
+    formatted_flags += flags.get_warning_flags(codebase.warnings)
+    formatted_flags += flags.get_miscellaneous_flags(codebase.miscellaneous)
     if preprocessor_variables:
         formatted_flags += flags.get_preprocessor_variable_flags(preprocessor_variables)
     if dependencies:
@@ -227,7 +229,7 @@ def archive_object_files_into_static_library(codebase: CodeBase,
 def create_dynamic_library(codebase: CodeBase,
                            secondary_dependencies: list[Dependency] | None = None) -> Dependency:
 
-    formatted_flags: list[str] = flags.get_dynamic_library_creation_flags(codebase.settings)
+    formatted_flags: list[str] = flags.get_dynamic_library_creation_flags(codebase.build_configuration)
 
     if secondary_dependencies:
         formatted_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in secondary_dependencies] if secondary_dependencies else None)  # noqa: E501

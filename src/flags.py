@@ -40,145 +40,101 @@ def _print_chosen_flag(flag_choice: str,
     print(f'\n{flag_choice:s}: {chosen_flag_description:s}')
 
 
-def get_build_configuration_flags(user_chosen_build_configuration: str | None = None) -> list[str]:
+def get_build_configuration_flags(user_chosen_build_configuration: str) -> list[str]:
 
-    flags: list[str] = []
+    if user_chosen_build_configuration not in FLAGS_PER_BUILD_CONFIGURATION:
+        raise ValueError(f"The following build configuration is not recognized: {user_chosen_build_configuration:s}")   # noqa: E501
 
-    if user_chosen_build_configuration:
+    _print_chosen_flag('Build', user_chosen_build_configuration)
 
-        if user_chosen_build_configuration not in FLAGS_PER_BUILD_CONFIGURATION:
-            raise ValueError(f"The following build configuration is not recognized: {user_chosen_build_configuration:s}")   # noqa: E501
-
-        _print_chosen_flag('Build', user_chosen_build_configuration)
-
-        flags += FLAGS_PER_BUILD_CONFIGURATION[user_chosen_build_configuration]
+    flags: list[str] = FLAGS_PER_BUILD_CONFIGURATION[user_chosen_build_configuration]
 
     return flags
 
 
-def get_language_standard_flag(user_specified_language_standard: str | None = None) -> list[str]:
+def get_language_standard_flag(user_specified_language_standard: str) -> list[str]:
 
-    flags: list[str] = []
+    matched_standard: re.Match[str] | None = re.fullmatch(r'C\++ 20(\d\d)', user_specified_language_standard)
 
-    if user_specified_language_standard:
+    standard_recognized: bool = False
+    if matched_standard:
+        two_digit_year: int = int(matched_standard.groups()[0])
+        if two_digit_year - 11 >= 0:
+            if (two_digit_year - 11) % 3 == 0:
+                language_standard_flag: str = LANGUAGE_STANDARDS[int((two_digit_year - 11)/3)]
+                standard_recognized = True
 
-        matched_standard: re.Match[str] | None = re.fullmatch(r'C\++ 20(\d\d)', user_specified_language_standard)
+    if not standard_recognized:
+        raise ValueError(f'The following Language Standard is not recognized: {user_specified_language_standard:s}')
 
-        standard_recognized: bool = False
-        if matched_standard:
-            two_digit_year: int = int(matched_standard.groups()[0])
-            if two_digit_year - 11 >= 0:
-                if (two_digit_year - 11) % 3 == 0:
-                    language_standard_flag: str = LANGUAGE_STANDARDS[int((two_digit_year - 11)/3)]
-                    standard_recognized = True
+    _print_chosen_flag('Language Standard', user_specified_language_standard)
 
-        if not standard_recognized:
-            raise ValueError(f'The following Language Standard is not recognized: {user_specified_language_standard:s}')
-
-        _print_chosen_flag('Language Standard', user_specified_language_standard)
-
-        flags += [f'std=c++{language_standard_flag:s}']
+    flags: list[str] = [f'std=c++{language_standard_flag:s}']
 
     return flags
 
 
-def get_miscellaneous_flags(user_chosen_misc_decisions: str | list[str] | None = None) -> list[str]:
+def get_miscellaneous_flags(user_chosen_misc_decisions: str | list[str]) -> list[str]:
 
-    flags: list[str] = []
+    if isinstance(user_chosen_misc_decisions, str):
+        user_chosen_misc_decisions = [user_chosen_misc_decisions]
 
-    if user_chosen_misc_decisions:
+    for decision in user_chosen_misc_decisions:
+        if decision not in FLAG_PER_MISCELLANEOUS_DECISION:
+            raise ValueError(f'The following miscellanous decision is not recognized: {decision:s}')
 
-        if isinstance(user_chosen_misc_decisions, str):
+    _print_flag_statuses('Miscellaneous',
+                         list(FLAG_PER_MISCELLANEOUS_DECISION.keys()),
+                         user_chosen_misc_decisions)
 
-            if user_chosen_misc_decisions not in FLAG_PER_MISCELLANEOUS_DECISION:
-                raise ValueError(f'The following miscellanous decision is not recognized: {user_chosen_misc_decisions:s}')  # noqa: E501
-
-            user_chosen_misc_decisions = [user_chosen_misc_decisions]
-
-        else:
-
-            for decision in user_chosen_misc_decisions:
-                if decision not in FLAG_PER_MISCELLANEOUS_DECISION:
-                    raise ValueError(f'The following miscellanous decision is not recognized: {decision:s}')  # noqa: E501
-
-        _print_flag_statuses('Miscellaneous',
-                             list(FLAG_PER_MISCELLANEOUS_DECISION.keys()),
-                             user_chosen_misc_decisions)
-
-        flags += [flag for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in user_chosen_misc_decisions]  # noqa: E501
+    flags: list[str] = [flag for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in user_chosen_misc_decisions]  # noqa: E501
 
     return flags
 
 
-def get_warning_flags(user_chosen_warnings: str | list[str] | None = None) -> list[str]:
+def get_warning_flags(user_chosen_warnings: str | list[str]) -> list[str]:
 
-    flags: list[str] = []
+    if isinstance(user_chosen_warnings, str):
+        user_chosen_warnings = [user_chosen_warnings]
 
-    if user_chosen_warnings:
+    for warning in user_chosen_warnings:
+        if warning not in FLAG_PER_WARNING:
+            raise ValueError(f'The following warning is not recognized: {warning:s}')
 
-        for warning in user_chosen_warnings:
-            if warning not in FLAG_PER_WARNING:
-                raise ValueError(f'The following warning is not recognized: {warning:s}')
+    _print_flag_statuses('Warning',
+                         list(FLAG_PER_WARNING.keys()),
+                         user_chosen_warnings)
 
-        if isinstance(user_chosen_warnings, str):
-            user_chosen_warnings = [user_chosen_warnings]
-
-        _print_flag_statuses('Warning',
-                             list(FLAG_PER_WARNING.keys()),
-                             user_chosen_warnings)
-
-        flags += [f'W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in user_chosen_warnings]
+    flags: list[str] = [f'W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in user_chosen_warnings]
 
     return flags
 
 
-def get_preprocessor_variable_flags(preprocessor_variables: list[str] | None) -> list[str]:
+def get_preprocessor_variable_flags(preprocessor_variables: list[str]) -> list[str]:
 
-    flags: list[str] = []
-
-    if preprocessor_variables:
-
-        flags += [f'D {variable:s}' for variable in preprocessor_variables]
-
-    return flags
+    return [f'D {variable:s}' for variable in preprocessor_variables]
 
 
-def get_include_directory_flags(include_directories: list[Path] | None = None) -> list[str]:
+def get_include_directory_flags(include_directories: list[Path]) -> list[str]:
 
-    flags: list[str] = []
-
-    if include_directories:
-        flags += [f'I {str(include_dir):s}' for include_dir in include_directories]
-
-    return flags
+    return [f'I {str(include_dir):s}' for include_dir in include_directories]
 
 
-def get_library_directory_flags(library_directories: list[Path] | None = None) -> list[str]:
+def get_library_directory_flags(library_directories: list[Path]) -> list[str]:
 
-    flags: list[str] = []
-
-    if library_directories:
-        flags += [f'L {str(library_directory):s}' for library_directory in library_directories]
-
-    return flags
+    return [f'L {str(library_directory):s}' for library_directory in library_directories]
 
 
-def get_library_name_flags(library_names: list[str] | None = None) -> list[str]:
+def get_library_name_flags(library_names: list[str]) -> list[str]:
 
-    flags: list[str] = []
-
-    if library_names:
-        flags += [f'l{library_name:s}' for library_name in library_names]
-
-    return flags
+    return [f'l{library_name:s}' for library_name in library_names]
 
 
-def get_dynamic_library_creation_flags(settings: dict[str, str | list[str]]) -> list[str]:
+def get_dynamic_library_creation_flags(user_chosen_build_configuration: str) -> list[str]:
 
     flags = ['shared']
 
-    if 'Build Configuration' in settings:
-        if settings['Build Configuration'] == 'Release':
-            flags.append('s')
+    if user_chosen_build_configuration == 'Release':
+        flags.append('s')
 
     return flags
