@@ -10,10 +10,12 @@ class Dependency:
 
     def __init__(self,
                  name: str,
+                 is_dynamic: bool,
                  include_directory: str | Path,
                  library_directory: str | Path) -> None:
 
-        self._name = name
+        self._name: str = name
+        self._is_dynamic: bool = is_dynamic
         self._include_directory: Path = Path(include_directory) if isinstance(include_directory, str) else include_directory  # noqa: E501
         self._library_directory: Path = Path(library_directory) if isinstance(library_directory, str) else library_directory  # noqa: E501
 
@@ -26,6 +28,10 @@ class Dependency:
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def is_dynamic(self) -> bool:
+        return self._is_dynamic
 
     @property
     def include_directory(self) -> Path:
@@ -119,7 +125,8 @@ class CodeBase:
     def miscellaneous(self) -> list[str]:
         return self._miscellaneous
 
-    def generate_dependency(self) -> Dependency:
+    def generate_dependency(self,
+                            is_dynamic: bool) -> Dependency:
 
         library_directory: Path = self._build_directory/'lib'
         if not library_directory.exists():
@@ -142,6 +149,7 @@ class CodeBase:
                                         include_directory/root.relative_to(self.source_directory)/file)  # noqa: E127
 
         return Dependency(self._name,
+                          is_dynamic,
                           include_directory,
                           library_directory)
 
@@ -215,7 +223,7 @@ def archive_object_files_into_static_library(codebase: CodeBase,
     object_file_names: list[str] = \
         [str(file_path) for file_path in codebase.build_directory.iterdir() if file_path.suffix == '.o']
 
-    static_library: Dependency = codebase.generate_dependency()
+    static_library: Dependency = codebase.generate_dependency(False)
 
     if run_command('Archiving into Static Library',
                    f'ar rcs {str(static_library.library_directory.relative_to(codebase.build_directory)/codebase.name):s}.{'lib' if platform.system() == 'Windows' else 'a':s} {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
@@ -238,7 +246,7 @@ def create_dynamic_library(codebase: CodeBase,
     object_file_names: list[str] = \
         [str(file_path) for file_path in codebase.build_directory.iterdir() if file_path.suffix == '.o']
 
-    dynamic_library: Dependency = codebase.generate_dependency()
+    dynamic_library: Dependency = codebase.generate_dependency(True)
 
     if run_command('Creating Dynamic Library',
                    f'ld -o {str(dynamic_library.library_directory.relative_to(codebase.build_directory)/codebase.name):s}.{'dll' if platform.system() == 'Windows' else 'so':s} {' '.join(object_file_names):s} {' '.join([f'-{flag:s}' for flag in formatted_flags]):s}',  # noqa: E501
