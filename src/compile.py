@@ -167,7 +167,7 @@ def generate_object_files(codebase: CodeBase,
     if preprocessor_variables:
         formatted_flags += flags.get_preprocessor_variable_flags(preprocessor_variables)
     if dependencies:
-        formatted_flags += flags.get_include_directory_flags([dependency.include_directory for dependency in dependencies] if dependencies else None)  # noqa: E501
+        formatted_flags += flags.get_include_directory_flags([dependency.include_directory for dependency in dependencies])  # noqa: E501
 
     current_source_file_path: Path
     corresponding_object_file_path: Path
