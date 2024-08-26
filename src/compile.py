@@ -45,18 +45,10 @@ class CodeBase:
 
         self._name: str = name
         self._repository_directory: Path = Path(repository_directory)
-        self._source_directory: Path = self._repository_directory/'src'
-        self._build_directory: Path = self._repository_directory/'build'
-        self._binary_directory: Path = self._build_directory/'bin'
-        self._settings_path: Path = self.build_directory/'compilation_settings.json'
 
         repository_exists: bool = self._repository_directory.is_dir() if self._repository_directory.exists() else False
         if not repository_exists:
             raise ValueError(f'The repository for the \'{name:s}\' code base does not exist')
-
-        source_code_exists: bool = self._source_directory.is_dir() if self._source_directory.exists() else False
-        if not source_code_exists:
-            raise ValueError(f'No directory labelled \'src\' was found in the \'{self._name:s}\' repository, please create it and put your source code to be compiled there')  # noqa: E501
 
     @property
     def name(self) -> str:
@@ -68,10 +60,19 @@ class CodeBase:
 
     @property
     def source_directory(self) -> Path:
+
+        self._source_directory: Path = self._repository_directory/'src'
+
+        source_code_exists: bool = self._source_directory.is_dir() if self._source_directory.exists() else False
+        if not source_code_exists:
+            raise ValueError(f'No directory labelled \'src\' was found in the \'{self._name:s}\' repository, please create it and put your source code to be compiled there')  # noqa: E501
+
         return self._source_directory
 
     @property
     def build_directory(self) -> Path:
+
+        self._build_directory: Path = self._repository_directory/'build'
 
         if not self._build_directory.exists():
             self._build_directory.mkdir()
@@ -81,6 +82,8 @@ class CodeBase:
     @property
     def binary_directory(self) -> Path:
 
+        self._binary_directory: Path = self._build_directory/'bin'
+
         if not self._binary_directory.exists():
             self._binary_directory.mkdir()
 
@@ -88,6 +91,8 @@ class CodeBase:
 
     @property
     def settings(self) -> dict[str, str | list[str]]:
+
+        self._settings_path: Path = self.build_directory/'compilation_settings.json'
 
         settings: dict[str, str | list[str]]
 
