@@ -10,3 +10,4 @@ Planned Future Improvements:
 - Incorporate Git into the Python scripts such that a GIT url should be all that it takes to retrieve and compile an open-source dependency
 - Refactor compile.py to have a lot more of the current functionality contained within the CodeBase class
     - Need more experience with actually using these scripts before I finalize this item
+- Add ability to create Python extensions
