@@ -9,11 +9,11 @@ if (__name__ == '__main__'):
         #"""
         arithmetic_library: compile.Dependency | None = \
             compile.build_static_library_from_source(compile.CodeBase('Arithmetic',
-                                                                      Path.cwd()/'sample_C++_static_library'))  # noqa: E501
+                                                                      Path.cwd()/'example_C++_static_library'))  # noqa: E501
         """
         arithmetic_library: compile.Dependency | None = \
             compile.build_dynamic_library_from_source(compile.CodeBase('Arithmetic',
-                                                                       Path.cwd()/'sample_C++_dynamic_library'),  # noqa: E501
+                                                                       Path.cwd()/'example_C++_dynamic_library'),  # noqa: E501
                                                       ['ADD_EXPORTS'])
         #"""
 
@@ -21,7 +21,7 @@ if (__name__ == '__main__'):
 
             present_arithmetic_exec: compile.CodeBase = \
                 compile.CodeBase('present_arithmetic',
-                                 Path.cwd()/'sample_C++_code')
+                                 Path.cwd()/'example_C++_code')
 
             present_arithmetic_exec.dependencies.append(arithmetic_library)
 
