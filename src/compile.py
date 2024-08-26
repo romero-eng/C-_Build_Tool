@@ -131,7 +131,7 @@ class CodeBase:
         return self._dependencies
 
     def generate_as_dependency(self,
-                            is_dynamic: bool) -> Dependency:
+                               is_dynamic: bool) -> Dependency:
 
         library_directory: Path = self._build_directory/'lib'
         if not library_directory.exists():
