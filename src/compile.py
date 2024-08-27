@@ -99,6 +99,36 @@ class CodeBase:
         # Initialize the list of Dependencies
         self._dependencies: list[Dependency] = []
 
+    def __str__(self) -> str:
+
+        def format_flag_statuses(title: str,
+                                 known_flag_descriptions: list[str],
+                                 chosen_descriptions: list[str]) -> str:
+
+            max_description_length: int = max([len(description) for description in known_flag_descriptions])
+            formatted_flag_statuses: list[str] = \
+                f'{title:s} Options:\n{'':{'-':s}>{len(title) + 9:d}s}\n{'\n'.join([f'{description:>{max_description_length:d}s}: {'ON' if description in chosen_descriptions else 'OFF':s}' for description in known_flag_descriptions]):s}'
+
+            return formatted_flag_statuses
+
+        def format_chosen_flag(flag_choice: str,
+                               chosen_flag_description: str) -> str:
+
+            return f'{flag_choice:s}: {chosen_flag_description:s}'
+
+        description: str = '\n\n'.join([format_chosen_flag('Build Configuration',
+                                                           self._build_configuration),
+                                        format_chosen_flag('Language Standard',
+                                                           self._language_standard),
+                                        format_flag_statuses('Warning',
+                                                             list(flags.FLAG_PER_WARNING.keys()),
+                                                             self._warnings),
+                                        format_flag_statuses('Miscellaneous',
+                                                             list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys()),
+                                                             self._miscellaneous)])
+
+        return f'\n{description:s}'
+
     @property
     def name(self) -> str:
         return self._name
@@ -154,6 +184,8 @@ class CodeBase:
         return standard_recognized
 
     def _generate_object_files(self) -> None:
+
+        print(self)
 
         # Get flags from the compilation settings
         formatted_flags: list[str] = \
