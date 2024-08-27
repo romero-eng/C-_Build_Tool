@@ -260,6 +260,10 @@ class CodeBase:
 
         return codebase_as_dependency
 
+    def add_dependency(self,
+                       new_dependency: Dependency) -> None:
+        self._dependencies.append(new_dependency)
+
     def test_executable(self) -> None:
 
         # Initialize the compiled executable path (within the Build directory)
