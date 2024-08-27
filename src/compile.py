@@ -1,7 +1,6 @@
 import shutil
 import platform
 from pathlib import Path
-from typing import Generator
 
 import flags
 from command import run_command
