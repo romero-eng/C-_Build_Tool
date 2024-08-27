@@ -129,11 +129,11 @@ class CodeBase:
             flags.get_language_standard_flag(self._language_standard) + \
             flags.get_warning_flags(self._warnings) + \
             flags.get_miscellaneous_flags(self._miscellaneous) + \
-            flags.get_preprocessor_variable_flags(self._preprocessor_variables)
+            [f'D {variable:s}' for variable in self._preprocessor_variables]
 
         # Get optional flags based on Dependencies
         if self._dependencies:
-            formatted_flags += flags.get_include_directory_flags([dependency.include_directory for dependency in self._dependencies])  # noqa: E501
+            formatted_flags += list(set([f'I {str(dependency.include_directory):s}' for dependency in self._dependencies]))  # noqa: E501
 
         # Initialize the Build directory
         if not self._build_directory.exists():
@@ -172,8 +172,8 @@ class CodeBase:
 
         # Get flags from each library directory per dependency
         formatted_flags = \
-            (flags.get_library_directory_flags([dependency.library_directory for dependency in self._dependencies]) +             # noqa: E501
-             flags.get_library_name_flags([dependency.name for dependency in self._dependencies])) if self._dependencies else []  # noqa: E501
+            [f'L {str(dependency.library_directory):s}' for dependency in self._dependencies] + \
+            [f'l{str(dependency.name):s}' for dependency in self._dependencies]
 
         # Initialize the Binary directory
         if not self._binary_directory.exists():
@@ -233,8 +233,8 @@ class CodeBase:
         linking_flags: list[str] = flags.get_dynamic_library_creation_flags(self._build_configuration) if is_dynamic else []          # noqa: E501
 
         if self._dependencies:
-            linking_flags += flags.get_library_directory_flags([dependency.library_directory for dependency in self._dependencies])   # noqa: E501
-            linking_flags += flags.get_library_name_flags([dependency.name for dependency in self._dependencies])                     # noqa: E501
+            linking_flags += [f'L {str(dependency.library_directory):s}' for dependency in self._dependencies]
+            linking_flags += [f'l{str(dependency.name):s}' for dependency in self._dependencies]
 
         # Initialize the command for the library creation
         create_command: str = 'ld -o {output_library:s} {input_objects:s} {linking_flags:s}'

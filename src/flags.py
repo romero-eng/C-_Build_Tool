@@ -110,26 +110,6 @@ def get_warning_flags(user_chosen_warnings: str | list[str]) -> list[str]:
     return flags
 
 
-def get_preprocessor_variable_flags(preprocessor_variables: list[str]) -> list[str]:
-
-    return [f'D {variable:s}' for variable in preprocessor_variables]
-
-
-def get_include_directory_flags(include_directories: list[Path]) -> list[str]:
-
-    return [f'I {str(include_dir):s}' for include_dir in include_directories]
-
-
-def get_library_directory_flags(library_directories: list[Path]) -> list[str]:
-
-    return [f'L {str(library_directory):s}' for library_directory in library_directories]
-
-
-def get_library_name_flags(library_names: list[str]) -> list[str]:
-
-    return [f'l{library_name:s}' for library_name in library_names]
-
-
 def get_dynamic_library_creation_flags(user_chosen_build_configuration: str) -> list[str]:
 
     flags = ['shared']
