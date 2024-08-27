@@ -10,6 +10,7 @@ if (__name__ == '__main__'):
     arithmetic_library_codebase: CodeBase | None = None
     present_arithmetic_codebase: CodeBase | None = None
     use_dynamic_library: bool = False
+    clean_up_build_directories: bool = True
 
     try:
         arithmetic_library_codebase = \
@@ -34,9 +35,10 @@ if (__name__ == '__main__'):
 
     finally:
 
-        if arithmetic_library_codebase:
-            if arithmetic_library_codebase.build_directory.exists():
-                shutil.rmtree(arithmetic_library_codebase.build_directory)
-        if present_arithmetic_codebase:
-            if present_arithmetic_codebase.build_directory.exists():
-                shutil.rmtree(present_arithmetic_codebase.build_directory)
+        if clean_up_build_directories:
+            if arithmetic_library_codebase:
+                if arithmetic_library_codebase.build_directory.exists():
+                    shutil.rmtree(arithmetic_library_codebase.build_directory)
+            if present_arithmetic_codebase:
+                if present_arithmetic_codebase.build_directory.exists():
+                    shutil.rmtree(present_arithmetic_codebase.build_directory)
