@@ -169,7 +169,7 @@ class CodeBase:
 
         # Generate and retrieve the object file paths
         self._generate_object_files()
-        object_paths: Generator[Path, None, None] = self._build_directory.glob('*.o')
+        object_paths: list[Path] = [file_path for file_path in self._build_directory.glob('*.o')]
 
         # Get flags from each library directory per dependency
         formatted_flags = \
@@ -202,7 +202,7 @@ class CodeBase:
 
         # Generate and retrieve the object file paths
         self._generate_object_files()
-        object_paths: Generator[Path, None, None] = self._build_directory.glob('*.o')
+        object_paths: list[Path] = [file_path for file_path in self._build_directory.glob('*.o')]
 
         # Initialize the Library Directory
         library_directory: Path = self._build_directory/'lib'
