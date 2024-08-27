@@ -1,5 +1,4 @@
 import re
-from pathlib import Path
 
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-build-configurations/
@@ -42,9 +41,6 @@ def _print_chosen_flag(flag_choice: str,
 
 def get_build_configuration_flags(user_chosen_build_configuration: str) -> list[str]:
 
-    if user_chosen_build_configuration not in FLAGS_PER_BUILD_CONFIGURATION:
-        raise ValueError(f"The following build configuration is not recognized: {user_chosen_build_configuration:s}")   # noqa: E501
-
     _print_chosen_flag('Build', user_chosen_build_configuration)
 
     flags: list[str] = FLAGS_PER_BUILD_CONFIGURATION[user_chosen_build_configuration]
@@ -54,34 +50,14 @@ def get_build_configuration_flags(user_chosen_build_configuration: str) -> list[
 
 def get_language_standard_flag(user_specified_language_standard: str) -> list[str]:
 
-    matched_standard: re.Match[str] | None = re.fullmatch(r'C\++ 20(\d\d)', user_specified_language_standard)
-
-    standard_recognized: bool = False
-    if matched_standard:
-        two_digit_year: int = int(matched_standard.groups()[0])
-        if two_digit_year - 11 >= 0:
-            if (two_digit_year - 11) % 3 == 0:
-                language_standard_flag: str = LANGUAGE_STANDARDS[int((two_digit_year - 11)/3)]
-                standard_recognized = True
-
-    if not standard_recognized:
-        raise ValueError(f'The following Language Standard is not recognized: {user_specified_language_standard:s}')
-
     _print_chosen_flag('Language Standard', user_specified_language_standard)
 
-    flags: list[str] = [f'std=c++{language_standard_flag:s}']
+    flags: list[str] = [f'std=c++{LANGUAGE_STANDARDS[int((int(re.fullmatch(r'C\++ 20(\d\d)', user_specified_language_standard).groups()[0]) - 11)/3)]:s}']
 
     return flags
 
 
 def get_miscellaneous_flags(user_chosen_misc_decisions: str | list[str]) -> list[str]:
-
-    if isinstance(user_chosen_misc_decisions, str):
-        user_chosen_misc_decisions = [user_chosen_misc_decisions]
-
-    for decision in user_chosen_misc_decisions:
-        if decision not in FLAG_PER_MISCELLANEOUS_DECISION:
-            raise ValueError(f'The following miscellanous decision is not recognized: {decision:s}')
 
     _print_flag_statuses('Miscellaneous',
                          list(FLAG_PER_MISCELLANEOUS_DECISION.keys()),
@@ -93,13 +69,6 @@ def get_miscellaneous_flags(user_chosen_misc_decisions: str | list[str]) -> list
 
 
 def get_warning_flags(user_chosen_warnings: str | list[str]) -> list[str]:
-
-    if isinstance(user_chosen_warnings, str):
-        user_chosen_warnings = [user_chosen_warnings]
-
-    for warning in user_chosen_warnings:
-        if warning not in FLAG_PER_WARNING:
-            raise ValueError(f'The following warning is not recognized: {warning:s}')
 
     _print_flag_statuses('Warning',
                          list(FLAG_PER_WARNING.keys()),

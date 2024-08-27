@@ -1,3 +1,4 @@
+import re
 import shutil
 import platform
 from pathlib import Path
@@ -49,8 +50,8 @@ class CodeBase:
                  repository_directory: Path,
                  build_configuration: str = list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
                  language_standard: str = f'C++ {2011 + 3*flags.LANGUAGE_STANDARDS.index('2a'):d}',
-                 warnings: list[str] = list(flags.FLAG_PER_WARNING.keys()),
-                 miscellaneous: list[str] = list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys()),
+                 warnings: str | list[str] = list(flags.FLAG_PER_WARNING.keys()),
+                 miscellaneous: str | list[str] = list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys()),
                  preprocessor_variables: list[str] = []) -> None:
 
         self._name: str = name
@@ -71,11 +72,28 @@ class CodeBase:
         self._build_directory: Path = self._repository_directory/'build'
         self._binary_directory: Path = self._build_directory/'bin'
 
-        # Set the compilation settings
+        # Set the build configuration, and check to make sure it makes sense
         self._build_configuration: str = build_configuration
+        if self._build_configuration not in flags.FLAGS_PER_BUILD_CONFIGURATION:
+            raise ValueError(f"The following build configuration is not recognized: {self._build_configuration:s}")   # noqa: E501
+
+        # Set the language standard, and check to make sure it makes sense
         self._language_standard: str = language_standard
-        self._warnings: list[str] = warnings
-        self._miscellaneous: list[str] = miscellaneous
+        if not self._verify_language_standard(self._language_standard):
+            raise ValueError(f'The following Language Standard is not recognized: {self._language_standard:s}')
+
+        # Set the warning, and check to make sure they make sense
+        self._warnings: list[str] = [warnings] if isinstance(warnings, str) else warnings
+        for warning in self._warnings:
+            if warning not in flags.FLAG_PER_WARNING:
+                raise ValueError(f'The following warning is not recognized: {warning:s}')
+
+        # Set the miscellaneous decisions, and check to make sure they make sense
+        self._miscellaneous: list[str] = [miscellaneous] if isinstance(miscellaneous, str) else miscellaneous
+        for decision in self._miscellaneous:
+            if decision not in flags.FLAG_PER_MISCELLANEOUS_DECISION:
+                raise ValueError(f'The following miscellanous decision is not recognized: {decision:s}')
+
         self._preprocessor_variables: list[str] = preprocessor_variables
 
         # Initialize the list of Dependencies
@@ -120,6 +138,20 @@ class CodeBase:
     @property
     def dependencies(self) -> list[Dependency]:
         return self._dependencies
+
+    def _verify_language_standard(self,
+                                  user_specified_language_standard) -> bool:
+
+        matched_standard: re.Match[str] | None = re.fullmatch(r'C\++ 20(\d\d)', user_specified_language_standard)
+
+        standard_recognized: bool = False
+        if matched_standard:
+            two_digit_year: int = int(matched_standard.groups()[0])
+            if two_digit_year - 11 >= 0:
+                if (two_digit_year - 11) % 3 == 0:
+                    standard_recognized = True
+
+        return standard_recognized
 
     def _generate_object_files(self) -> None:
 
