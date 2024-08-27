@@ -106,8 +106,8 @@ class CodeBase:
                                  chosen_descriptions: list[str]) -> str:
 
             max_description_length: int = max([len(description) for description in known_flag_descriptions])
-            formatted_flag_statuses: list[str] = \
-                f'{title:s} Options:\n{'':{'-':s}>{len(title) + 9:d}s}\n{'\n'.join([f'{description:>{max_description_length:d}s}: {'ON' if description in chosen_descriptions else 'OFF':s}' for description in known_flag_descriptions]):s}'
+            formatted_flag_statuses: str = \
+                f'{title:s} Options:\n{'':{'-':s}>{len(title) + 9:d}s}\n{'\n'.join([f'{description:>{max_description_length:d}s}: {'ON' if description in chosen_descriptions else 'OFF':s}' for description in known_flag_descriptions]):s}'  # noqa: E231, E501
 
             return formatted_flag_statuses
 
@@ -170,7 +170,7 @@ class CodeBase:
         return self._dependencies
 
     def _verify_language_standard(self,
-                                  user_specified_language_standard) -> bool:
+                                  user_specified_language_standard: str) -> bool:
 
         matched_standard: re.Match[str] | None = re.fullmatch(r'C\++ 20(\d\d)', user_specified_language_standard)
 
