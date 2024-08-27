@@ -1,31 +1,40 @@
+import shutil
 import traceback
 from pathlib import Path
 
-import compile
+from compile import CodeBase
 
 
 if (__name__ == '__main__'):
+
+    arithmetic_library_codebase: CodeBase | None = None
+    present_arithmetic_codebase: CodeBase | None = None
+    use_dynamic_library: bool = False
+
     try:
-        #"""
-        arithmetic_library: compile.Dependency | None = \
-            compile.build_static_library_from_source(compile.CodeBase('Arithmetic',
-                                                                      Path.cwd()/'example_C++_static_library'))  # noqa: E501
-        """
-        arithmetic_library: compile.Dependency | None = \
-            compile.build_dynamic_library_from_source(compile.CodeBase('Arithmetic',
-                                                                       Path.cwd()/'example_C++_dynamic_library'),  # noqa: E501
-                                                      ['ADD_EXPORTS'])
-        #"""
+        arithmetic_library_codebase = \
+            CodeBase('Arithmetic',
+                     Path.cwd()/f'example_C++_{'dynamic' if use_dynamic_library else 'static':s}_library',
+                     preprocessor_variables=['ADD_EXPORTS'] if use_dynamic_library else [])
 
-        if arithmetic_library:
+        present_arithmetic_codebase = \
+            CodeBase('present_arithmetic',
+                     Path.cwd()/'example_C++_code')
 
-            present_arithmetic_exec: compile.CodeBase = \
-                compile.CodeBase('present_arithmetic',
-                                 Path.cwd()/'example_C++_code')
-
-            present_arithmetic_exec.dependencies.append(arithmetic_library)
-
-            compile.build_executable_from_source(present_arithmetic_exec)
+        present_arithmetic_codebase.dependencies.append(arithmetic_library_codebase.generate_as_dependency(use_dynamic_library))
+        present_arithmetic_codebase.generate_as_executable()
 
     except Exception:
         print(traceback.format_exc())
+
+    else:
+        present_arithmetic_codebase.test_executable()
+
+    finally:
+
+        if arithmetic_library_codebase:
+            if arithmetic_library_codebase.build_directory.exists():
+                shutil.rmtree(arithmetic_library_codebase.build_directory)
+        if present_arithmetic_codebase:
+            if present_arithmetic_codebase.build_directory.exists():
+                shutil.rmtree(present_arithmetic_codebase.build_directory)
