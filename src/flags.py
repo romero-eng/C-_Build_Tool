@@ -1,5 +1,3 @@
-import re
-
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-build-configurations/
 FLAGS_PER_BUILD_CONFIGURATION: dict[str, list[str]] = \
@@ -23,36 +21,6 @@ FLAG_PER_WARNING: dict[str, str] = \
      'Follow Effective C++ Style Guidelines': 'effc++',
      'Avoid potentially value-changing implicit conversions': 'conversion',
      'Avoid potentially sign-changing implicit conversions for integers': 'sign-conversion'}
-
-
-def get_build_configuration_flags(user_chosen_build_configuration: str) -> list[str]:
-
-    flags: list[str] = FLAGS_PER_BUILD_CONFIGURATION[user_chosen_build_configuration]
-
-    return flags
-
-
-def get_language_standard_flag(user_specified_language_standard: str) -> list[str]:
-
-    # Normally, we would need to check if the input string matches the regex, but this is
-    # already being done earlier on, so we'll ignore mypy's warnings for now.
-    flags: list[str] = [f'std=c++{LANGUAGE_STANDARDS[int((int(re.fullmatch(r'C\++ 20(\d\d)', user_specified_language_standard).groups()[0]) - 11)/3)]:s}']  # type: ignore[union-attr]  # noqa: E501
-
-    return flags
-
-
-def get_miscellaneous_flags(user_chosen_misc_decisions: str | list[str]) -> list[str]:
-
-    flags: list[str] = [flag for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in user_chosen_misc_decisions]  # noqa: E501
-
-    return flags
-
-
-def get_warning_flags(user_chosen_warnings: str | list[str]) -> list[str]:
-
-    flags: list[str] = [f'W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in user_chosen_warnings]
-
-    return flags
 
 
 def get_dynamic_library_creation_flags(user_chosen_build_configuration: str) -> list[str]:
