@@ -205,6 +205,7 @@ class CodeBase:
         # Initialize the Build directory
         if not self._build_directory.exists():
             self._build_directory.mkdir()
+            print(f'\nCreating Build Directory: {str(self._build_directory):s}\n')
 
         # Initialize variables for the upcoming for-loop
         tmp_source_file_path: Path
@@ -245,6 +246,7 @@ class CodeBase:
         # Initialize the Binary directory
         if not self._binary_directory.exists():
             self._binary_directory.mkdir()
+            print(f'\nCreating Binary Directory: {str(self._binary_directory):s}\n')
 
         # Initialize the path for the to-be-compiled executable within the Binary directory
         executable_path: Path = self._binary_directory/f'{self._name:s}.exe'
@@ -274,6 +276,7 @@ class CodeBase:
         library_directory: Path = self._build_directory/'lib'
         if not library_directory.exists():
             library_directory.mkdir()
+            print(f'\nCreating Library Directory: {str(library_directory):s}\n')
 
         # Create the path for the Library file
         library_path: Path = library_directory/f'{self._name:s}.{('dll' if is_dynamic else 'lib') if platform.system() == 'Windows' else ('so' if is_dynamic else 'a'):s}'  # noqa: E501
