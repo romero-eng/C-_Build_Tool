@@ -296,7 +296,7 @@ class CodeBase:
                     tmp_dir.mkdir()
             for file in files:
                 if Path(file).suffix == '.h':
-                    shutil.copyfile(self.source_directory/root.relative_to(self._source_directory)/file,
+                    shutil.copyfile(self._source_directory/root.relative_to(self._source_directory)/file,
                                         include_directory/root.relative_to(self._source_directory)/file)  # noqa: E127
 
         # Create the flags for the object linking command
