@@ -80,19 +80,25 @@ class CodeBase:
         # Set the language standard, and check to make sure it makes sense
         self._language_standard: str = language_standard
 
+        language_standard_recognized: bool = False
         matched_C_Plus_Plus_standard: re.Match[str] | None = re.fullmatch(r'C\++ 20(\d\d)', self._language_standard)
         matched_C_standard: re.Match[str] | None = re.fullmatch(r'C (19|20)(\d\d)', self._language_standard)
 
         if matched_C_Plus_Plus_standard:
+
             two_digit_year: int = int(matched_C_Plus_Plus_standard.groups()[0])
             if two_digit_year - 11 >= 0:
                 if (two_digit_year - 11) % 3 == 0:
+                    language_standard_recognized = True
                     self._utility: str = 'g++'
                     self._language_standard_flag: str = f'++{flags.C_PLUS_PLUS_LANGUAGE_STANDARDS[int((int(matched_C_Plus_Plus_standard.groups()[0]) - 11)/3)]:s}'  # noqa: E501
                     self._source_code_extensions: list[str] = flags.C_PLUS_PLUS_SOURCE_CODE_EXTENSIONS
+
         elif matched_C_standard:
+
             two_digit_year: int = int(matched_C_standard.groups()[1])
             if two_digit_year in flags.C_LANGUAGE_STANDARDS:
+                language_standard_recognized = True
                 self._utility: str = 'gcc'
                 self._language_standard_flag: str = f'{two_digit_year:2d}'
                 self._source_code_extensions: list[str] = ['.c']
@@ -100,7 +106,8 @@ class CodeBase:
                 # This is not a valid warning for C compilation
                 if 'Follow Effective C++ Style Guidelines' in warnings:
                     warnings.remove('Follow Effective C++ Style Guidelines')
-        else:
+
+        if not language_standard_recognized:
             raise ValueError(f'The following Language Standard is not recognized: {self._language_standard:s}')
 
         # Set the warning, and check to make sure they make sense
