@@ -2,7 +2,7 @@ import shutil
 import traceback
 from pathlib import Path
 
-from compile import CodeBase
+from compile import CodeBase, Dependency
 
 
 if (__name__ == '__main__'):
@@ -18,7 +18,7 @@ if (__name__ == '__main__'):
                      Path.cwd()/f'example_C++_{'dynamic' if use_dynamic_library else 'static':s}_library',
                      preprocessor_variables=['ADD_EXPORTS'] if use_dynamic_library else [])
 
-        arithmetic_library = arithmetic_library_codebase.generate_as_dependency(use_dynamic_library)
+        arithmetic_library: Dependency = arithmetic_library_codebase.generate_as_dependency(use_dynamic_library)
 
         present_arithmetic_codebase = \
             CodeBase('present_arithmetic',
