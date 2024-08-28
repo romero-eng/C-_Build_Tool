@@ -1,0 +1,9 @@
+- Combine all non-example scripts into one Python script
+    - Put Commmand.run_command() function into compile.CodeBase() class
+
+- Refactor example.py scripts into one example.py script with the following parameters:
+    1. Use C or C++ for libraries?
+    2. Use Static or Dynamic Libraries?
+    3. Use Release or Debug build configurations?
+
+- Put all example repositories into nested directory
