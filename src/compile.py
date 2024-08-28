@@ -313,13 +313,15 @@ class CodeBase:
             linking_flags += ['shared']
             if self._build_configuration == 'Release':
                 linking_flags += ['s']
+        else:
+            linking_flags += ['r', 'c', 's']
 
         # Initialize the command for the library creation
-        create_command: str = '{utility:s} -o {output_library:s} {input_objects:s} {linking_flags:s}'
+        create_command: str = '{utility:s} {linking_flags:s} -o {output_library:s} {input_objects:s}'
 
         # Run the library creation command within the Build Directory
         run_command('Creating Dynamic Library' if is_dynamic else 'Archiving into Static Library',
-                    create_command.format(utility='ld',
+                    create_command.format(utility='g++' if is_dynamic else 'ar',
                                           output_library=str(codebase_as_dependency.library_path.relative_to(self._build_directory)),
                                           input_objects=' '.join([object_path.name for object_path in object_paths]),
                                           linking_flags=' '.join([f'-{flag:s}' for flag in linking_flags])),
