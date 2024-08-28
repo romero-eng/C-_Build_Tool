@@ -21,13 +21,3 @@ FLAG_PER_WARNING: dict[str, str] = \
      'Follow Effective C++ Style Guidelines': 'effc++',
      'Avoid potentially value-changing implicit conversions': 'conversion',
      'Avoid potentially sign-changing implicit conversions for integers': 'sign-conversion'}
-
-
-def get_dynamic_library_creation_flags(user_chosen_build_configuration: str) -> list[str]:
-
-    flags = ['shared']
-
-    if user_chosen_build_configuration == 'Release':
-        flags.append('s')
-
-    return flags

@@ -303,19 +303,24 @@ class CodeBase:
                     shutil.copyfile(self._source_directory/root.relative_to(self._source_directory)/file,
                                         include_directory/root.relative_to(self._source_directory)/file)  # noqa: E127
 
-        # Create the flags for the object linking command
-        linking_flags: list[str] = flags.get_dynamic_library_creation_flags(self._build_configuration) if is_dynamic else []          # noqa: E501
+        # Create the flags for the object linking command based on libraries
+        linking_flags = \
+            [f'L {str(dependency.library_path.parent):s}' for dependency in self._dependencies] + \
+            [ f'l{str(dependency.library_path.name  ):s}' for dependency in self._dependencies]
 
-        if self._dependencies:
-            linking_flags += [f'L {str(dependency.library_path.parent):s}' for dependency in self._dependencies]
-            linking_flags += [f'l{str(dependency.library_path.name):s}' for dependency in self._dependencies]
+        # Add further flags based on library type
+        if is_dynamic:
+            linking_flags += ['shared']
+            if self._build_configuration == 'Release':
+                linking_flags += ['s']
 
         # Initialize the command for the library creation
-        create_command: str = 'ld -o {output_library:s} {input_objects:s} {linking_flags:s}'
+        create_command: str = '{utility:s} -o {output_library:s} {input_objects:s} {linking_flags:s}'
 
         # Run the library creation command within the Build Directory
         run_command('Creating Dynamic Library' if is_dynamic else 'Archiving into Static Library',
-                    create_command.format(output_library=str(codebase_as_dependency.library_path.relative_to(self._build_directory)),
+                    create_command.format(utility='ld',
+                                          output_library=str(codebase_as_dependency.library_path.relative_to(self._build_directory)),
                                           input_objects=' '.join([object_path.name for object_path in object_paths]),
                                           linking_flags=' '.join([f'-{flag:s}' for flag in linking_flags])),
                     self._build_directory)
