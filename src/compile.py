@@ -77,6 +77,18 @@ class CodeBase:
         if self._build_configuration not in flags.FLAGS_PER_BUILD_CONFIGURATION:
             raise ValueError(f"The following build configuration is not recognized: {self._build_configuration:s}")   # noqa: E501
 
+        # Set the warning, and check to make sure they make sense
+        self._warnings: list[str] = [warnings] if isinstance(warnings, str) else warnings
+        for warning in self._warnings:
+            if warning not in flags.FLAG_PER_WARNING:
+                raise ValueError(f'The following warning is not recognized: {warning:s}')
+
+        # Set the miscellaneous decisions, and check to make sure they make sense
+        self._miscellaneous: list[str] = [miscellaneous] if isinstance(miscellaneous, str) else miscellaneous
+        for decision in self._miscellaneous:
+            if decision not in flags.FLAG_PER_MISCELLANEOUS_DECISION:
+                raise ValueError(f'The following miscellanous decision is not recognized: {decision:s}')
+
         # Set the language standard, and check to make sure it makes sense
         self._language_standard: str = language_standard
 
@@ -114,18 +126,6 @@ class CodeBase:
 
         if not language_standard_recognized:
             raise ValueError(f'The following Language Standard is not recognized: {self._language_standard:s}')
-
-        # Set the warning, and check to make sure they make sense
-        self._warnings: list[str] = [warnings] if isinstance(warnings, str) else warnings
-        for warning in self._warnings:
-            if warning not in flags.FLAG_PER_WARNING:
-                raise ValueError(f'The following warning is not recognized: {warning:s}')
-
-        # Set the miscellaneous decisions, and check to make sure they make sense
-        self._miscellaneous: list[str] = [miscellaneous] if isinstance(miscellaneous, str) else miscellaneous
-        for decision in self._miscellaneous:
-            if decision not in flags.FLAG_PER_MISCELLANEOUS_DECISION:
-                raise ValueError(f'The following miscellanous decision is not recognized: {decision:s}')
 
         self._preprocessor_variables: list[str] = preprocessor_variables
 
