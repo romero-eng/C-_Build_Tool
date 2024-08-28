@@ -13,6 +13,7 @@ if (__name__ == '__main__'):
     clean_up_build_directories: bool = True
 
     try:
+
         Arithmetic_library_codebase = \
             CodeBase('Arithmetic',
                      Path.cwd()/f'example_C++_{'dynamic' if use_dynamic_library else 'static':s}_library',
