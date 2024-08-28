@@ -16,8 +16,9 @@ if (__name__ == '__main__'):
 
         Add_library_codebase = \
             CodeBase('Arithmetic',
-                     Path.cwd()/'example_C_library',
-                     language_standard='C 2018')
+                     Path.cwd()/f'example_C_{'dynamic' if use_dynamic_library else 'static':s}_library',
+                     language_standard='C 2018',
+                     preprocessor_variables=['ADD_EXPORTS'] if use_dynamic_library else [])
 
         Add_library: Dependency = Add_library_codebase.generate_as_dependency(use_dynamic_library)
 
