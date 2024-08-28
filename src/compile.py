@@ -39,8 +39,8 @@ class Dependency:
         return self._include_directory
 
     @property
-    def library_directory(self) -> Path:
-        return self._library_directory
+    def library_path(self) -> Path:
+        return self._library_directory/f'lib{self._name:s}.{('dll' if self._is_dynamic else 'lib') if platform.system() == 'Windows' else ('so' if self._is_dynamic else 'a'):s}'  # noqa: E501
 
 
 class CodeBase:
@@ -240,7 +240,7 @@ class CodeBase:
 
         # Get flags from each library directory per dependency
         formatted_flags = \
-            [f'L {str(dependency.library_directory):s}' for dependency in self._dependencies] + \
+            [f'L {str(dependency.library_path.parent):s}' for dependency in self._dependencies] + \
             [f'l{str(dependency.name):s}' for dependency in self._dependencies]
 
         # Initialize the Binary directory
@@ -278,13 +278,17 @@ class CodeBase:
             library_directory.mkdir()
             print(f'\nCreating Library Directory: {str(library_directory):s}\n')
 
-        # Create the path for the Library file
-        library_path: Path = library_directory/f'{self._name:s}.{('dll' if is_dynamic else 'lib') if platform.system() == 'Windows' else ('so' if is_dynamic else 'a'):s}'  # noqa: E501
-
         # Initialize the Include Directory
         include_directory: Path = self._build_directory/'include'
         if not include_directory.exists():
             include_directory.mkdir()
+
+        # Finally, create the Dependency with the Include and Library directories
+        codebase_as_dependency: Dependency = \
+            Dependency(self._name,
+                       is_dynamic,
+                       include_directory,
+                       library_directory)
 
         tmp_dir: Path
 
@@ -303,15 +307,15 @@ class CodeBase:
         linking_flags: list[str] = flags.get_dynamic_library_creation_flags(self._build_configuration) if is_dynamic else []          # noqa: E501
 
         if self._dependencies:
-            linking_flags += [f'L {str(dependency.library_directory):s}' for dependency in self._dependencies]
-            linking_flags += [f'l{str(dependency.name):s}' for dependency in self._dependencies]
+            linking_flags += [f'L {str(dependency.library_path.parent):s}' for dependency in self._dependencies]
+            linking_flags += [f'l{str(dependency.library_path.name):s}' for dependency in self._dependencies]
 
         # Initialize the command for the library creation
         create_command: str = 'ld -o {output_library:s} {input_objects:s} {linking_flags:s}'
 
         # Run the library creation command within the Build Directory
         run_command('Creating Dynamic Library' if is_dynamic else 'Archiving into Static Library',
-                    create_command.format(output_library=str(library_path.relative_to(self._build_directory)),
+                    create_command.format(output_library=str(codebase_as_dependency.library_path.relative_to(self._build_directory)),
                                           input_objects=' '.join([object_path.name for object_path in object_paths]),
                                           linking_flags=' '.join([f'-{flag:s}' for flag in linking_flags])),
                     self._build_directory)
@@ -344,8 +348,8 @@ class CodeBase:
             # Move any .dll/.so files to the Binary directory for testing
             for dependency in self._dependencies:
                 if dependency.is_dynamic:
-                    shutil.copyfile(dependency.library_directory/f'{dependency.name:s}.{'dll' if platform.system() == 'Windows' else 'so'}',  # noqa: E501
-                                    self._binary_directory/f'{dependency.name:s}.{'dll' if platform.system() == 'Windows' else 'so'}')     # noqa: E501
+                    shutil.copyfile(dependency.library_path,
+                                    self._binary_directory/dependency.library_path.name)
 
             # Actually test the executable
             run_command('Testing Executable',
