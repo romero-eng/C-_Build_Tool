@@ -96,6 +96,10 @@ class CodeBase:
                 self._utility: str = 'gcc'
                 self._language_standard_flag: str = f'{two_digit_year:2d}'
                 self._source_code_extensions: list[str] = ['.c']
+
+                # This is not a valid flag for C
+                if 'Follow Effective C++ Style Guidelines' in warnings:
+                    warnings.remove('Follow Effective C++ Style Guidelines')
         else:
             raise ValueError(f'The following Language Standard is not recognized: {self._language_standard:s}')
 
