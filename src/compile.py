@@ -133,16 +133,18 @@ class CodeBase:
 
             return f'{flag_choice:s}: {chosen_flag_description:s}'
 
-        description: str = '\n\n'.join([format_chosen_flag('Build Configuration',
-                                                           self._build_configuration),
-                                        format_chosen_flag('Language Standard',
-                                                           self._language_standard),
-                                        format_flag_statuses('Warning',
-                                                             list(flags.FLAG_PER_WARNING.keys()),
-                                                             self._warnings),
-                                        format_flag_statuses('Miscellaneous',
-                                                             list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys()),
-                                                             self._miscellaneous)])
+        description: str = \
+            f'{'':{'=':s}<200s}\n{'':{'=':s}<200s}\n\n' + \
+            f'\n\n'.join([format_chosen_flag('Build Configuration',
+                                             self._build_configuration),
+                        format_chosen_flag('Language Standard',
+                                           self._language_standard),
+                        format_flag_statuses('Warning',
+                                             list(flags.FLAG_PER_WARNING.keys()),
+                                             self._warnings),
+                        format_flag_statuses('Miscellaneous',
+                                             list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys()),
+                                             self._miscellaneous)])
 
         return f'\n{description:s}'
 
