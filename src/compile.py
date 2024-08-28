@@ -49,7 +49,7 @@ class CodeBase:
                  name: str,
                  repository_directory: Path,
                  build_configuration: str = list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
-                 language_standard: str = f'C++ {2011 + 3*flags.LANGUAGE_STANDARDS.index('2a'):d}',
+                 language_standard: str = f'C++ {2011 + 3*flags.C_PLUS_PLUS_LANGUAGE_STANDARDS.index('2a'):d}',
                  warnings: str | list[str] = list(flags.FLAG_PER_WARNING.keys()),
                  miscellaneous: str | list[str] = list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys()),
                  preprocessor_variables: list[str] = []) -> None:
@@ -79,7 +79,24 @@ class CodeBase:
 
         # Set the language standard, and check to make sure it makes sense
         self._language_standard: str = language_standard
-        if not self._verify_language_standard(self._language_standard):
+
+        matched_C_Plus_Plus_standard: re.Match[str] | None = re.fullmatch(r'C\++ 20(\d\d)', self._language_standard)
+        matched_C_standard: re.Match[str] | None = re.fullmatch(r'C (19|20)(\d\d)', self._language_standard)
+
+        if matched_C_Plus_Plus_standard:
+            two_digit_year: int = int(matched_C_Plus_Plus_standard.groups()[0])
+            if two_digit_year - 11 >= 0:
+                if (two_digit_year - 11) % 3 == 0:
+                    self._utility: str = 'g++'
+                    self._language_standard_flag: str = f'++{flags.C_PLUS_PLUS_LANGUAGE_STANDARDS[int((int(matched_C_Plus_Plus_standard.groups()[0]) - 11)/3)]:s}'  # noqa: E501
+                    self._source_code_extensions: list[str] = flags.C_PLUS_PLUS_SOURCE_CODE_EXTENSIONS
+        elif matched_C_standard:
+            two_digit_year: int = int(matched_C_standard.groups()[1])
+            if two_digit_year in flags.C_LANGUAGE_STANDARDS:
+                self._utility: str = 'gcc'
+                self._language_standard_flag: str = f'{two_digit_year:2d}'
+                self._source_code_extensions: list[str] = ['.c']
+        else:
             raise ValueError(f'The following Language Standard is not recognized: {self._language_standard:s}')
 
         # Set the warning, and check to make sure they make sense
@@ -169,31 +186,14 @@ class CodeBase:
     def dependencies(self) -> list[Dependency]:
         return self._dependencies
 
-    def _verify_language_standard(self,
-                                  user_specified_language_standard: str) -> bool:
-
-        matched_standard: re.Match[str] | None = re.fullmatch(r'C\++ 20(\d\d)', user_specified_language_standard)
-
-        standard_recognized: bool = False
-        if matched_standard:
-            two_digit_year: int = int(matched_standard.groups()[0])
-            if two_digit_year - 11 >= 0:
-                if (two_digit_year - 11) % 3 == 0:
-                    standard_recognized = True
-
-        return standard_recognized
-
     def _generate_object_files(self) -> None:
 
         print(self)
 
         # Get flags from the compilation settings
-        # With regards to the language standard flag: normally, we would need to check if
-        # the input string matches the regex, but this is already being done earlier on, so
-        # we'll ignore mypy's warnings for now.
         formatted_flags: list[str] = \
             (flags.FLAGS_PER_BUILD_CONFIGURATION[self._build_configuration] +
-             [f'std=c++{flags.LANGUAGE_STANDARDS[int((int(re.fullmatch(r'C\++ 20(\d\d)', self._language_standard).groups()[0]) - 11)/3)]:s}'] +  # type: ignore[union-attr]  # noqa: E501
+             [f'std=c{self._language_standard_flag:s}'] +
              [f'W{flag:s}' for warning, flag in flags.FLAG_PER_WARNING.items() if warning in self._warnings] +
              [flag for decision, flag in flags.FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in self._miscellaneous] +  # noqa: E501
              [f'D {variable:s}' for variable in self._preprocessor_variables])
@@ -212,7 +212,7 @@ class CodeBase:
         tmp_object_file_path: Path
 
         # Initialize the compile command
-        compile_command: str = 'g++ -c {input_source:s} -o {output_object:s} {compilation_flags:s}'
+        compile_command: str = '{utility:s} -c {input_source:s} -o {output_object:s} {compilation_flags:s}'
 
         # Walk through the Source directory and compile each individual source file
         for root, _, files in self._source_directory.walk():
@@ -223,11 +223,12 @@ class CodeBase:
                 tmp_object_file_path = self._build_directory/f'{tmp_source_file_path.stem:s}.o'
 
                 # If the source code file is C++,...
-                if tmp_source_file_path.suffix in ['.cc', '.cxx', '.cpp']:
+                if tmp_source_file_path.suffix in self._source_code_extensions:
 
                     # ..., then compile it
                     run_command(f'"{tmp_source_file_path.stem:s}" Compilation Results',
-                                compile_command.format(input_source=str(tmp_source_file_path.relative_to(self._repository_directory)),   # noqa: E501
+                                compile_command.format(utility=self._utility,
+                                                       input_source=str(tmp_source_file_path.relative_to(self._repository_directory)),   # noqa: E501
                                                        output_object=str(tmp_object_file_path.relative_to(self._repository_directory)),  # noqa: E501
                                                        compilation_flags=' '.join([f'-{flag:s}' for flag in formatted_flags])),          # noqa: E501
                                 self._repository_directory)
@@ -252,11 +253,12 @@ class CodeBase:
         executable_path: Path = self._binary_directory/f'{self._name:s}.exe'
 
         # Initialize the command for the executable creation
-        link_command: str = 'g++ -o {output_executable:s} {input_objects:s} {linking_flags:s}'
+        link_command: str = '{utility:s} -o {output_executable:s} {input_objects:s} {linking_flags:s}'
 
         # Run the object linking command within the Build Directory
         run_command('Linking Results',
-                    link_command.format(output_executable=str(executable_path.relative_to(self._build_directory)),
+                    link_command.format(utility=self._utility,
+                                        output_executable=str(executable_path.relative_to(self._build_directory)),
                                         input_objects=' '.join([object_path.name for object_path in object_paths]),
                                         linking_flags=' '.join([f'-{flag:s}' for flag in formatted_flags])),
                     self._build_directory)
@@ -306,7 +308,7 @@ class CodeBase:
         # Create the flags for the object linking command based on libraries
         linking_flags = \
             [f'L {str(dependency.library_path.parent):s}' for dependency in self._dependencies] + \
-            [ f'l{str(dependency.library_path.name  ):s}' for dependency in self._dependencies]
+            [ f'l{str(dependency.library_path.name  ):s}' for dependency in self._dependencies]      # noqa: E201, E202
 
         # Add further flags based on library type
         if is_dynamic:
@@ -321,8 +323,8 @@ class CodeBase:
 
         # Run the library creation command within the Build Directory
         run_command('Creating Dynamic Library' if is_dynamic else 'Archiving into Static Library',
-                    create_command.format(utility='g++' if is_dynamic else 'ar',
-                                          output_library=str(codebase_as_dependency.library_path.relative_to(self._build_directory)),
+                    create_command.format(utility=self._utility if is_dynamic else 'ar',
+                                          output_library=str(codebase_as_dependency.library_path.relative_to(self._build_directory)),  # noqa: E501
                                           input_objects=' '.join([object_path.name for object_path in object_paths]),
                                           linking_flags=' '.join([f'-{flag:s}' for flag in linking_flags])),
                     self._build_directory)
@@ -330,13 +332,6 @@ class CodeBase:
         # Remove the object files afterwards
         for object_path in object_paths:
             Path.unlink(object_path)
-
-        # Finally, create the Dependency with the Include and Library directories
-        codebase_as_dependency: Dependency = \
-            Dependency(self._name,
-                       is_dynamic,
-                       include_directory,
-                       library_directory)
 
         return codebase_as_dependency
 

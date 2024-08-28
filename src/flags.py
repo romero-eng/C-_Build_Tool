@@ -5,7 +5,10 @@ FLAGS_PER_BUILD_CONFIGURATION: dict[str, list[str]] = \
      'Release': ['O2', 'DNDEBUG']}
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-choosing-a-language-standard/
-LANGUAGE_STANDARDS: list[str] = ['0x', '1y', '1z',  '2a', '2b']
+C_PLUS_PLUS_LANGUAGE_STANDARDS: list[str] = ['0x', '1y', '1z',  '2a', '2b']
+C_LANGUAGE_STANDARDS: list[int] = [89, 90, 99, 11, 18]
+
+C_PLUS_PLUS_SOURCE_CODE_EXTENSIONS: list[str] = ['.cc', '.cxx', '.cpp']
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-compiler-extensions/
 FLAG_PER_MISCELLANEOUS_DECISION: dict[str, str] = \
