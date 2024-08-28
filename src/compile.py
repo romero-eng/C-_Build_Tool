@@ -97,7 +97,7 @@ class CodeBase:
                 self._language_standard_flag: str = f'{two_digit_year:2d}'
                 self._source_code_extensions: list[str] = ['.c']
 
-                # This is not a valid flag for C
+                # This is not a valid warning for C compilation
                 if 'Follow Effective C++ Style Guidelines' in warnings:
                     warnings.remove('Follow Effective C++ Style Guidelines')
         else:
