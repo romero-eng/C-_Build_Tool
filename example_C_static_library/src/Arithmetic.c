@@ -1,4 +1,4 @@
-#include "Add.h"
+#include "Arithmetic.h"
 
 double add(double x, double y)
 {

@@ -1,5 +1,5 @@
-#ifndef ADD_H
-#define ADD_H
+#ifndef ARITHMETIC_H
+#define ARITHMETIC_H
 
 #ifdef __cplusplus
 extern "C"
