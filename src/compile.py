@@ -121,8 +121,8 @@ class CodeBase:
                 self._source_code_extensions = ['.c']
 
                 # This is not a valid warning for C compilation
-                if 'Follow Effective C++ Style Guidelines' in warnings:
-                    warnings.remove('Follow Effective C++ Style Guidelines')
+                if 'Follow Effective C++ Style Guidelines' in self._warnings:
+                    self._warnings.remove('Follow Effective C++ Style Guidelines')
 
         if not language_standard_recognized:
             raise ValueError(f'The following Language Standard is not recognized: {self._language_standard:s}')
