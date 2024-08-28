@@ -22,7 +22,7 @@ if (__name__ == '__main__'):
         Add_codebase = \
             CodeBase('Arithmetic',
                      Path.cwd()/'example_C_code',
-                     language_standard='C 2018')
+                     language_standard='C++ 2020')
 
         Add_codebase.add_dependency(Add_library)
         Add_codebase.generate_as_executable()
