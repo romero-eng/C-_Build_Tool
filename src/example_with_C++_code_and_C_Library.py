@@ -9,6 +9,8 @@ if (__name__ == '__main__'):
 
     Add_library_codebase: CodeBase | None = None
     Add_codebase: CodeBase | None = None
+    use_dynamic_library: bool = False
+    clean_up_build_directories: bool = True
 
     try:
 
@@ -17,11 +19,11 @@ if (__name__ == '__main__'):
                      Path.cwd()/'example_C_library',
                      language_standard='C 2018')
 
-        Add_library: Dependency = Add_library_codebase.generate_as_dependency(False)
+        Add_library: Dependency = Add_library_codebase.generate_as_dependency(use_dynamic_library)
 
         Add_codebase = \
             CodeBase('Arithmetic',
-                     Path.cwd()/'example_C_code',
+                     Path.cwd()/'example_C++_code_with_C_Linkage',
                      language_standard='C++ 2020')
 
         Add_codebase.add_dependency(Add_library)
@@ -35,9 +37,10 @@ if (__name__ == '__main__'):
 
     finally:
 
-        if Add_library_codebase:
-            if Add_library_codebase.build_directory.exists():
-                shutil.rmtree(Add_library_codebase.build_directory)
-        if Add_codebase:
-            if Add_codebase.build_directory.exists():
-                shutil.rmtree(Add_codebase.build_directory)
+        if clean_up_build_directories:
+            if Add_library_codebase:
+                if Add_library_codebase.build_directory.exists():
+                    shutil.rmtree(Add_library_codebase.build_directory)
+            if Add_codebase:
+                if Add_codebase.build_directory.exists():
+                    shutil.rmtree(Add_codebase.build_directory)
