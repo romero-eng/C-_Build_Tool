@@ -127,6 +127,7 @@ class CodeBase:
         if not language_standard_recognized:
             raise ValueError(f'The following Language Standard is not recognized: {self._language_standard:s}')
 
+        # Initialize the list of preprocessor variables
         self._preprocessor_variables: list[str] = preprocessor_variables
 
         # Initialize the list of Dependencies
