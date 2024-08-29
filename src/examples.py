@@ -10,7 +10,7 @@ if (__name__ == '__main__'):
     Arithmetic_library_codebase: CodeBase | None = None
     Arithmetic_codebase: CodeBase | None = None
 
-    library_is_C_plus_plus: bool = False
+    library_is_C_plus_plus: bool = True
     use_dynamic_library: bool = False
     clean_up_build_directories: bool = False
 
@@ -18,7 +18,7 @@ if (__name__ == '__main__'):
 
         Arithmetic_library_codebase = \
             CodeBase('Arithmetic',
-                     Path.cwd()/f'example_C{'++' if library_is_C_plus_plus else '':s}_{'dynamic' if use_dynamic_library else 'static':s}_library',
+                     Path.cwd()/'example_repos'/f'C{'++' if library_is_C_plus_plus else '':s}_{'dynamic' if use_dynamic_library else 'static':s}_library',
                      language_standard='C++ 2020' if library_is_C_plus_plus else 'C 2018',
                      preprocessor_variables=['ADD_EXPORTS'] if use_dynamic_library else [])
 
@@ -26,7 +26,7 @@ if (__name__ == '__main__'):
 
         Arithmetic_codebase = \
             CodeBase('present_arithmetic',
-                     Path.cwd()/f'example_C++_code{'_with_C_Linkage' if not library_is_C_plus_plus else '':s}',
+                     Path.cwd()/'example_repos'/f'C++_code{'_with_C_Linkage' if not library_is_C_plus_plus else '':s}',
                      language_standard='C++ 2020')
 
         Arithmetic_codebase.add_dependency(Arithmetic_library)
