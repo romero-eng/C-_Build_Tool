@@ -1,4 +1,4 @@
-# C-_Build_Tool
+# MinGW_Build_Tool
 
 
 This repository features Python scripts which can build C/C++ repositories from scratch. It is theoretically cross-platform, but is mainly intended to help compile open-source c/C++ repositories which do not feature any build system files that work for Windows. This has only been developed and tested with MSYS2 on Windows 10.
