@@ -2,7 +2,7 @@
 #define ARITHMETIC_H
 
 #ifdef _WIN32
-  #ifdef ADD_EXPORTS
+  #ifdef PREPARE_ARITHMETIC_LIBRARY_FOR_DLL_EXPORT
     #define ADDAPI __declspec(dllexport)
   #else
     #define ADDAPI __declspec(dllimport)

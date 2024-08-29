@@ -20,7 +20,7 @@ if (__name__ == '__main__'):
             CodeBase('Arithmetic',
                      Path.cwd()/'example_repos'/f'C{'++' if library_is_C_plus_plus else '':s}_{'dynamic' if use_dynamic_library else 'static':s}_library',
                      language_standard='C++ 2020' if library_is_C_plus_plus else 'C 2018',
-                     preprocessor_variables=['ADD_EXPORTS'] if use_dynamic_library else [])
+                     preprocessor_variables=['PREPARE_ARITHMETIC_LIBRARY_FOR_DLL_EXPORT'] if use_dynamic_library else [])
 
         Arithmetic_library: Dependency = Arithmetic_library_codebase.generate_as_dependency(use_dynamic_library)
 
