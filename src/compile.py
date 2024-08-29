@@ -67,6 +67,9 @@ class Dependency:
     def library_path(self) -> Path:
         return self._library_directory/f'lib{self._name:s}.{('dll' if self._is_dynamic else 'lib') if platform.system() == 'Windows' else ('so' if self._is_dynamic else 'a'):s}'  # noqa: E501
 
+    def exists(self) -> bool:
+        return (self._include_directory.is_dir() if self._include_directory.exists() else False) and (self.library_path.is_file() if self.library_path.exists() else False)
+
 
 class CodeBase:
 
