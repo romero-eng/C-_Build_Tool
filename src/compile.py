@@ -4,7 +4,32 @@ import platform
 import subprocess
 from pathlib import Path
 
-import flags
+
+# https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-build-configurations/
+FLAGS_PER_BUILD_CONFIGURATION: dict[str, list[str]] = \
+    {'Debug': ['ggdb'],
+     'Release': ['O2', 'DNDEBUG']}
+
+# https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-choosing-a-language-standard/
+C_PLUS_PLUS_LANGUAGE_STANDARDS: list[str] = ['0x', '1y', '1z',  '2a', '2b']
+C_LANGUAGE_STANDARDS: list[int] = [89, 90, 99, 11, 18]
+
+C_PLUS_PLUS_SOURCE_CODE_EXTENSIONS: list[str] = ['.cc', '.cxx', '.cpp']
+
+# https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-compiler-extensions/
+FLAG_PER_MISCELLANEOUS_DECISION: dict[str, str] = \
+    {'Disable Compiler Extensions': 'pedantic-errors'}
+
+# https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-warning-and-error-levels/
+# https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html#Warning-Options
+# https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html
+FLAG_PER_WARNING: dict[str, str] = \
+    {'Treat warnings as errors': 'error',
+     'Avoid a lot of questionable coding practices': 'all',
+     'Avoid even more questionable coding practices': 'extra',
+     'Follow Effective C++ Style Guidelines': 'effc++',
+     'Avoid potentially value-changing implicit conversions': 'conversion',
+     'Avoid potentially sign-changing implicit conversions for integers': 'sign-conversion'}
 
 
 class Dependency:
@@ -48,10 +73,10 @@ class CodeBase:
     def __init__(self,
                  name: str,
                  repository_directory: Path,
-                 build_configuration: str = list(flags.FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
-                 language_standard: str = f'C++ {2011 + 3*flags.C_PLUS_PLUS_LANGUAGE_STANDARDS.index('2a'):d}',
-                 warnings: str | list[str] = list(flags.FLAG_PER_WARNING.keys()),
-                 miscellaneous: str | list[str] = list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys()),
+                 build_configuration: str = list(FLAGS_PER_BUILD_CONFIGURATION.keys())[0],
+                 language_standard: str = f'C++ {2011 + 3*C_PLUS_PLUS_LANGUAGE_STANDARDS.index('2a'):d}',
+                 warnings: str | list[str] = list(FLAG_PER_WARNING.keys()),
+                 miscellaneous: str | list[str] = list(FLAG_PER_MISCELLANEOUS_DECISION.keys()),
                  preprocessor_variables: list[str] = []) -> None:
 
         self._name: str = name
@@ -74,19 +99,19 @@ class CodeBase:
 
         # Set the build configuration, and check to make sure it makes sense
         self._build_configuration: str = build_configuration
-        if self._build_configuration not in flags.FLAGS_PER_BUILD_CONFIGURATION:
+        if self._build_configuration not in FLAGS_PER_BUILD_CONFIGURATION:
             raise ValueError(f"The following build configuration is not recognized: {self._build_configuration:s}")   # noqa: E501
 
         # Set the warning, and check to make sure they make sense
         self._warnings: list[str] = [warnings] if isinstance(warnings, str) else warnings
         for warning in self._warnings:
-            if warning not in flags.FLAG_PER_WARNING:
+            if warning not in FLAG_PER_WARNING:
                 raise ValueError(f'The following warning is not recognized: {warning:s}')
 
         # Set the miscellaneous decisions, and check to make sure they make sense
         self._miscellaneous: list[str] = [miscellaneous] if isinstance(miscellaneous, str) else miscellaneous
         for decision in self._miscellaneous:
-            if decision not in flags.FLAG_PER_MISCELLANEOUS_DECISION:
+            if decision not in FLAG_PER_MISCELLANEOUS_DECISION:
                 raise ValueError(f'The following miscellanous decision is not recognized: {decision:s}')
 
         # Set the language standard, and check to make sure it makes sense
@@ -108,13 +133,13 @@ class CodeBase:
                 if (two_digit_year - 11) % 3 == 0:
                     language_standard_recognized = True
                     self._utility = 'g++'
-                    self._language_standard_flag = f'++{flags.C_PLUS_PLUS_LANGUAGE_STANDARDS[int((int(matched_C_Plus_Plus_standard.groups()[0]) - 11)/3)]:s}'  # noqa: E501
-                    self._source_code_extensions = flags.C_PLUS_PLUS_SOURCE_CODE_EXTENSIONS
+                    self._language_standard_flag = f'++{C_PLUS_PLUS_LANGUAGE_STANDARDS[int((int(matched_C_Plus_Plus_standard.groups()[0]) - 11)/3)]:s}'  # noqa: E501
+                    self._source_code_extensions = C_PLUS_PLUS_SOURCE_CODE_EXTENSIONS
 
         elif matched_C_standard:
 
             two_digit_year = int(matched_C_standard.groups()[1])
-            if two_digit_year in flags.C_LANGUAGE_STANDARDS:
+            if two_digit_year in C_LANGUAGE_STANDARDS:
                 language_standard_recognized = True
                 self._utility = 'gcc'
                 self._language_standard_flag = f'{two_digit_year:2d}'
@@ -157,10 +182,10 @@ class CodeBase:
                           format_chosen_flag('Language Standard',
                                              self._language_standard),
                           format_flag_statuses('Warning',
-                                               list(flags.FLAG_PER_WARNING.keys()),
+                                               list(FLAG_PER_WARNING.keys()),
                                                self._warnings),
                           format_flag_statuses('Miscellaneous',
-                                               list(flags.FLAG_PER_MISCELLANEOUS_DECISION.keys()),
+                                               list(FLAG_PER_MISCELLANEOUS_DECISION.keys()),
                                                self._miscellaneous)]))
 
         return f'\n{description:s}'
@@ -243,10 +268,10 @@ class CodeBase:
 
         # Get flags from the compilation settings
         formatted_flags: list[str] = \
-            (flags.FLAGS_PER_BUILD_CONFIGURATION[self._build_configuration] +
+            (FLAGS_PER_BUILD_CONFIGURATION[self._build_configuration] +
              [f'std=c{self._language_standard_flag:s}'] +
-             [f'W{flag:s}' for warning, flag in flags.FLAG_PER_WARNING.items() if warning in self._warnings] +
-             [flag for decision, flag in flags.FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in self._miscellaneous] +  # noqa: E501
+             [f'W{flag:s}' for warning, flag in FLAG_PER_WARNING.items() if warning in self._warnings] +
+             [flag for decision, flag in FLAG_PER_MISCELLANEOUS_DECISION.items() if decision in self._miscellaneous] +  # noqa: E501
              [f'D {variable:s}' for variable in self._preprocessor_variables])
 
         # Get optional flags based on Dependencies
