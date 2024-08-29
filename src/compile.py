@@ -15,6 +15,10 @@ C_PLUS_PLUS_LANGUAGE_STANDARDS: list[str] = ['0x', '1y', '1z',  '2a', '2b']
 C_LANGUAGE_STANDARDS: list[int] = [1989, 1990, 1999, 2011, 2018]
 
 C_PLUS_PLUS_SOURCE_CODE_EXTENSIONS: list[str] = ['.cc', '.cxx', '.cpp']
+C_PLUS_PLUS_HEADER_EXTENSION: str = '.hpp'
+
+C_SOURCE_CODE_EXTENSIONS: list[str] = ['.c']
+C_HEADER_EXTENSION: str = '.h'
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-compiler-extensions/
 FLAG_PER_MISCELLANEOUS_DECISION: dict[str, str] = \
@@ -124,6 +128,7 @@ class CodeBase:
         self._utility: str
         self._language_standard_flag: str
         self._source_code_extensions: list[str]
+        self._header_file_extension: str
 
         language_standard_recognized: bool = False
         matched_C_Plus_Plus_standard: re.Match[str] | None = re.fullmatch(r'C\++ 20(\d\d)', self._language_standard)
@@ -138,6 +143,7 @@ class CodeBase:
                     self._utility = 'g++'
                     self._language_standard_flag = f'++{C_PLUS_PLUS_LANGUAGE_STANDARDS[int((int(matched_C_Plus_Plus_standard.groups()[0]) - 11)/3)]:s}'  # noqa: E501
                     self._source_code_extensions = C_PLUS_PLUS_SOURCE_CODE_EXTENSIONS
+                    self._header_file_extension = C_PLUS_PLUS_HEADER_EXTENSION
 
         elif matched_C_standard:
 
@@ -148,7 +154,8 @@ class CodeBase:
                 language_standard_recognized = True
                 self._utility = 'gcc'
                 self._language_standard_flag = f'{two_digit_year:2d}'
-                self._source_code_extensions = ['.c']
+                self._source_code_extensions = C_SOURCE_CODE_EXTENSIONS
+                self._header_file_extension = C_HEADER_EXTENSION
 
                 # This is not a valid warning for C compilation
                 if 'Follow Effective C++ Style Guidelines' in self._warnings:
@@ -303,7 +310,7 @@ class CodeBase:
                 tmp_source_file_path = root/file
                 tmp_object_file_path = self._build_directory/f'{tmp_source_file_path.stem:s}.o'
 
-                # If the source code file is C++,...
+                # If the source code file is C/C++,...
                 if tmp_source_file_path.suffix in self._source_code_extensions:
 
                     # ..., then compile it
@@ -382,7 +389,7 @@ class CodeBase:
                 if not tmp_dir.exists():
                     tmp_dir.mkdir()
             for file in files:
-                if Path(file).suffix in ['.h', '.hpp']:
+                if Path(file).suffix == self._header_file_extension:
                     shutil.copyfile(self._source_directory/root.relative_to(self._source_directory)/file,
                                          include_directory/root.relative_to(self._source_directory)/file)  # noqa: E127
 
