@@ -1,4 +1,4 @@
-#include "Arithmetic.h"
+#include "Arithmetic.hpp"
 
 
 double Arithmetic::divide(double x, double y)

@@ -382,9 +382,9 @@ class CodeBase:
                 if not tmp_dir.exists():
                     tmp_dir.mkdir()
             for file in files:
-                if Path(file).suffix == '.h':
+                if Path(file).suffix in ['.h', '.hpp']:
                     shutil.copyfile(self._source_directory/root.relative_to(self._source_directory)/file,
-                                        include_directory/root.relative_to(self._source_directory)/file)  # noqa: E127
+                                         include_directory/root.relative_to(self._source_directory)/file)  # noqa: E127
 
         # Create the flags for the object linking command based on libraries
         linking_flags = \

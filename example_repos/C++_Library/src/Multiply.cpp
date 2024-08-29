@@ -1,4 +1,4 @@
-#include "Arithmetic.h"
+#include "Arithmetic.hpp"
 
 int Arithmetic::multiply(int x, int y)
 {

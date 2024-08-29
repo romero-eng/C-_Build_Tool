@@ -1,4 +1,4 @@
-#include "Arithmetic.h"
+#include "Arithmetic.hpp"
 
 int Arithmetic::subtract(int x, int y)
 {
