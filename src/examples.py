@@ -7,12 +7,12 @@ from compile import CodeBase, Dependency
 
 if (__name__ == '__main__'):
 
-    Arithmetic_library_codebase: CodeBase | None = None
-    Arithmetic_codebase: CodeBase | None = None
-
     library_is_C_plus_plus: bool = True
     use_dynamic_library: bool = False
-    clean_up_build_directories: bool = False
+    clean_up_build_directories: bool = True
+
+    Arithmetic_library_codebase: CodeBase | None = None
+    Arithmetic_codebase: CodeBase | None = None
 
     try:
 
