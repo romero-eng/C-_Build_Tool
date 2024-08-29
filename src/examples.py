@@ -1,4 +1,5 @@
 import shutil
+import platform
 import traceback
 from pathlib import Path
 
@@ -12,13 +13,16 @@ def test_python_build_tool(library_is_C_plus_plus: bool,
     Arithmetic_library_codebase: CodeBase | None = None
     Arithmetic_codebase: CodeBase | None = None
 
+    compiling_on_windows: bool = platform.system() == 'Windows'
+    use_preprocessor_variables: bool = library_is_dynamic and compiling_on_windows
+
     try:
 
         Arithmetic_library_codebase = \
             CodeBase('Arithmetic',
                      Path.cwd()/'example_repos'/f'C{'++' if library_is_C_plus_plus else '':s}_Library',
                      language_standard='C++ 2020' if library_is_C_plus_plus else 'C 2018',
-                     preprocessor_variables=['ACTIVATE_ARITHMETIC_LIBRARY_DYNAMIC_LINKING', 'EXPORT_AS_DLL'] if library_is_dynamic else [])
+                     preprocessor_variables=['ACTIVATE_ARITHMETIC_LIBRARY_DYNAMIC_LINKING', 'EXPORT_AS_DLL'] if use_preprocessor_variables else [])  # noqa: E501
 
         Arithmetic_library: Dependency = Arithmetic_library_codebase.generate_as_dependency(library_is_dynamic)
 
@@ -26,7 +30,7 @@ def test_python_build_tool(library_is_C_plus_plus: bool,
             CodeBase('present_arithmetic',
                      Path.cwd()/'example_repos'/f'C++_code{'_with_C_Linkage' if not library_is_C_plus_plus else '':s}',
                      language_standard='C++ 2020',
-                     preprocessor_variables=['ACTIVATE_ARITHMETIC_LIBRARY_DYNAMIC_LINKING'] if library_is_dynamic else [])
+                     preprocessor_variables=['ACTIVATE_ARITHMETIC_LIBRARY_DYNAMIC_LINKING'] if use_preprocessor_variables else [])  # noqa: E501
 
         Arithmetic_codebase.add_dependency(Arithmetic_library)
         Arithmetic_codebase.generate_as_executable()
@@ -51,7 +55,7 @@ def test_python_build_tool(library_is_C_plus_plus: bool,
 
 if (__name__ == '__main__'):
 
-    library_is_C_plus_plus: bool = False
+    library_is_C_plus_plus: bool = True
     library_is_dynamic: bool = False
     clean_up_build_directories: bool = True
 
