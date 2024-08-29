@@ -1,10 +1,10 @@
 import re
 import shutil
 import platform
+import subprocess
 from pathlib import Path
 
 import flags
-from command import run_command
 
 
 class Dependency:
@@ -205,6 +205,38 @@ class CodeBase:
     def dependencies(self) -> list[Dependency]:
         return self._dependencies
 
+    def _run_command(self,
+                     command_description: str,
+                     command: str,
+                     working_directory: Path | None = None,
+                     successful_return_code: int = 0) -> None:
+
+        results: subprocess.CompletedProcess[bytes] = \
+            subprocess.run(command,
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE,
+                           cwd=working_directory,
+                           shell=True) if working_directory else subprocess.run(command,
+                                                                                stdout=subprocess.PIPE,
+                                                                                stderr=subprocess.PIPE)
+
+        success: bool = results.returncode == successful_return_code
+
+        formatted_results: list[str] = [f'\tWorking directory: {str(working_directory):s}'] if working_directory else []
+        formatted_results.append(f'\tCommand: {command:s}')
+        if results.stdout:
+            formatted_results.append(f'\tOutput:\n\n{results.stdout.decode('utf-8'):s}')
+        if results.stderr:
+            formatted_results.append(f'\t Error:\n\n{results.stderr.decode('utf-8'):s}')
+
+        msg_title: str = f'{command_description:s}: {'Succesful' if success else 'Failure':s}'
+        msg = f'\n{msg_title:s}\n{'':{'-':s}>{len(msg_title):d}s}\n{'\n'.join(formatted_results):s}\n'  # noqa: E231
+
+        if success:
+            print(msg)
+        else:
+            raise Exception('\n' + msg)
+
     def _generate_object_files(self) -> None:
 
         print(self)
@@ -245,12 +277,12 @@ class CodeBase:
                 if tmp_source_file_path.suffix in self._source_code_extensions:
 
                     # ..., then compile it
-                    run_command(f'"{tmp_source_file_path.stem:s}" Compilation Results',
-                                compile_command.format(utility=self._utility,
-                                                       input_source=str(tmp_source_file_path.relative_to(self._repository_directory)),   # noqa: E501
-                                                       output_object=str(tmp_object_file_path.relative_to(self._repository_directory)),  # noqa: E501
-                                                       compilation_flags=' '.join([f'-{flag:s}' for flag in formatted_flags])),          # noqa: E501
-                                self._repository_directory)
+                    self._run_command(f'"{tmp_source_file_path.stem:s}" Compilation Results',
+                                      compile_command.format(utility=self._utility,
+                                                             input_source=str(tmp_source_file_path.relative_to(self._repository_directory)),   # noqa: E501
+                                                             output_object=str(tmp_object_file_path.relative_to(self._repository_directory)),  # noqa: E501
+                                                             compilation_flags=' '.join([f'-{flag:s}' for flag in formatted_flags])),          # noqa: E501
+                                      self._repository_directory)
 
     def generate_as_executable(self) -> None:
 
@@ -275,12 +307,12 @@ class CodeBase:
         link_command: str = '{utility:s} -o {output_executable:s} {input_objects:s} {linking_flags:s}'
 
         # Run the object linking command within the Build Directory
-        run_command('Linking Results',
-                    link_command.format(utility=self._utility,
-                                        output_executable=str(executable_path.relative_to(self._build_directory)),
-                                        input_objects=' '.join([object_path.name for object_path in object_paths]),
-                                        linking_flags=' '.join([f'-{flag:s}' for flag in formatted_flags])),
-                    self._build_directory)
+        self._run_command('Linking Results',
+                          link_command.format(utility=self._utility,
+                                              output_executable=str(executable_path.relative_to(self._build_directory)),
+                                              input_objects=' '.join([object_path.name for object_path in object_paths]),
+                                              linking_flags=' '.join([f'-{flag:s}' for flag in formatted_flags])),
+                          self._build_directory)
 
         # Remove the object files afterwards
         for object_path in object_paths:
@@ -341,12 +373,12 @@ class CodeBase:
         create_command: str = '{utility:s} {linking_flags:s} -o {output_library:s} {input_objects:s}'
 
         # Run the library creation command within the Build Directory
-        run_command('Creating Dynamic Library' if is_dynamic else 'Archiving into Static Library',
-                    create_command.format(utility=self._utility if is_dynamic else 'ar',
-                                          output_library=str(codebase_as_dependency.library_path.relative_to(self._build_directory)),  # noqa: E501
-                                          input_objects=' '.join([object_path.name for object_path in object_paths]),
-                                          linking_flags=' '.join([f'-{flag:s}' for flag in linking_flags])),
-                    self._build_directory)
+        self._run_command('Creating Dynamic Library' if is_dynamic else 'Archiving into Static Library',
+                          create_command.format(utility=self._utility if is_dynamic else 'ar',
+                                                output_library=str(codebase_as_dependency.library_path.relative_to(self._build_directory)),  # noqa: E501
+                                                input_objects=' '.join([object_path.name for object_path in object_paths]),
+                                                linking_flags=' '.join([f'-{flag:s}' for flag in linking_flags])),
+                          self._build_directory)
 
         # Remove the object files afterwards
         for object_path in object_paths:
@@ -373,6 +405,6 @@ class CodeBase:
                                     self._binary_directory/dependency.library_path.name)
 
             # Actually test the executable
-            run_command('Testing Executable',
-                        f'{executable_path.stem:s}.exe',
-                        self._binary_directory)
+            self._run_command('Testing Executable',
+                              f'{executable_path.stem:s}.exe',
+                              self._binary_directory)
