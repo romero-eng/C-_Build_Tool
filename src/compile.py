@@ -72,7 +72,7 @@ class Dependency:
         return self._library_directory/f'lib{self._name:s}.{('dll' if self._is_dynamic else 'lib') if platform.system() == 'Windows' else ('so' if self._is_dynamic else 'a'):s}'  # noqa: E501
 
     def exists(self) -> bool:
-        return (self._include_directory.is_dir() if self._include_directory.exists() else False) and (self.library_path.is_file() if self.library_path.exists() else False)
+        return (self._include_directory.is_dir() if self._include_directory.exists() else False) and (self.library_path.is_file() if self.library_path.exists() else False)  # noqa: E501
 
 
 class CodeBase:
@@ -347,7 +347,7 @@ class CodeBase:
         self._run_command('Linking Results',
                           link_command.format(utility=self._utility,
                                               output_executable=str(executable_path.relative_to(self._build_directory)),
-                                              input_objects=' '.join([object_path.name for object_path in object_paths]),
+                                              input_objects=' '.join([object_path.name for object_path in object_paths]),  # noqa: E501
                                               linking_flags=' '.join([f'-{flag:s}' for flag in formatted_flags])),
                           self._build_directory)
 
@@ -413,7 +413,7 @@ class CodeBase:
         self._run_command('Creating Dynamic Library' if is_dynamic else 'Archiving into Static Library',
                           create_command.format(utility=self._utility if is_dynamic else 'ar',
                                                 output_library=str(codebase_as_dependency.library_path.relative_to(self._build_directory)),  # noqa: E501
-                                                input_objects=' '.join([object_path.name for object_path in object_paths]),
+                                                input_objects=' '.join([object_path.name for object_path in object_paths]),                  # noqa: E501
                                                 linking_flags=' '.join([f'-{flag:s}' for flag in linking_flags])),
                           self._build_directory)
 
