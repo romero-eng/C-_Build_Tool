@@ -1,3 +1,2 @@
 
-- Make C Language Standard recognition pay attention to Century as well
 - Add support for headers-only libraries

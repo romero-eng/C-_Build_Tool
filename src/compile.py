@@ -12,7 +12,7 @@ FLAGS_PER_BUILD_CONFIGURATION: dict[str, list[str]] = \
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-choosing-a-language-standard/
 C_PLUS_PLUS_LANGUAGE_STANDARDS: list[str] = ['0x', '1y', '1z',  '2a', '2b']
-C_LANGUAGE_STANDARDS: list[int] = [89, 90, 99, 11, 18]
+C_LANGUAGE_STANDARDS: list[int] = [1989, 1990, 1999, 2011, 2018]
 
 C_PLUS_PLUS_SOURCE_CODE_EXTENSIONS: list[str] = ['.cc', '.cxx', '.cpp']
 
@@ -141,8 +141,10 @@ class CodeBase:
 
         elif matched_C_standard:
 
+            century: int = int(matched_C_standard.groups()[0])
             two_digit_year = int(matched_C_standard.groups()[1])
-            if two_digit_year in C_LANGUAGE_STANDARDS:
+
+            if 100*century + two_digit_year in C_LANGUAGE_STANDARDS:
                 language_standard_recognized = True
                 self._utility = 'gcc'
                 self._language_standard_flag = f'{two_digit_year:2d}'
