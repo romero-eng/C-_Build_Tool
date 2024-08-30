@@ -17,6 +17,9 @@ Library/
 # Ignore JSON files
 *.json
 
+# Ignore "fmt" library
+/example_repos/fmt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
