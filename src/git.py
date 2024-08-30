@@ -39,7 +39,7 @@ if (__name__ == '__main__'):
         shutil.move(repository_directory/github_repo_name, repository_directory/'src')
 
     fmt_codebase = \
-        CodeBase('Arithmetic',
+        CodeBase('fmt',
                  repository_directory,
                  warnings=['Avoid a lot of questionable coding practices',
                            'Avoid even more questionable coding practices',
