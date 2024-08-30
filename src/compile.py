@@ -19,7 +19,7 @@ C_PLUS_PLUS_SOURCE_CODE_EXTENSIONS: list[str] = ['.cc', '.cxx', '.cpp']
 C_PLUS_PLUS_HEADER_EXTENSIONS: list[str] = ['.h', '.hpp']
 
 C_SOURCE_CODE_EXTENSIONS: list[str] = ['.c']
-C_HEADER_EXTENSIONS: str = ['.h']
+C_HEADER_EXTENSIONS: list[str] = ['.h']
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-compiler-extensions/
 FLAG_PER_MISCELLANEOUS_DECISION: dict[str, str] = \
