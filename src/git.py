@@ -43,6 +43,8 @@ if (__name__ == '__main__'):
                  repository_directory,
                  warnings=['Avoid a lot of questionable coding practices',
                            'Avoid even more questionable coding practices',
-                           'Avoid potentially value-changing implicit conversions'])
+                           'Follow Effective C++ Style Guidelines',
+                           'Avoid potentially value-changing implicit conversions',
+                           'Avoid potentially sign-changing implicit conversions for integers'])
 
     fmt_codebase.generate_as_dependency(False)
