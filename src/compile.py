@@ -349,18 +349,21 @@ class CodeBase:
                        include_directory,
                        library_directory)
 
-        tmp_dir: Path
+        tmp_include_dir: Path
 
         # Walk through the Source directory and copy over the header files to the Include directory
         for root, dirs, files in self._source_directory.walk():
+
+            tmp_include_dir = include_directory/root.relative_to(self._source_directory)
+
             for dir in dirs:
-                tmp_dir = Path(dir)
-                if not tmp_dir.exists():
-                    tmp_dir.mkdir()
+                if not (tmp_include_dir/dir).exists():
+                    (tmp_include_dir/dir).mkdir()
+
             for file in files:
                 if Path(file).suffix in self._header_file_extensions:
-                    shutil.copyfile(self._source_directory/root.relative_to(self._source_directory)/file,
-                                         include_directory/root.relative_to(self._source_directory)/file)  # noqa: E127
+                    shutil.copyfile(root/file,
+                                    tmp_include_dir/file)
 
         # Create the flags for the object linking command based on libraries
         linking_flags = \
