@@ -17,8 +17,9 @@ Library/
 # Ignore JSON files
 *.json
 
-# Ignore "fmt" library
+# Ignore "fmt" and "SDL" libraries
 /real_world_repos/fmt
+/real_world_repos/SDL
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
