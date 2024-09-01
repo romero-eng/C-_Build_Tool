@@ -22,7 +22,9 @@ def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
 
         for child in repository_directory.iterdir():
             if child.is_dir():
-                if child not in [repository_directory/'src', repository_directory/'include', repository_directory/'.git']:
+                if child not in [repository_directory/'src',
+                                 repository_directory/'include',
+                                 repository_directory/'.git']:
                     shutil.rmtree(child)
 
         shutil.move(repository_directory/'include'/name, repository_directory/'src')
@@ -40,7 +42,7 @@ def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
         source_code_lines.pop(87)
         source_code_lines.pop(81)
         source_code_lines.pop(0)
-        
+
         with open(repository_directory/'src'/'fmt.cc', 'w') as C_Plus_Plus_Source_File:
             C_Plus_Plus_Source_File.writelines(source_code_lines)
 
