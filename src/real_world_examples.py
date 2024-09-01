@@ -1,4 +1,5 @@
 import shutil
+import traceback
 from pathlib import Path
 
 from compile import CodeBase, Dependency
@@ -50,10 +51,7 @@ def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
             CodeBase(name,
                      repository_directory,
                      warnings=['Avoid a lot of questionable coding practices',
-                               'Avoid even more questionable coding practices',
-                               'Follow Effective C++ Style Guidelines',
-                               'Avoid potentially value-changing implicit conversions',
-                               'Avoid potentially sign-changing implicit conversions for integers'])
+                               'Avoid even more questionable coding practices'])
 
         fmt_dependency = fmt_codebase.generate_as_dependency(False)
 
@@ -70,5 +68,30 @@ def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
 
 if (__name__ == '__main__'):
 
-    fmt_dependency: Dependency = get_fmt_dependency(Path.cwd()/'real_world_repos')
-    print(fmt_dependency)
+    try:
+
+        fmt_dependency: Dependency = \
+            get_fmt_dependency(Path.cwd()/'real_world_repos')
+    
+        Test_codebase = \
+            CodeBase('test',
+                     Path.cwd()/'real_world_repos'/'Test',
+                     warnings=['Avoid a lot of questionable coding practices',
+                               'Avoid even more questionable coding practices',
+                               'Follow Effective C++ Style Guidelines',
+                               'Avoid potentially value-changing implicit conversions',
+                               'Avoid potentially sign-changing implicit conversions for integers'])
+    
+        Test_codebase.add_dependency(fmt_dependency)
+        Test_codebase.generate_as_executable()
+
+    except Exception:
+        print(traceback.format_exc())
+
+    else:
+        Test_codebase.test_executable()
+
+    finally:
+        if Test_codebase:
+            if Test_codebase.build_directory.exists():
+                shutil.rmtree(Test_codebase.build_directory)
