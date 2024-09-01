@@ -18,7 +18,7 @@ Library/
 *.json
 
 # Ignore "fmt" library
-/example_repos/fmt
+/real_world_repos/fmt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

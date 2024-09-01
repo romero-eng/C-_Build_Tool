@@ -70,5 +70,5 @@ def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
 
 if (__name__ == '__main__'):
 
-    fmt_dependency: Dependency = get_fmt_dependency(Path.cwd()/'example_repos')
+    fmt_dependency: Dependency = get_fmt_dependency(Path.cwd()/'real_world_repos')
     print(fmt_dependency)
