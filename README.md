@@ -8,7 +8,6 @@ See src/examples.py for examples on how to use the API contained within these sc
 See TODO.txt for a list of planned short-term improvements that will be done (sooner or later), and see the "Possible Future Improvements" section below for a list of possible improvements which may or may not happen.
 
 ## Possible Future Improvements:
-- Incorporate Git into the Python scripts such that a git URL should be all that it takes to retrieve and compile an open-source dependency
-    - Incorporate the Git commit history such that only object files corresponding to modified source code files get recompiled (in contrast with the current code which recompiles every single object file for each new build)
+- Incorporate the Git commit history such that only object files corresponding to modified source code files get recompiled (in contrast with the current code which recompiles every single object file for each new build)
 - Add ability to compile C/C++ extensions for Python
 - Add ability to compile WebAssembly projects
