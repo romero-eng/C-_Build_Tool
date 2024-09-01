@@ -68,6 +68,42 @@ def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
 
 if (__name__ == '__main__'):
 
+    repository_directory: Path = Path.cwd()/'real_world_repos'/'SDL'
+
+    if not repository_directory.exists():
+
+        retrieve_repository_from_github(repository_directory,
+                                        'libsdl-org',
+                                        'release-2.30.x')
+
+        for child in repository_directory.iterdir():
+            if child.is_file():
+                Path.unlink(child)
+
+        for child in repository_directory.iterdir():
+            if child.is_dir():
+                if child not in [repository_directory/'src',
+                                 repository_directory/'include',
+                                 repository_directory/'.git']:
+                    shutil.rmtree(child)
+        
+        shutil.move(repository_directory/'include'/'SDL_config.h',
+                    repository_directory/'src'/'SDL_config.h')
+        shutil.move(repository_directory/'include'/'SDL_platform.h',
+                    repository_directory/'src'/'SDL_platform.h')
+        shutil.move(repository_directory/'include'/'begin_code.h',
+                    repository_directory/'src'/'begin_code.h')
+        shutil.move(repository_directory/'include'/'close_code.h',
+                    repository_directory/'src'/'close_code.h')
+
+    SDL_codebase = \
+            CodeBase('SDL',
+                     repository_directory,
+                     language_standard='C 2018')
+
+    SDL_codebase.generate_as_dependency(True)
+
+    """
     try:
 
         fmt_dependency: Dependency = \
@@ -92,3 +128,4 @@ if (__name__ == '__main__'):
         if Test_codebase:
             if Test_codebase.build_directory.exists():
                 shutil.rmtree(Test_codebase.build_directory)
+    """
