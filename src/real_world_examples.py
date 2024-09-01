@@ -77,10 +77,7 @@ if (__name__ == '__main__'):
             CodeBase('test',
                      Path.cwd()/'real_world_repos'/'Test',
                      warnings=['Avoid a lot of questionable coding practices',
-                               'Avoid even more questionable coding practices',
-                               'Follow Effective C++ Style Guidelines',
-                               'Avoid potentially value-changing implicit conversions',
-                               'Avoid potentially sign-changing implicit conversions for integers'])
+                               'Avoid even more questionable coding practices'])
     
         Test_codebase.add_dependency(fmt_dependency)
         Test_codebase.generate_as_executable()
