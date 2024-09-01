@@ -12,8 +12,7 @@ if (__name__ == '__main__'):
     if not repository_directory.exists():
 
         retrieve_repository_from_github(repository_directory,
-                                        'fmtlib',
-                                        '4.x')
+                                        'fmtlib')
 
         for child in repository_directory.iterdir():
             if child.is_file():
@@ -21,10 +20,27 @@ if (__name__ == '__main__'):
 
         for child in repository_directory.iterdir():
             if child.is_dir():
-                if child not in [repository_directory/'fmt', repository_directory/'.git']:
+                if child not in [repository_directory/'src', repository_directory/'include', repository_directory/'.git']:
                     shutil.rmtree(child)
 
-        shutil.move(repository_directory/'fmt', repository_directory/'src')
+        shutil.move(repository_directory/'include'/'fmt', repository_directory/'src')
+        shutil.rmtree(repository_directory/'include')
+
+        with open(repository_directory/'src'/'fmt.cc', 'r') as C_Plus_Plus_Source_File:
+            source_code_lines = C_Plus_Plus_Source_File.readlines()
+
+        source_code_lines.pop(127)
+        source_code_lines.pop(126)
+        source_code_lines.pop(125)
+        source_code_lines.pop(124)
+        source_code_lines.pop(89)
+        source_code_lines.pop(88)
+        source_code_lines.pop(87)
+        source_code_lines.pop(81)
+        source_code_lines.pop(0)
+        
+        with open(repository_directory/'src'/'fmt.cc', 'w') as C_Plus_Plus_Source_File:
+            C_Plus_Plus_Source_File.writelines(source_code_lines)
 
     fmt_codebase = \
         CodeBase('fmt',
