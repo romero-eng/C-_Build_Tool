@@ -1,13 +1,15 @@
 import shutil
 from pathlib import Path
 
-from compile import CodeBase
+from compile import CodeBase, Dependency
 from git import retrieve_repository_from_github
 
 
-if (__name__ == '__main__'):
+def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
 
-    repository_directory: Path = Path.cwd()/'example_repos'/'fmt'
+    name: str = 'fmt'
+    repository_directory: Path = example_repos_dir/name
+    fmt_dependency: Dependency
 
     if not repository_directory.exists():
 
@@ -23,7 +25,7 @@ if (__name__ == '__main__'):
                 if child not in [repository_directory/'src', repository_directory/'include', repository_directory/'.git']:
                     shutil.rmtree(child)
 
-        shutil.move(repository_directory/'include'/'fmt', repository_directory/'src')
+        shutil.move(repository_directory/'include'/name, repository_directory/'src')
         shutil.rmtree(repository_directory/'include')
 
         with open(repository_directory/'src'/'fmt.cc', 'r') as C_Plus_Plus_Source_File:
@@ -42,13 +44,29 @@ if (__name__ == '__main__'):
         with open(repository_directory/'src'/'fmt.cc', 'w') as C_Plus_Plus_Source_File:
             C_Plus_Plus_Source_File.writelines(source_code_lines)
 
-    fmt_codebase = \
-        CodeBase('fmt',
-                 repository_directory,
-                 warnings=['Avoid a lot of questionable coding practices',
-                           'Avoid even more questionable coding practices',
-                           'Follow Effective C++ Style Guidelines',
-                           'Avoid potentially value-changing implicit conversions',
-                           'Avoid potentially sign-changing implicit conversions for integers'])
+        fmt_codebase = \
+            CodeBase(name,
+                     repository_directory,
+                     warnings=['Avoid a lot of questionable coding practices',
+                               'Avoid even more questionable coding practices',
+                               'Follow Effective C++ Style Guidelines',
+                               'Avoid potentially value-changing implicit conversions',
+                               'Avoid potentially sign-changing implicit conversions for integers'])
 
-    fmt_codebase.generate_as_dependency(False)
+        fmt_dependency = fmt_codebase.generate_as_dependency(False)
+
+    else:
+
+        fmt_dependency = \
+            Dependency(name,
+                       False,
+                       repository_directory/'build'/'include',
+                       repository_directory/'build'/'lib')
+
+    return fmt_dependency
+
+
+if (__name__ == '__main__'):
+
+    fmt_dependency: Dependency = get_fmt_dependency(Path.cwd()/'example_repos')
+    print(fmt_dependency)
