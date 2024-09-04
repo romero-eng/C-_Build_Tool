@@ -52,14 +52,16 @@ class CodeBase:
         # Set the warning, and check to make sure they make sense
         self._warnings: list[str] = [warnings] if isinstance(warnings, str) else warnings
         for warning in self._warnings:
-            if warning not in FLAG_PER_WARNING:
-                raise ValueError(f'The following warning is not recognized: {warning:s}')
+            if warning:
+                if warning not in FLAG_PER_WARNING:
+                    raise ValueError(f'The following warning is not recognized: {warning:s}')
 
         # Set the miscellaneous decisions, and check to make sure they make sense
         self._miscellaneous: list[str] = [miscellaneous] if isinstance(miscellaneous, str) else miscellaneous
         for decision in self._miscellaneous:
-            if decision not in FLAG_PER_MISCELLANEOUS_DECISION:
-                raise ValueError(f'The following miscellanous decision is not recognized: {decision:s}')
+            if decision:
+                if decision not in FLAG_PER_MISCELLANEOUS_DECISION:
+                    raise ValueError(f'The following miscellanous decision is not recognized: {decision:s}')
 
         # Set the language standard, and check to make sure it makes sense
         self._language_standard: str = language_standard

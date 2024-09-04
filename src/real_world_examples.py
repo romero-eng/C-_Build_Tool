@@ -65,7 +65,7 @@ def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
 
 if (__name__ == '__main__'):
 
-    """
+    #"""
     repository_directory: Path = Path.cwd()/'real_world_repos'/'SDL'
 
     if not repository_directory.exists():
@@ -84,20 +84,17 @@ if (__name__ == '__main__'):
                                  repository_directory/'include',
                                  repository_directory/'.git']:
                     shutil.rmtree(child)
-        
-        shutil.move(repository_directory/'include'/'SDL_config.h',
-                    repository_directory/'src'/'SDL_config.h')
-        shutil.move(repository_directory/'include'/'SDL_platform.h',
-                    repository_directory/'src'/'SDL_platform.h')
-        shutil.move(repository_directory/'include'/'begin_code.h',
-                    repository_directory/'src'/'begin_code.h')
-        shutil.move(repository_directory/'include'/'close_code.h',
-                    repository_directory/'src'/'close_code.h')
 
     SDL_codebase = \
             CodeBase('SDL',
                      repository_directory,
-                     language_standard='C 2018')
+                     language_standard='C 2018',
+                     warnings=['Avoid a lot of questionable coding practices',
+                               'Avoid even more questionable coding practices',
+                               'Follow Effective C++ Style Guidelines',
+                               'Avoid potentially value-changing implicit conversions',
+                               'Avoid potentially sign-changing implicit conversions for integers'],
+                     miscellaneous='')
 
     SDL_codebase.generate_as_dependency(True)
     """
