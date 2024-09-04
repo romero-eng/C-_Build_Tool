@@ -28,9 +28,6 @@ def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
                                  repository_directory/'.git']:
                     shutil.rmtree(child)
 
-        shutil.move(repository_directory/'include'/name, repository_directory/'src')
-        shutil.rmtree(repository_directory/'include')
-
         with open(repository_directory/'src'/'fmt.cc', 'r') as C_Plus_Plus_Source_File:
             source_code_lines = C_Plus_Plus_Source_File.readlines()
 
@@ -68,6 +65,7 @@ def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
 
 if (__name__ == '__main__'):
 
+    """
     repository_directory: Path = Path.cwd()/'real_world_repos'/'SDL'
 
     if not repository_directory.exists():
@@ -102,7 +100,6 @@ if (__name__ == '__main__'):
                      language_standard='C 2018')
 
     SDL_codebase.generate_as_dependency(True)
-
     """
     try:
 
@@ -128,4 +125,4 @@ if (__name__ == '__main__'):
         if Test_codebase:
             if Test_codebase.build_directory.exists():
                 shutil.rmtree(Test_codebase.build_directory)
-    """
+    #"""
