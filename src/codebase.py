@@ -237,8 +237,8 @@ class CodeBase:
 
         # Get flags from each library directory per dependency
         formatted_flags = \
-            [f'L {str(dependency.library_path.parent):s}' for dependency in self._dependencies] + \
-            [f'l{str(dependency.name):s}' for dependency in self._dependencies]
+            [f'L {str(dependency.library_path.parent):s}' for dependency in self._dependencies if not dependency.is_header_only] + \
+            [f'l{str(dependency.name                ):s}' for dependency in self._dependencies if not dependency.is_header_only]
 
         # Initialize the Binary directory
         if not self._binary_directory.exists():
@@ -306,8 +306,8 @@ class CodeBase:
 
         # Create the flags for the object linking command based on libraries
         linking_flags = \
-            [f'L {str(dependency.library_path.parent):s}' for dependency in self._dependencies] + \
-            [ f'l{str(dependency.library_path.name  ):s}' for dependency in self._dependencies]      # noqa: E201, E202
+            [f'L {str(dependency.library_path.parent):s}' for dependency in self._dependencies if not dependency.is_header_only] + \
+            [ f'l{str(dependency.library_path.name  ):s}' for dependency in self._dependencies if not dependency.is_header_only]      # noqa: E201, E202
 
         # Add further flags based on library type
         if is_dynamic:
