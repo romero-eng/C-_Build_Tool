@@ -4,9 +4,8 @@
 # Ignore Object files
 *.o
 
-# Ignore include and Library directories
-include/
-Library/
+# Ignore anything within a build directory
+build/
 
 # Ignore any compiled executables
 *.exe
