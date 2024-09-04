@@ -9,20 +9,23 @@ class Dependency:
                  is_dynamic: bool,
                  is_header_only: bool,
                  include_directory: str | Path,
-                 library_directory: str | Path) -> None:
+                 library_directory: str | Path | None = None) -> None:
 
         if not include_directory.exists():
             raise ValueError(f'Please make sure the include directory for the \'{self._name:s}\' Dependency exists before instantiating it as a Dependency object')  # noqa: E501
     
         if not is_header_only:
+            if not library_directory:
+                raise Exception(f'The \'{self._name:s}\' dependency must have a library directory unless it is header-only.')
             if not library_directory.exists():
-                raise ValueError(f'Please make sure the library directory for the \'{self._name:s}\' Dependency exists before instantiating it as a Dependency object')  # noqa: E501
+                raise Exception(f'Please make sure the library directory for the \'{self._name:s}\' Dependency exists before instantiating it as a Dependency object')  # noqa: E501
 
         self._name: str = name
         self._is_dynamic: bool = is_dynamic
         self._is_header_only: bool = is_header_only
         self._include_directory: Path = Path(include_directory) if isinstance(include_directory, str) else include_directory  # noqa: E501
-        self._library_directory: Path = Path(library_directory) if isinstance(library_directory, str) else library_directory  # noqa: E501
+        if not is_header_only:
+            self._library_directory: Path = Path(library_directory) if isinstance(library_directory, str) else library_directory  # noqa: E501
 
     @property
     def name(self) -> str:
@@ -44,7 +47,7 @@ class Dependency:
     def extension(self) -> str:
 
         if self._is_header_only:
-            raise ValueError(f'The \'{self._name:s}\' Dependency is a header-only library, it doesn\'t make sense to ask for the Library file extension.')  # noqa: E501
+            raise Exception(f'The \'{self._name:s}\' Dependency is a header-only library, it doesn\'t make sense to ask for the Library file extension.')  # noqa: E501
 
         extension: str
 
@@ -60,7 +63,7 @@ class Dependency:
     def library_path(self) -> Path:
 
         if self._is_header_only:
-            raise ValueError(f'The \'{self._name:s}\' Dependency is a header-only library, it doesn\'t make sense to ask for the Library file path.')  # noqa: E501
+            raise Exception(f'The \'{self._name:s}\' Dependency is a header-only library, it doesn\'t make sense to ask for the Library file path.')  # noqa: E501
 
         return self._library_directory/f'lib{self._name:s}.{self.extension:s}'
 
