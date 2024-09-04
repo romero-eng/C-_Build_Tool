@@ -6,9 +6,9 @@ class Dependency:
 
     def __init__(self,
                  name: str,
-                 is_dynamic: bool,
-                 is_header_only: bool,
                  include_directory: str | Path,
+                 is_header_only: bool,
+                 is_dynamic: bool | None = None,
                  library_directory: str | Path | None = None) -> None:
 
         if not include_directory.exists():
@@ -21,10 +21,13 @@ class Dependency:
                 raise Exception(f'Please make sure the library directory for the \'{self._name:s}\' Dependency exists before instantiating it as a Dependency object')  # noqa: E501
 
         self._name: str = name
-        self._is_dynamic: bool = is_dynamic
         self._is_header_only: bool = is_header_only
+
         self._include_directory: Path = Path(include_directory) if isinstance(include_directory, str) else include_directory  # noqa: E501
+
         if not is_header_only:
+
+            self._is_dynamic: bool = is_dynamic
             self._library_directory: Path = Path(library_directory) if isinstance(library_directory, str) else library_directory  # noqa: E501
 
     @property
@@ -33,6 +36,10 @@ class Dependency:
 
     @property
     def is_dynamic(self) -> bool:
+
+        if self._is_header_only:
+            raise Exception(f'The \'{self._name:s}\' Dependency is a header-only library, it doesn\'t make sense to ask if it\'s dynamic or not.')  # noqa: E501
+
         return self._is_dynamic
 
     @property

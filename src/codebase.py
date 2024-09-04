@@ -283,9 +283,9 @@ class CodeBase:
         # Finally, create the Dependency with the Include and Library directories
         codebase_as_dependency: Dependency = \
             Dependency(self._name,
-                       is_dynamic,
-                       False,
                        include_directory,
+                       False,
+                       is_dynamic,
                        library_directory)
 
         tmp_include_dir: Path
