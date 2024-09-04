@@ -3,7 +3,7 @@ import platform
 import traceback
 from pathlib import Path
 
-from compile import CodeBase, Dependency
+from codebase import CodeBase, Dependency
 
 
 def test_python_build_tool(library_is_C_plus_plus: bool,

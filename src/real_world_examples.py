@@ -2,7 +2,7 @@ import shutil
 import traceback
 from pathlib import Path
 
-from compile import CodeBase, Dependency
+from codebase import CodeBase, Dependency
 from git import retrieve_repository_from_github
 
 
