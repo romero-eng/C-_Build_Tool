@@ -110,6 +110,14 @@ class CodeBase:
         # Initialize the list of Dependencies
         self._dependencies: list[Dependency] = []
 
+        # Initialize the Include Directory Dependency if it exists
+        include_directory: Path = self._repository_directory/'include'
+        if include_directory.exists():
+            self._dependencies.append(Dependency(self._name,
+                                                 include_directory,
+                                                 True))
+
+
     def __str__(self) -> str:
 
         def format_flag_statuses(title: str,
@@ -275,34 +283,13 @@ class CodeBase:
             library_directory.mkdir()
             print(f'\nCreating Library Directory: {str(library_directory):s}\n')
 
-        # Initialize the Include Directory
-        include_directory: Path = self._build_directory/'include'
-        if not include_directory.exists():
-            include_directory.mkdir()
-
-        # Finally, create the Dependency with the Include and Library directories
+        # Create the Dependency with both the Include and Library directories
         codebase_as_dependency: Dependency = \
             Dependency(self._name,
-                       include_directory,
+                       self._dependencies[0].include_directory,
                        False,
                        is_dynamic,
                        library_directory)
-
-        tmp_include_dir: Path
-
-        # Walk through the Source directory and copy over the header files to the Include directory
-        for root, dirs, files in self._source_directory.walk():
-
-            tmp_include_dir = include_directory/root.relative_to(self._source_directory)
-
-            for dir in dirs:
-                if not (tmp_include_dir/dir).exists():
-                    (tmp_include_dir/dir).mkdir()
-
-            for file in files:
-                if Path(file).suffix in self._header_file_extensions:
-                    shutil.copyfile(root/file,
-                                    tmp_include_dir/file)
 
         # Create the flags for the object linking command based on libraries
         linking_flags = \
