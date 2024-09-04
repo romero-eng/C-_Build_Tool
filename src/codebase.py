@@ -280,14 +280,6 @@ class CodeBase:
         if not include_directory.exists():
             include_directory.mkdir()
 
-        # Finally, create the Dependency with the Include and Library directories
-        codebase_as_dependency: Dependency = \
-            Dependency(self._name,
-                       is_dynamic,
-                       False,
-                       include_directory,
-                       library_directory)
-
         tmp_include_dir: Path
 
         # Walk through the Source directory and copy over the header files to the Include directory
@@ -323,7 +315,7 @@ class CodeBase:
         # Run the library creation command within the Build Directory
         run_command('Creating Dynamic Library' if is_dynamic else 'Archiving into Static Library',
                     create_command.format(utility=self._utility if is_dynamic else 'ar',
-                                          output_library=str(codebase_as_dependency.library_path.relative_to(self._build_directory)),  # noqa: E501
+                                          output_library=str(library_directory.relative_to(self._build_directory)),
                                           input_objects=' '.join([object_path.name for object_path in object_paths]),
                                           linking_flags=' '.join([f'-{flag:s}' for flag in linking_flags])),
                     self._build_directory)
@@ -332,7 +324,11 @@ class CodeBase:
         for object_path in object_paths:
             Path.unlink(object_path)
 
-        return codebase_as_dependency
+        return Dependency(self._name,
+                          is_dynamic,
+                          False,
+                          include_directory,
+                          library_directory)
 
     def add_dependency(self,
                        new_dependency: Dependency) -> None:
