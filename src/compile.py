@@ -1,9 +1,9 @@
 import re
 import shutil
-import platform
 from pathlib import Path
 
 from command import run_command
+from dependency import Dependency
 
 
 # https://www.learncpp.com/cpp-tutorial/configuring-your-compiler-build-configurations/
@@ -36,44 +36,6 @@ FLAG_PER_WARNING: dict[str, str] = \
      'Avoid potentially value-changing implicit conversions': 'conversion',
      'Avoid potentially sign-changing implicit conversions for integers': 'sign-conversion'}
 
-
-class Dependency:
-
-    def __init__(self,
-                 name: str,
-                 is_dynamic: bool,
-                 include_directory: str | Path,
-                 library_directory: str | Path) -> None:
-
-        self._name: str = name
-        self._is_dynamic: bool = is_dynamic
-        self._include_directory: Path = Path(include_directory) if isinstance(include_directory, str) else include_directory  # noqa: E501
-        self._library_directory: Path = Path(library_directory) if isinstance(library_directory, str) else library_directory  # noqa: E501
-
-        if not self._include_directory.exists():
-            raise ValueError(f'Please make sure the include directory for the \'{self._name:s}\' Dependency exists before instantiating it as a Dependency object')  # noqa: E501
-
-        if not self._library_directory.exists():
-            raise ValueError(f'Please make sure the library directory for the \'{self._name:s}\' Dependency exists before instantiating it as a Dependency object')  # noqa: E501
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def is_dynamic(self) -> bool:
-        return self._is_dynamic
-
-    @property
-    def include_directory(self) -> Path:
-        return self._include_directory
-
-    @property
-    def library_path(self) -> Path:
-        return self._library_directory/f'lib{self._name:s}.{('dll' if self._is_dynamic else 'lib') if platform.system() == 'Windows' else ('so' if self._is_dynamic else 'a'):s}'  # noqa: E501
-
-    def exists(self) -> bool:
-        return (self._include_directory.is_dir() if self._include_directory.exists() else False) and (self.library_path.is_file() if self.library_path.exists() else False)  # noqa: E501
 
 
 class CodeBase:
@@ -239,11 +201,7 @@ class CodeBase:
     def miscellaneous(self) -> list[str]:
         return self._miscellaneous
 
-    @property
-    def dependencies(self) -> list[Dependency]:
-        return self._dependencies
-
-    def _generate_object_files(self) -> None:
+    def _generate_object_files(self) -> list[Path]:
 
         print(self)
 
@@ -265,8 +223,9 @@ class CodeBase:
             print(f'\nCreating Build Directory: {str(self._build_directory):s}\n')
 
         # Initialize variables for the upcoming for-loop
-        tmp_source_file_path: Path
-        tmp_object_file_path: Path
+        current_source_file_path: Path
+        current_object_file_path: Path
+        object_file_paths: list[Path] = []
 
         # Initialize the compile command
         compile_command: str = '{utility:s} -c {input_source:s} -o {output_object:s} {compilation_flags:s}'
@@ -276,25 +235,28 @@ class CodeBase:
             for file in files:
 
                 # Get the file paths for the source file and corresponding object file
-                tmp_source_file_path = root/file
-                tmp_object_file_path = self._build_directory/f'{tmp_source_file_path.stem:s}.o'
+                current_source_file_path = root/file
+                current_object_file_path = self._build_directory/f'{current_source_file_path.stem:s}.o'
 
                 # If the source code file is C/C++,...
-                if tmp_source_file_path.suffix in self._source_code_extensions:
+                if current_source_file_path.suffix in self._source_code_extensions:
 
                     # ..., then compile it
-                    run_command(f'"{tmp_source_file_path.stem:s}" Compilation Results',
+                    run_command(f'"{current_source_file_path.stem:s}" Compilation Results',
                                 compile_command.format(utility=self._utility,
-                                                       input_source=str(tmp_source_file_path.relative_to(self._repository_directory)),   # noqa: E501
-                                                       output_object=str(tmp_object_file_path.relative_to(self._repository_directory)),  # noqa: E501
+                                                       input_source=str(current_source_file_path.relative_to(self._repository_directory)),   # noqa: E501
+                                                       output_object=str(current_object_file_path.relative_to(self._repository_directory)),  # noqa: E501
                                                        compilation_flags=' '.join([f'-{flag:s}' for flag in formatted_flags])),          # noqa: E501
                                 self._repository_directory)
+
+                    object_file_paths.append(current_object_file_path)
+
+        return object_file_paths
 
     def generate_as_executable(self) -> None:
 
         # Generate and retrieve the object file paths
-        self._generate_object_files()
-        object_paths: list[Path] = [file_path for file_path in self._build_directory.glob('*.o')]
+        object_paths: list[Path] = self._generate_object_files()
 
         # Get flags from each library directory per dependency
         formatted_flags = \
@@ -328,8 +290,7 @@ class CodeBase:
                                is_dynamic: bool) -> Dependency:
 
         # Generate and retrieve the object file paths
-        self._generate_object_files()
-        object_paths: list[Path] = [file_path for file_path in self._build_directory.glob('*.o')]
+        object_paths: list[Path] = self._generate_object_files()
 
         # Initialize the Library Directory
         library_directory: Path = self._build_directory/'lib'
@@ -346,6 +307,7 @@ class CodeBase:
         codebase_as_dependency: Dependency = \
             Dependency(self._name,
                        is_dynamic,
+                       False,
                        include_directory,
                        library_directory)
 
@@ -417,3 +379,4 @@ class CodeBase:
             run_command('Testing Executable',
                         f'{executable_path.stem:s}.exe',
                         self._binary_directory)
+            
