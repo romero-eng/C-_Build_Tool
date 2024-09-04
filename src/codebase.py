@@ -117,7 +117,6 @@ class CodeBase:
                                                  include_directory,
                                                  True))
 
-
     def __str__(self) -> str:
 
         def format_flag_statuses(title: str,
