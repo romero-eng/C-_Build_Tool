@@ -232,7 +232,7 @@ class CodeBase:
                                 compile_command.format(utility=self._utility,
                                                        input_source=str(current_source_file_path.relative_to(self._repository_directory)),   # noqa: E501
                                                        output_object=str(current_object_file_path.relative_to(self._repository_directory)),  # noqa: E501
-                                                       compilation_flags=' '.join([f'-{flag:s}' for flag in formatted_flags])),          # noqa: E501
+                                                       compilation_flags=' '.join([f'-{flag:s}' for flag in formatted_flags])),              # noqa: E501
                                 self._repository_directory)
 
                     object_file_paths.append(current_object_file_path)
