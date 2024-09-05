@@ -71,17 +71,6 @@ def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
         retrieve_repository_from_github(repository_directory,
                                         'fmtlib')
 
-        for child in repository_directory.iterdir():
-            if child.is_file():
-                Path.unlink(child)
-
-        for child in repository_directory.iterdir():
-            if child.is_dir():
-                if child not in [repository_directory/'src',
-                                 repository_directory/'include',
-                                 repository_directory/'.git']:
-                    shutil.rmtree(child)
-
         remove_lines(repository_directory/'src'/'fmt.cc',
                      [0, 89, 95, 96, 97, 132, 133, 134, 135])
 
@@ -115,20 +104,6 @@ if (__name__ == '__main__'):
                                         'libsdl-org',
                                         'release-2.30.x')
 
-        for child in repository_directory.iterdir():
-            if child.is_file():
-                Path.unlink(child)
-
-        for child in repository_directory.iterdir():
-            if child.is_dir():
-                if child not in [repository_directory/'src',
-                                 repository_directory/'include',
-                                 repository_directory/'.git']:
-                    shutil.rmtree(child)
-
-        #=================================================================================================================#
-        #=================================================================================================================#
-
         insert_OS_guards(['SDL_ps2audio'],
                          repository_directory/'src'/'audio'/'ps2',
                          'SDL_AUDIO_DRIVER_PS2')
@@ -156,9 +131,6 @@ if (__name__ == '__main__'):
 
         insert_lines(rwopsromfs_file_path.with_suffix('.h'),
                      [(21, '#include <stdio.h>')])
-
-        #=================================================================================================================#
-        #=================================================================================================================#
 
     SDL_codebase = \
             CodeBase('SDL',
