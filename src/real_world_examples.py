@@ -4,12 +4,14 @@ import traceback
 import platform
 from pathlib import Path
 
+from command import run_command
 from codebase import CodeBase, Dependency
 from git import retrieve_repository_from_github
+from compilation_constants import C_SOURCE_CODE_EXTENSIONS, C_HEADER_EXTENSIONS
 
 
 def insert_lines(source_file_path: Path,
-                 lines_to_insert: tuple[int, str]) -> None:
+                 lines_to_insert: list[tuple[int, str]]) -> None:
 
     with codecs.open(source_file_path, 'r', 'utf-8') as source_file:
         source_code: list[str] = source_file.readlines()
@@ -21,7 +23,7 @@ def insert_lines(source_file_path: Path,
                                            reverse=True)]
     
     for line_number, new_line_text in sorted_line_numbers:
-        source_code.insert(line_number, new_line_text)
+        source_code.insert(line_number, f'{new_line_text:s}\n')
 
     with codecs.open(source_file_path, 'w+', 'utf-8') as source_file:
         source_file.writelines(source_code)
@@ -43,21 +45,44 @@ def remove_lines(source_file_path: Path,
         source_file.writelines(source_code_lines)
 
 
+def change_lines(source_file_path: Path,
+                 lines_to_insert: list[tuple[int, str]]) -> None:
+
+    with codecs.open(source_file_path, 'r', 'utf-8') as source_file:
+        source_code_lines = source_file.readlines()
+
+    for line_number, new_line_text in lines_to_insert:
+        source_code_lines[line_number] = f'{new_line_text:s}\n'
+
+    with codecs.open(source_file_path, 'w+', 'utf-8') as source_file:
+        source_file.writelines(source_code_lines)
+
+
 def insert_OS_guards(source_file_names: list[str],
                      main_path: Path,
                      OS_guard: str) -> None:
+    
+    def _insert(source_file_path: Path,
+                OS_guard: str) -> None:
+
+        with codecs.open(source_file_path, 'r', 'utf-8') as source_file:
+            source_code: list[str] = source_file.readlines()
+
+        source_code.insert(0, f'#ifdef {OS_guard:s}')
+        source_code.append('#endif')
+
+        with codecs.open(source_file_path, 'w+', 'utf-8') as source_file:
+            source_file.writelines(source_code)
+
+    source_file_path: Path
 
     for source_file_name in source_file_names:
     
         source_file_path = main_path/f'{source_file_name:s}.c'
-        insert_lines(source_file_path,
-                     [( 0, f'#ifdef {OS_guard:s}'),
-                      (-1, '#endif')])
+        _insert(source_file_path, OS_guard)
 
         if source_file_path.with_suffix('.h').exists():
-            insert_lines(source_file_path.with_suffix('.h'),
-                         [( 0, f'#ifdef {OS_guard:s}'),
-                          (-1, '#endif')])
+            _insert(source_file_path.with_suffix('.h'), OS_guard)
 
 
 def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
@@ -102,6 +127,159 @@ def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
                        repository_directory/'build'/'lib')
 
     return fmt_dependency
+
+
+def get_libusb_dependency(example_repos_dir: Path) -> Dependency:
+
+    name: str = 'libusb'
+    repository_directory: Path = example_repos_dir/name
+    libusb_dependency: Dependency
+
+    if not repository_directory.exists():
+
+        retrieve_repository_from_github(repository_directory,
+                                        name)
+
+        run_command('Run Autotools',
+                    'C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -c "bash bootstrap.sh"',
+                    repository_directory)
+
+        run_command('Run Configuration',
+                    'C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -c "./configure"',
+                    repository_directory)
+
+        for child in repository_directory.iterdir():
+            if child.is_file():
+                if child.suffix not in (C_SOURCE_CODE_EXTENSIONS + C_HEADER_EXTENSIONS):
+                    Path.unlink(child)
+            elif child.is_dir():
+                if child not in [repository_directory/name,
+                                 repository_directory/'.git']:
+                    shutil.rmtree(child)
+        
+        shutil.rmtree(repository_directory/name/'.deps')
+        shutil.rmtree(repository_directory/name/'os'/'.deps')
+
+        for child in (repository_directory/name).iterdir():
+            if child.is_file():
+                if child.suffix not in (C_SOURCE_CODE_EXTENSIONS + C_HEADER_EXTENSIONS):
+                    Path.unlink(child)
+
+        shutil.move(repository_directory/'config.h',
+                    repository_directory/name/'config.h')
+
+        source_directory: Path = repository_directory/'src'
+
+        shutil.copytree(repository_directory/name,
+                        source_directory)
+
+        shutil.rmtree(repository_directory/name)
+
+        include_directory: Path = repository_directory/'include'
+        include_directory.mkdir()
+
+        shutil.move(source_directory/f'{name:s}.h',
+                    include_directory/f'{name:s}.h')
+        
+        change_lines(source_directory/'libusbi.h',
+                     [(26, '#include "config.h"')])
+        
+        change_lines(source_directory/'os'/'darwin_usb.c',
+                     [(21, '#include "../config.h"')])
+
+        insert_OS_guards(['darwin_usb'],
+                         source_directory/'os',
+                         '__APPLE__')
+        
+        change_lines(source_directory/'os'/'events_posix.c',
+                     [(20, '#include "../libusbi.h"')])
+        
+        change_lines(source_directory/'os'/'threads_posix.c',
+                     [(21, '#include "../libusbi.h"')])
+
+        insert_OS_guards(['events_posix', 'threads_posix'],
+                         source_directory/'os',
+                         '_POSIX_VERSION')
+        
+        change_lines(source_directory/'os'/'events_windows.c',
+                     [(20, '#include "../config.h"'),
+                      (22, '#include "../libusbi.h"')])
+        
+        change_lines(source_directory/'os'/'threads_windows.c',
+                     [(21, '#include "../libusbi.h"')])
+        
+        change_lines(source_directory/'os'/'windows_common.c',
+                     [(24, '#include "../config.h"'),
+                      (28, '#include "../libusbi.h"')])
+        
+        change_lines(source_directory/'os'/'windows_usbdk.c',
+                     [(23, '#include "../config.h"'),
+                      (28, '#include "../libusbi.h"')])
+        
+        change_lines(source_directory/'os'/'windows_winusb.c',
+                     [(25, '#include "../config.h"'),
+                      (33, '#include "../libusbi.h"')])
+        
+        change_lines(source_directory/'os'/'linux_netlink.c',
+                     [(23, '#include "../libusbi.h"')])
+        
+        change_lines(source_directory/'os'/'linux_udev.c',
+                     [(22, '#include "../libusbi.h"')])
+        
+        change_lines(source_directory/'os'/'linux_usbfs.c',
+                     [(24, '#include "../libusbi.h"')])
+
+        insert_OS_guards(['linux_netlink', 'linux_udev', 'linux_usbfs'],
+                         source_directory/'os',
+                         '__LINUX__')
+        
+        change_lines(source_directory/'os'/'netbsd_usb.c',
+                     [(18, '#include "../config.h"')])
+
+        insert_OS_guards(['netbsd_usb'],
+                         source_directory/'os',
+                         '__NetBSD__')
+        
+        change_lines(source_directory/'os'/'null_usb.c',
+                     [(18, '#include "../libusbi.h"')])
+        
+        change_lines(source_directory/'os'/'openbsd_usb.c',
+                     [(18, '#include "../config.h"')])
+
+        insert_OS_guards(['openbsd_usb'],
+                         source_directory/'os',
+                         '__OPENBSD__')
+        
+        change_lines(source_directory/'os'/'sunos_usb.c',
+                     [(19, '#include "../config.h"')])
+
+        insert_OS_guards(['sunos_usb'],
+                         source_directory/'os',
+                         '__sun')
+
+        libusb_codebase: CodeBase = \
+            CodeBase(name,
+                     repository_directory,
+                     language_standard='C 2018',
+                     warnings=['Avoid a lot of questionable coding practices',
+                               'Avoid even more questionable coding practices',
+                               'Follow Effective C++ Style Guidelines',
+                               'Avoid potentially value-changing implicit conversions',
+                               'Avoid potentially sign-changing implicit conversions for integers'],
+                     miscellaneous=[''])
+
+        libusb_dependency = libusb_codebase.generate_as_dependency(False)
+    
+    else:
+
+        libusb_dependency = \
+            Dependency(name,
+                       repository_directory/'include',
+                       False,
+                       True,
+                       repository_directory/'build'/'lib')
+
+    return libusb_dependency
 
 
 if (__name__ == '__main__'):
@@ -163,6 +341,8 @@ if (__name__ == '__main__'):
                                'Avoid potentially value-changing implicit conversions',
                                'Avoid potentially sign-changing implicit conversions for integers'],
                      miscellaneous='')
+    
+    SDL_codebase.add_dependency(get_libusb_dependency(Path.cwd()/'real_world_repos'))
 
     SDL_codebase.generate_as_dependency(True)
     """
