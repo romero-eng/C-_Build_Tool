@@ -16,9 +16,10 @@ build/
 # Ignore JSON files
 *.json
 
-# Ignore "fmt" and "SDL" libraries
+# Ignore the "fmt", "SDL", and "libusb" libraries
 /real_world_repos/fmt
 /real_world_repos/SDL
+/real_world_repos/libusb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
