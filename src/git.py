@@ -8,7 +8,7 @@ def retrieve_repository_from_github(repository_directory: Path,
                                     username: str,
                                     branch: str | None = None) -> None:
 
-    run_command('Test git clone',
+    run_command('Download Github Repository',
                 f'git clone {urlunsplit(('https',
                                          '.'.join(['github', 'com']),
                                          '/'.join([username, f'{repository_directory.stem:s}.git']),
@@ -16,6 +16,6 @@ def retrieve_repository_from_github(repository_directory: Path,
                 repository_directory.parent)
 
     if branch:
-        run_command('Test git clone',
+        run_command('Download Github Repository',
                     f'git checkout {branch:s}',
                     repository_directory)
