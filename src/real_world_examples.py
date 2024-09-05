@@ -71,6 +71,17 @@ def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
         retrieve_repository_from_github(repository_directory,
                                         'fmtlib')
 
+        for child in repository_directory.iterdir():
+            if child.is_file():
+                Path.unlink(child)
+
+        for child in repository_directory.iterdir():
+            if child.is_dir():
+                if child not in [repository_directory/'src',
+                                 repository_directory/'include',
+                                 repository_directory/'.git']:
+                    shutil.rmtree(child)
+
         remove_lines(repository_directory/'src'/'fmt.cc',
                      [0, 89, 95, 96, 97, 132, 133, 134, 135])
 
@@ -103,6 +114,17 @@ if (__name__ == '__main__'):
         retrieve_repository_from_github(repository_directory,
                                         'libsdl-org',
                                         'release-2.30.x')
+
+        for child in repository_directory.iterdir():
+            if child.is_file():
+                Path.unlink(child)
+
+        for child in repository_directory.iterdir():
+            if child.is_dir():
+                if child not in [repository_directory/'src',
+                                 repository_directory/'include',
+                                 repository_directory/'.git']:
+                    shutil.rmtree(child)
 
         source_directory: Path = repository_directory/'src'
 

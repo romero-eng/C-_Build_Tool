@@ -19,14 +19,3 @@ def retrieve_repository_from_github(repository_directory: Path,
         run_command('Test git clone',
                     f'git checkout {branch:s}',
                     repository_directory)
-
-    for child in repository_directory.iterdir():
-        if child.is_file():
-            Path.unlink(child)
-
-    for child in repository_directory.iterdir():
-        if child.is_dir():
-            if child not in [repository_directory/'src',
-                             repository_directory/'include',
-                             repository_directory/'.git']:
-                shutil.rmtree(child)
