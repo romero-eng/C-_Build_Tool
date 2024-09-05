@@ -104,27 +104,26 @@ if (__name__ == '__main__'):
                                         'libsdl-org',
                                         'release-2.30.x')
 
-        insert_OS_guards(['SDL_ps2audio'],
-                         repository_directory/'src'/'audio'/'ps2',
-                         'SDL_AUDIO_DRIVER_PS2')
+        source_directory: Path = repository_directory/'src'
 
-        insert_OS_guards(['SDL_fcitx'],
-                         repository_directory/'src'/'core'/'linux',
-                         '__LINUX__') 
+        things = \
+            [(['SDL_ps2audio'],     source_directory/'audio'/'ps2',           'SDL_AUDIO_DRIVER_PS2'),
+             (['SDL_fcitx'   ],     source_directory/'core'/'linux',          '__LINUX__'),
+             (['SDL_wscons_kbd',
+               'SDL_wscons_mouse'], source_directory/'core'/'openbsd',        '__OPENBSD__'),
+             (['geniconv',
+               'os2cp',
+               'os2iconv',
+               'sys2utf8',
+               'test'],             source_directory/'core'/'os2'/'geniconv', '__OS2__'),
+             (['SDL_poll'],         source_directory/'core'/'unix',           '__unix__')]
 
-        insert_OS_guards(['SDL_wscons_kbd', 'SDL_wscons_mouse'],
-                         repository_directory/'src'/'core'/'openbsd',
-                         '__OPENBSD__') 
+        for files, source_file_path, OS_guard in things:
+            insert_OS_guards(files,
+                             source_file_path,
+                             OS_guard)
 
-        insert_OS_guards(['geniconv', 'os2cp', 'os2iconv', 'sys2utf8', 'test'],
-                         repository_directory/'src'/'core'/'os2'/'geniconv',
-                         '__OS2__') 
-
-        insert_OS_guards(['SDL_poll'],
-                         repository_directory/'src'/'core'/'unix',
-                         '__unix__')
-        
-        rwopsromfs_file_path: Path = repository_directory/'src'/'file'/'n3ds'/'SDL_rwopsromfs.c'
+        rwopsromfs_file_path: Path = source_directory/'file'/'n3ds'/'SDL_rwopsromfs.c'
 
         insert_lines(rwopsromfs_file_path,
                      [(23, '#include <stdio.h>')])
