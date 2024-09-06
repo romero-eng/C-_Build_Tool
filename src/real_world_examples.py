@@ -87,14 +87,21 @@ def insert_OS_guards(source_file_names: list[str],
 
 def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
 
-    name: str = 'fmt'
-    repository_directory: Path = example_repos_dir/name
     fmt_dependency: Dependency
 
-    if not repository_directory.exists():
-
-        retrieve_repository_from_github(repository_directory,
+    (repository_directory,
+     repo_already_exists) = \
+        retrieve_repository_from_github(example_repos_dir,
+                                        'fmt',
                                         'fmtlib')
+
+    source_directory: Path = repository_directory/'src'
+    include_directory: Path = repository_directory/'include'
+    build_directory: Path = repository_directory/'build'
+    library_directory: Path = build_directory/'lib'
+    is_dynamic: bool = False
+
+    if not repo_already_exists:
 
         for child in repository_directory.iterdir():
             if child.is_file():
@@ -102,29 +109,30 @@ def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
 
         for child in repository_directory.iterdir():
             if child.is_dir():
-                if child not in [repository_directory/'src',
-                                 repository_directory/'include',
+                if child not in [source_directory,
+                                 include_directory,
                                  repository_directory/'.git']:
                     shutil.rmtree(child)
 
-        remove_lines(repository_directory/'src'/'fmt.cc',
+        remove_lines(source_directory/'fmt.cc',
                      [0, 89, 95, 96, 97, 132, 133, 134, 135])
 
         fmt_codebase = \
-            CodeBase(name,
+            CodeBase('fmt',
                      repository_directory,
                      warnings=['Avoid a lot of questionable coding practices',
                                'Avoid even more questionable coding practices'])
 
-        fmt_dependency = fmt_codebase.generate_as_dependency(False)
+        fmt_dependency = fmt_codebase.generate_as_dependency(is_dynamic)
 
     else:
 
         fmt_dependency = \
-            Dependency(name,
+            Dependency('fmt',
+                       include_directory,
                        False,
-                       repository_directory/'build'/'include',
-                       repository_directory/'build'/'lib')
+                       is_dynamic,
+                       library_directory)
 
     return fmt_dependency
 
@@ -132,13 +140,21 @@ def get_fmt_dependency(example_repos_dir: Path) -> Dependency:
 def get_libusb_dependency(example_repos_dir: Path) -> Dependency:
 
     name: str = 'libusb'
-    repository_directory: Path = example_repos_dir/name
     libusb_dependency: Dependency
 
-    if not repository_directory.exists():
-
-        retrieve_repository_from_github(repository_directory,
+    (repository_directory,
+     repo_already_exists) = \
+        retrieve_repository_from_github(example_repos_dir,
+                                        name,
                                         name)
+
+    source_directory: Path = repository_directory/'src'
+    include_directory: Path = repository_directory/'include'
+    build_directory: Path = repository_directory/'build'
+    library_directory: Path = build_directory/'lib'
+    is_dynamic: bool = False
+
+    if not repo_already_exists:
 
         run_command('Run Autotools',
                     'C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -c "./bootstrap.sh"' if platform.system() == 'Windows' else './bootstrap.sh',
@@ -168,14 +184,11 @@ def get_libusb_dependency(example_repos_dir: Path) -> Dependency:
         shutil.move(repository_directory/'config.h',
                     repository_directory/name/'config.h')
 
-        source_directory: Path = repository_directory/'src'
-
         shutil.copytree(repository_directory/name,
                         source_directory)
 
         shutil.rmtree(repository_directory/name)
 
-        include_directory: Path = repository_directory/'include'
         include_directory.mkdir()
 
         shutil.move(source_directory/f'{name:s}.h',
@@ -268,16 +281,16 @@ def get_libusb_dependency(example_repos_dir: Path) -> Dependency:
                                'Avoid potentially sign-changing implicit conversions for integers'],
                      miscellaneous=[''])
 
-        libusb_dependency = libusb_codebase.generate_as_dependency(False)
+        libusb_dependency = libusb_codebase.generate_as_dependency(is_dynamic)
     
     else:
 
         libusb_dependency = \
             Dependency(name,
-                       repository_directory/'include',
+                       include_directory,
                        False,
-                       True,
-                       repository_directory/'build'/'lib')
+                       is_dynamic,
+                       library_directory)
 
     return libusb_dependency
 
@@ -285,13 +298,17 @@ def get_libusb_dependency(example_repos_dir: Path) -> Dependency:
 if (__name__ == '__main__'):
 
     #"""
-    repository_directory: Path = Path.cwd()/'real_world_repos'/'SDL'
-
-    if not repository_directory.exists():
-
-        retrieve_repository_from_github(repository_directory,
+    (repository_directory,
+     repo_already_exists) = \
+        retrieve_repository_from_github(Path.cwd()/'real_world_repos',
+                                        'SDL',
                                         'libsdl-org',
                                         'release-2.30.x')
+
+    source_directory: Path = repository_directory/'src'
+    include_directory: Path = repository_directory/'include'
+
+    if not repo_already_exists:
 
         for child in repository_directory.iterdir():
             if child.is_file():
@@ -299,12 +316,10 @@ if (__name__ == '__main__'):
 
         for child in repository_directory.iterdir():
             if child.is_dir():
-                if child not in [repository_directory/'src',
-                                 repository_directory/'include',
+                if child not in [source_directory,
+                                 include_directory,
                                  repository_directory/'.git']:
                     shutil.rmtree(child)
-
-        source_directory: Path = repository_directory/'src'
 
         things = \
             [(['SDL_ps2audio'],     source_directory/'audio'/'ps2',           'SDL_AUDIO_DRIVER_PS2'),
