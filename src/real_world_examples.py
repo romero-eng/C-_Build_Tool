@@ -355,6 +355,10 @@ if (__name__ == '__main__'):
                          source_directory/'misc'/'emscripten',
                          '__EMSCRIPTEN__')
         
+        insert_OS_guards(['SDL_sysurl'],
+                         source_directory/'misc'/'riscos',
+                         '__RISCOS__')
+        
         insert_OS_guards(['SDL_syslocale'],
                          source_directory/'locale'/'n3ds',
                          '_3DS')
@@ -363,9 +367,17 @@ if (__name__ == '__main__'):
                          source_directory/'locale'/'vita',
                          'PSP2_SDK_VERSION')
         
+        insert_OS_guards(['SDL_sysurl'],
+                         source_directory/'misc'/'vita',
+                         'PSP2_SDK_VERSION')
+        
         insert_OS_guards(['SDL_gdk_main'],
                          source_directory/'main'/'gdk',
                          '__GDK__')
+
+        insert_OS_guards(['SDL_sysurl'],
+                         source_directory/'misc'/'unix',
+                         '__unix__')
 
     SDL_codebase = \
             CodeBase('SDL',
