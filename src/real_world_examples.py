@@ -141,11 +141,11 @@ def get_libusb_dependency(example_repos_dir: Path) -> Dependency:
                                         name)
 
         run_command('Run Autotools',
-                    'C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -c "bash bootstrap.sh"',
+                    'C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -c "./bootstrap.sh"' if platform.system() == 'Windows' else './bootstrap.sh',
                     repository_directory)
 
         run_command('Run Configuration',
-                    'C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -c "./configure"',
+                    'C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -c "./configure"' if platform.system() == 'Windows' else './configure',
                     repository_directory)
 
         for child in repository_directory.iterdir():
@@ -330,6 +330,42 @@ if (__name__ == '__main__'):
 
         insert_lines(rwopsromfs_file_path.with_suffix('.h'),
                      [(21, '#include <stdio.h>')])
+        
+        insert_OS_guards(['hid'],
+                         source_directory/'hidapi'/'linux',
+                         '__LINUX__')
+        
+        insert_OS_guards(['hid'],
+                         source_directory/'hidapi'/'mac',
+                         '__APPLE__')
+        
+        insert_OS_guards(['SDL_syslocale'],
+                         source_directory/'locale'/'android',
+                         '__ANDROID__')
+        
+        insert_OS_guards(['SDL_sysurl'],
+                         source_directory/'misc'/'android',
+                         '__ANDROID__')
+        
+        insert_OS_guards(['SDL_syslocale'],
+                         source_directory/'locale'/'emscripten',
+                         '__EMSCRIPTEN__')
+        
+        insert_OS_guards(['SDL_sysurl'],
+                         source_directory/'misc'/'emscripten',
+                         '__EMSCRIPTEN__')
+        
+        insert_OS_guards(['SDL_syslocale'],
+                         source_directory/'locale'/'n3ds',
+                         '_3DS')
+        
+        insert_OS_guards(['SDL_syslocale'],
+                         source_directory/'locale'/'vita',
+                         'PSP2_SDK_VERSION')
+        
+        insert_OS_guards(['SDL_gdk_main'],
+                         source_directory/'main'/'gdk',
+                         '__GDK__')
 
     SDL_codebase = \
             CodeBase('SDL',
