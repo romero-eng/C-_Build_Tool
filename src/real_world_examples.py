@@ -324,6 +324,7 @@ if (__name__ == '__main__'):
         things = \
             [(['SDL_ps2audio'],     source_directory/'audio'/'ps2',           'SDL_AUDIO_DRIVER_PS2'),
              (['SDL_fcitx'   ],     source_directory/'core'/'linux',          '__LINUX__'),
+             (['hid'],              source_directory/'hidapi'/'linux',        '__LINUX__'),
              (['SDL_wscons_kbd',
                'SDL_wscons_mouse'], source_directory/'core'/'openbsd',        '__OPENBSD__'),
              (['geniconv',
@@ -331,7 +332,18 @@ if (__name__ == '__main__'):
                'os2iconv',
                'sys2utf8',
                'test'],             source_directory/'core'/'os2'/'geniconv', '__OS2__'),
-             (['SDL_poll'],         source_directory/'core'/'unix',           '__unix__')]
+             (['SDL_poll'],         source_directory/'core'/'unix',           '__unix__'),
+             (['SDL_sysurl'],       source_directory/'misc'/'unix',           '__unix__'),
+             (['SDL_gdk_main'],     source_directory/'main'/'gdk',            '__GDK__'),
+             (['SDL_sysurl'],       source_directory/'misc'/'vita',           'PSP2_SDK_VERSION'),
+             (['SDL_syslocale'],    source_directory/'locale'/'vita',         'PSP2_SDK_VERSION'),
+             (['SDL_syslocale'],    source_directory/'locale'/'n3ds',         '_3DS'),
+             (['SDL_sysurl'],       source_directory/'misc'/'riscos',         '__RISCOS__'),
+             (['SDL_sysurl'],       source_directory/'misc'/'emscripten',     '__EMSCRIPTEN__'),
+             (['SDL_syslocale'],    source_directory/'locale'/'emscripten',   '__EMSCRIPTEN__'),
+             (['SDL_sysurl'],       source_directory/'misc'/'android',        '__ANDROID__'),
+             (['SDL_syslocale'],    source_directory/'locale'/'android',      '__ANDROID__'),
+             (['hid'],              source_directory/'hidapi'/'mac',          '__APPLE__')]
 
         for files, source_file_path, OS_guard in things:
             insert_OS_guards(files,
@@ -345,54 +357,6 @@ if (__name__ == '__main__'):
 
         insert_lines(rwopsromfs_file_path.with_suffix('.h'),
                      [(21, '#include <stdio.h>')])
-        
-        insert_OS_guards(['hid'],
-                         source_directory/'hidapi'/'linux',
-                         '__LINUX__')
-        
-        insert_OS_guards(['hid'],
-                         source_directory/'hidapi'/'mac',
-                         '__APPLE__')
-        
-        insert_OS_guards(['SDL_syslocale'],
-                         source_directory/'locale'/'android',
-                         '__ANDROID__')
-        
-        insert_OS_guards(['SDL_sysurl'],
-                         source_directory/'misc'/'android',
-                         '__ANDROID__')
-        
-        insert_OS_guards(['SDL_syslocale'],
-                         source_directory/'locale'/'emscripten',
-                         '__EMSCRIPTEN__')
-        
-        insert_OS_guards(['SDL_sysurl'],
-                         source_directory/'misc'/'emscripten',
-                         '__EMSCRIPTEN__')
-        
-        insert_OS_guards(['SDL_sysurl'],
-                         source_directory/'misc'/'riscos',
-                         '__RISCOS__')
-        
-        insert_OS_guards(['SDL_syslocale'],
-                         source_directory/'locale'/'n3ds',
-                         '_3DS')
-        
-        insert_OS_guards(['SDL_syslocale'],
-                         source_directory/'locale'/'vita',
-                         'PSP2_SDK_VERSION')
-        
-        insert_OS_guards(['SDL_sysurl'],
-                         source_directory/'misc'/'vita',
-                         'PSP2_SDK_VERSION')
-        
-        insert_OS_guards(['SDL_gdk_main'],
-                         source_directory/'main'/'gdk',
-                         '__GDK__')
-
-        insert_OS_guards(['SDL_sysurl'],
-                         source_directory/'misc'/'unix',
-                         '__unix__')
 
     SDL_codebase = \
             CodeBase('SDL',
