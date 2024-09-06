@@ -369,6 +369,7 @@ if (__name__ == '__main__'):
                                'Avoid potentially sign-changing implicit conversions for integers'],
                      miscellaneous='')
     
+    # Need to add ANGLE from https://chromium.googlesource.com/angle/angle
     SDL_codebase.add_dependency(get_libusb_dependency(Path.cwd()/'real_world_repos'))
 
     SDL_codebase.generate_as_dependency(True)
