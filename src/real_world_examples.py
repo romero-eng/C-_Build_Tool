@@ -294,6 +294,34 @@ def get_libusb_dependency(example_repos_dir: Path) -> Dependency:
 
     return libusb_dependency
 
+if (__name__ != '__main__'):
+
+    Test_codebase: CodeBase | None = None
+
+    try:
+
+        fmt_dependency: Dependency = \
+            get_fmt_dependency(Path.cwd()/'real_world_repos')
+    
+        Test_codebase = \
+            CodeBase('test',
+                     Path.cwd()/'real_world_repos'/'Test',
+                     warnings=['Avoid a lot of questionable coding practices',
+                               'Avoid even more questionable coding practices'])
+    
+        Test_codebase.add_dependency(fmt_dependency)
+        Test_codebase.generate_as_executable()
+
+    except Exception:
+        print(traceback.format_exc())
+
+    else:
+        Test_codebase.test_executable()
+
+    finally:
+        if Test_codebase:
+            if Test_codebase.build_directory.exists():
+                shutil.rmtree(Test_codebase.build_directory)
 
 if (__name__ == '__main__'):
 
@@ -368,36 +396,6 @@ if (__name__ == '__main__'):
                                'Avoid potentially value-changing implicit conversions',
                                'Avoid potentially sign-changing implicit conversions for integers'],
                      miscellaneous='')
-    
-    # Need to add ANGLE from https://chromium.googlesource.com/angle/angle
+
     SDL_codebase.add_dependency(get_libusb_dependency(Path.cwd()/'real_world_repos'))
-
     SDL_codebase.generate_as_dependency(True)
-    """
-    Test_codebase: CodeBase | None = None
-
-    try:
-
-        fmt_dependency: Dependency = \
-            get_fmt_dependency(Path.cwd()/'real_world_repos')
-    
-        Test_codebase = \
-            CodeBase('test',
-                     Path.cwd()/'real_world_repos'/'Test',
-                     warnings=['Avoid a lot of questionable coding practices',
-                               'Avoid even more questionable coding practices'])
-    
-        Test_codebase.add_dependency(fmt_dependency)
-        Test_codebase.generate_as_executable()
-
-    except Exception:
-        print(traceback.format_exc())
-
-    else:
-        Test_codebase.test_executable()
-
-    finally:
-        if Test_codebase:
-            if Test_codebase.build_directory.exists():
-                shutil.rmtree(Test_codebase.build_directory)
-    #"""
